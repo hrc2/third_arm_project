@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+
+<robot name="third_arm">
+
+  <!-- Third Arm has 5 joints, need many more links to make the model -->
+
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0" rpy ="1.5708 0 0"/>
+      <material name="Red">
+      <color rgba="1.0 0.0 0.0 1.0"/>
+      </material>
+      <geometry>
+        <cylinder length="0.6" radius="0.15" />
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="block_to_base">
+    <visual>
+		<origin xyz="0 0 0" rpy ="0 1.5708  0"/>
+      <material name="Green">
+       <color rgba="0 1.0 0.0 1.0"/>
+      </material> 	
+      <geometry>
+        <box size="0.1 .2 .2"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="brace_block_link" type="fixed">
+  	<origin xyz="0 -0.2 -0.2" rpy="0 0 0" />
+    <parent link="base_link"/>
+    <child link="block_to_base"/>
+  </joint>
+
+
+  <link name="base_motor">
+  	<inertial>
+  		<origin xyz="0 0 0" rpy ="0 1.5708  0"/>
+  		<mass value="1"/>
+  		<inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+  	</inertial>
+    <visual>
+		<origin xyz="0 0 0" rpy ="0 0  0"/>
+      <material name="Yellow">
+       <color rgba="1.0 1.0 0.0 1.0"/>
+      </material> 	
+      <geometry>
+        <cylinder length="0.1" radius="0.11"/>
+      </geometry>
+    </visual>
+  </link>
+
+
+  <joint name="base_to_motor1" type="revolute">
+  	<axis xyz="0 0 1"/>
+  	<limit lower="-1.5708" upper="1.5708" effort="10" velocity="0.314"/>
+  	<origin xyz="0 0 -0.1" rpy="0 0 0" />
+    <parent link="block_to_base"/>
+    <child link="base_motor"/>
+  </joint>
+
+  <link name="swivel_link">
+    <visual>
+		<origin xyz="0 0 0" rpy ="0 0 0"/>
+      <material name="Blue">
+       <color rgba="0 0.0 1.0 1.0"/>
+      </material> 	
+      <geometry>
+        <box size="0.2 .8 .1"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="motor1_to_swivel_link" type="fixed">
+  	<origin xyz="0 0.51 0" rpy="0 0 0" />
+    <parent link="base_motor"/>
+    <child link="swivel_link"/>
+  </joint>
+
+
+</robot>
