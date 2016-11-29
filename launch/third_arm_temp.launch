@@ -1,23 +1,21 @@
 <launch>
 
-    <!-- Start the Dynamixel Controller -->
-    <node name="dynamixel_manager" pkg="dynamixel_controllers" type="controller_manager.py" required="true" output="screen">
-        <rosparam file="$(find third_arm)/config/manager.yaml" command="load" />
-    </node>
+  <node name="arbotix" pkg="arbotix_python" type="arbotix_driver" output="screen">
+    <rosparam file="$(find third_arm)/config/arbotix.yaml" command="load" />
+  </node>
 
-    <rosparam file="$(find third_arm)/config/dof_controllers.yaml" command="load"/>
 
-    <!-- Start Joint Position Controllers for each DoF -->
-    <node name="ctrl_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
-          args="--manager=dxl_manager
-                --port=third_arm_port
-                 base_swivel_controller
-                 vertical_tilt_controller
-                 arm_extension_controller
-                 wrist_controller
-		 gripper_controller"
-          output="screen">
 
-    </node>
+    <!-- Start Vision Nodes -->
+
+    <include file="$(find freenect_launch)/launch/examples/freenect-registered-xyzrgb.launch"/>
+
+    <include file="$(find rbx1_vision)/launch/camshift.launch"/>
+    
+    <include file="$(find rbx1_vision)/launch/camshift2.launch"/>
+
+    <include file="$(find rbx1_vision)/launch/pos_calculator.launch"/>
+
+    <node name="third_arm_kinect" pkg="third_arm" type="closed_loop_vision.py" output="screen"/>
 
 </launch>

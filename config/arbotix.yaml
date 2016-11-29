@@ -1,0 +1,18 @@
+port: /dev/ttyUSB0
+rate: 100
+sync_write: True
+sync_read: True
+read_rate: 100
+write_rate: 100
+
+
+joints: {
+    base: {id: 1, ticks: 4096, neutral: 2490, range: 360, max_speed: 60, invert: False},
+    elbow: {id: 2, ticks: 4096, neutral: 1822, range: 360, max_speed: 60, invert: False},
+    arm: {id: 3, ticks: 4096, neutral: 3661, range: 360, max_speed: 700, invert: False},
+    wrist: {id: 4, ticks: 1024, neutral: 512, range: 300, max_speed: 200, invert: False},
+    hand: {id: 5, ticks: 4096, neutral: 970, range: 360, max_speed: 200, invert: False}
+}
+controllers: {
+  test_controller: {type: follow_controller, joints: [base, elbow, arm, wrist, hand], action_name: follow_joint_trajectory}
+}
