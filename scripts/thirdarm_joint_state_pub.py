@@ -13,7 +13,7 @@ def callback(data):
 	i += 0.01
 	state = data
 	val = 1.57*math.sin(i)
-	state.position = [val,val,0.1*val,val,val,val]
+	state.position = [val,val,math.fabs(0.1*val),val,val,val]
 	
 	# if i < 1.57 and incr == 1:
 	# 	i += 0.01

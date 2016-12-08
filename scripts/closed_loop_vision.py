@@ -20,7 +20,7 @@ class ThirdArm():
         self.error = None
         self.set_point = Vector3(0,0,0)
         self.init_pubs()
-        self.base_speed_max = 0.157
+        self.base_speed_max = 0.3 #0.157
 
     def arm_callback(self,msg): 
         self.elbow_pose = msg.position[0]
@@ -57,16 +57,22 @@ class ThirdArm():
         self.error = (x**2 + y**2)**0.5
         scale = math.pi
 
-        Kp = 1
+        #Kp = 1
 
-        if self.error_old > self.error:
-            Kp = -Kp
-            self.base_command = Kp*self.error
+        if x<0:
+            Kp = -1
         else:
-            self.base_command = Kp*self.error
+            Kp = 1
 
+        # if self.error_old > self.error:
+        #     Kp = -Kp
+        #     self.base_command = Kp*self.error
+        # else:
+        #     self.base_command = Kp*self.error
+        #self.base_command = Kp*self.error
+        self.base_command = Kp*self.base_speed_max
         scale = 1.5
-        self.base_command = self.base_command*self.base_speed_max/scale
+        #self.base_command = self.base_command*self.base_speed_max/scale
 
         # if math.fabs(self.base_command) < 0.05:
         #     self.base_command = 0
@@ -114,7 +120,8 @@ class ThirdArm():
             # print (elbow_pose, base_pose, wrist_pose, arm_pose, hand_pose)                 
                 self.closed_loop_calculate()
                 rospy.loginfo("The base command is : {0}".format(self.base_command))
-                self.pub_base.publish(0.0)
+                #self.pub_base.publish(0.0)
+                self.pub_base.publish(self.base_command)
                 self.pub_elbow.publish(0.0)
                 self.pub_arm.publish(0.0)
                 self.pub_wrist.publish(0.0)
