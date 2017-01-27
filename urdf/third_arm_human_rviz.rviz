@@ -6,7 +6,8 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /RobotModel1/Links1
+        - /TF1/Frames1
+        - /Marker1
       Splitter Ratio: 0.5
     Tree Height: 555
   - Class: rviz/Selection
@@ -320,220 +321,26 @@ Visualization Manager:
       Value: true
       Visual Enabled: true
     - Class: rviz/TF
-      Enabled: true
+      Enabled: false
       Frame Timeout: 15
       Frames:
-        All Enabled: true
-        base_footprint:
-          Value: true
-        base_link:
-          Value: true
-        base_motor:
-          Value: true
-        block_to_base:
-          Value: true
-        extend_link1:
-          Value: true
-        extend_link2:
-          Value: true
-        finger1:
-          Value: true
-        finger2:
-          Value: true
-        gripper_motor:
-          Value: true
-        human/base:
-          Value: true
-        human/head:
-          Value: true
-        human/left_ankle:
-          Value: true
-        human/left_ankle_0:
-          Value: true
-        human/left_arm_mount:
-          Value: true
-        human/left_elbow:
-          Value: true
-        human/left_foot:
-          Value: true
-        human/left_hand:
-          Value: true
-        human/left_hip:
-          Value: true
-        human/left_hip_0:
-          Value: true
-        human/left_hip_1:
-          Value: true
-        human/left_knee:
-          Value: true
-        human/left_leg_mount:
-          Value: true
-        human/left_shoulder:
-          Value: true
-        human/left_shoulder_0:
-          Value: true
-        human/left_shoulder_1:
-          Value: true
-        human/left_wrist:
-          Value: true
-        human/left_wrist_0:
-          Value: true
-        human/left_wrist_1:
-          Value: true
-        human/neck:
-          Value: true
-        human/neck_0:
-          Value: true
-        human/neck_1:
-          Value: true
-        human/right_ankle:
-          Value: true
-        human/right_ankle_0:
-          Value: true
-        human/right_arm_mount:
-          Value: true
-        human/right_elbow:
-          Value: true
-        human/right_foot:
-          Value: true
-        human/right_hand:
-          Value: true
-        human/right_hip:
-          Value: true
-        human/right_hip_0:
-          Value: true
-        human/right_hip_1:
-          Value: true
-        human/right_knee:
-          Value: true
-        human/right_leg_mount:
-          Value: true
-        human/right_shoulder:
-          Value: true
-        human/right_shoulder_0:
-          Value: true
-        human/right_shoulder_1:
-          Value: true
-        human/right_wrist:
-          Value: true
-        human/right_wrist_0:
-          Value: true
-        human/right_wrist_1:
-          Value: true
-        human/shoulder_center:
-          Value: true
-        human/spine:
-          Value: true
-        human/spine_0:
-          Value: true
-        human/spine_1:
-          Value: true
-        human/spine_2:
-          Value: true
-        lift_motor:
-          Value: true
-        map:
-          Value: true
-        odom:
-          Value: true
-        sphero_ggw:
-          Value: true
-        sphero_rgw:
-          Value: true
-        sphero_wpp:
-          Value: true
-        sphero_wrb:
-          Value: true
-        sphero_yoo:
-          Value: true
-        swivel_link:
-          Value: true
-        vicon/sphero_ggw/body:
-          Value: true
-        vicon/sphero_rgw/body:
-          Value: true
-        vicon/sphero_wpp/body:
-          Value: true
-        vicon/sphero_wrb/body:
-          Value: true
-        vicon/sphero_yoo/body:
-          Value: true
-        world:
-          Value: true
-        wrist_motor:
-          Value: true
-        wrist_plate:
-          Value: true
+        All Enabled: false
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
-        human/base:
-          human/left_leg_mount:
-            human/left_hip_0:
-              human/left_hip_1:
-                human/left_hip:
-                  human/left_knee:
-                    human/left_ankle_0:
-                      human/left_ankle:
-                        human/left_foot:
-                          {}
-          human/right_leg_mount:
-            human/right_hip_0:
-              human/right_hip_1:
-                human/right_hip:
-                  human/right_knee:
-                    human/right_ankle_0:
-                      human/right_ankle:
-                        human/right_foot:
-                          {}
-          human/spine_0:
-            human/spine_1:
-              human/spine_2:
-                human/spine:
-                  human/shoulder_center:
-                    human/left_arm_mount:
-                      human/left_shoulder_0:
-                        human/left_shoulder_1:
-                          human/left_shoulder:
-                            human/left_elbow:
-                              human/left_wrist_0:
-                                human/left_wrist_1:
-                                  human/left_wrist:
-                                    human/left_hand:
-                                      {}
-                    human/neck_0:
-                      human/neck_1:
-                        human/neck:
-                          human/head:
-                            {}
-                    human/right_arm_mount:
-                      human/right_shoulder_0:
-                        human/right_shoulder_1:
-                          human/right_shoulder:
-                            human/right_elbow:
-                              base_link:
-                                block_to_base:
-                                  base_motor:
-                                    swivel_link:
-                                      lift_motor:
-                                        extend_link1:
-                                          extend_link2:
-                                            wrist_motor:
-                                              wrist_plate:
-                                                gripper_motor:
-                                                  finger1:
-                                                    {}
-                                                  finger2:
-                                                    {}
-                              human/right_wrist_0:
-                                human/right_wrist_1:
-                                  human/right_wrist:
-                                    human/right_hand:
-                                      {}
+        {}
       Update Interval: 0
+      Value: false
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /marker_array
+      Name: Marker
+      Namespaces:
+        {}
+      Queue Size: 1000000
       Value: true
   Enabled: true
   Global Options:
@@ -559,7 +366,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 3.62918
+      Distance: 4.3586
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
@@ -571,10 +378,10 @@ Visualization Manager:
         Z: 0
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.195398
+      Pitch: 0.425398
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 5.85857
+      Yaw: 6.01176
     Saved: ~
 Window Geometry:
   Displays:
@@ -593,4 +400,4 @@ Window Geometry:
     collapsed: false
   Width: 1200
   X: 62
-  Y: 38
+  Y: 27

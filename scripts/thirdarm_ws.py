@@ -35,8 +35,10 @@ if __name__ == '__main__':
 
 	rospy.init_node('thirdarm_ws')
 	listener = tf.TransformListener()
+	topic = 'marker_array'
+	publisher = rospy.Publisher(topic, Marker, queue_size=100)
 	count = 0
-	MARKERS_MAX = 100
+	MARKERS_MAX = 10000
 	markerArray = MarkerArray()
 	#rate = rospy.Rate(5)
 	#while not rospy.is_shutdown():
@@ -46,28 +48,29 @@ if __name__ == '__main__':
 	
 	while not rospy.is_shutdown():
 		try:
-		    (trans,rot) = listener.lookupTransform('wrist_motor', 'human/base', rospy.Time(0))
+		    (trans,rot) = listener.lookupTransform('human/base', 'gripper_motor', rospy.Time(0))
 		except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
 			continue
 
-    	rospy.loginfo('Position of wrist motor {0}'.format(trans))
-    	rate.sleep()
+		rospy.loginfo('Position of gripper motor {0}'.format(trans))
+		
 
 		marker = Marker()
-		marker.header.frame_id = "/neck"
-		marker.type = marker.POINTS
+		marker.header.frame_id = "human/base"
+		marker.type = marker.SPHERE
 		marker.action = marker.ADD
-		marker.scale.x = 0.2
-		marker.scale.y = 0.2
-		marker.scale.z = 0.2
+		marker.scale.x = 0.05
+		marker.scale.y = 0.05
+		marker.scale.z = 0.05
 		marker.color.a = 1.0
-		marker.color.r = 1.0
+		marker.color.r = 0.5
 		marker.color.g = 1.0
 		marker.color.b = 0.0
 		marker.pose.orientation.w = 1.0
-		marker.pose.position.x = math.cos(count / 50.0)
-		marker.pose.position.y = math.cos(count / 40.0) 
-		marker.pose.position.z = math.cos(count / 30.0) 
+		marker.pose.position.x = trans[0]
+		marker.pose.position.y = trans[1] 
+		marker.pose.position.z = trans[2] 
+		marker.lifetime = rospy.Duration(0)
 
 		# We add the new marker to the MarkerArray, removing the oldest
 		# marker from it when necessary
@@ -83,9 +86,12 @@ if __name__ == '__main__':
 		   id += 1
 
 		# Publish the MarkerArray
-		publisher.publish(markerArray)
+		publisher.publish(marker)
+
+		print 'PosX {0}'.format(trans[0])
 
 		count += 1
+		rate.sleep()
 
 	#rospy.spin()
 	#rate.sleep()
