@@ -1,48 +1,53 @@
 
-% Transform matrices:
-T = eye(4);
-
-%Trans = matlabFunction(T);
-
-%limits for workspace volume:
-thet1 = linspace(0,2*pi,10);
-thet2 = linspace(0,pi/2+pi/6,10);
-dist3 = linspace(280,430,10);
-thet4 = linspace(-pi,pi,10);
-
-%Plot points
-plotpts = zeros(3,1)
+from scipy.spatial import Delaunay
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.tri as mtri
 
 
+def sq_norm(v): #squared norm
+    return np.linalg.norm(v)**2
 
 
-%Using random sampling for faster plots:
-N = 1000;
-for i = 1:N
-    t1 = rand2val(-pi,pi);
-    %t1 = rand2val(-pi,pi/2);
-    %t2 = rand2val(-pi/2,pi/6);
-    t2 = rand2val(0,pi/2+pi/6);
-    %t2 = pi/3;
-    d3 = rand2val(280,430);
-    %d3 = 280;
-    t4 = rand2val(-pi,pi);
-    %t4 = 0;
+def circumcircle(points,simplex):
+    A=[points[simplex[k]] for k in range(3)]
+    M=[[1.0]*4]
+    M+=[[sq_norm(A[k]), A[k][0], A[k][1], 1.0 ] for k in range(3)]
+    M=np.asarray(M, dtype=np.float32)
+    S=np.array([0.5*np.linalg.det(M[1:,[0,2,3]]), -0.5*np.linalg.det(M[1:,[0,1,3]])])
+    a=np.linalg.det(M[1:, 1:])
+    b=np.linalg.det(M[1:, [0,1,2]])
+    return S/a,  np.sqrt(b/a+sq_norm(S)/a**2) #center=S/a, radius=np.sqrt(b/a+sq_norm(S)/a**2)
 
-    a = [112,0,0,0];
-    %alph = [pi/2,pi/2,0,0];
-    alph = [pi/2,pi/2,0,0];
-    %d = [0,0,d3,106];
-    d = [0,0,d3,106+430-280];
-    t = [t1,t2,pi/2,t4];
 
-    T = eye(4);
-    for h = 1:4
-        T = T * [cos(t(h)), -cos(alph(h))*sin(t(h)), sin(alph(h))*sin(t(h)), a(h)*cos(t(h));
-        sin(t(h)), cos(alph(h))*sin(t(h)), -sin(alph(h))*cos(t(h)), a(h)*sin(t(h));
-        0, sin(alph(h)), cos(alph(h)), d(h);
-        0, 0, 0, 1];
-    end
+def get_alpha_complex(alpha, points, simplexes):
+    #alpha is the parameter for the alpha shape
+    #points are given data points
+    #simplexes is the  list of indices in the array of points
+    #that define 2-simplexes in the Delaunay triangulation
 
-    plotpts = [plotpts, T(1:3,4)];
-end
+    return filter(lambda simplex: circumcircle(points,simplex)[1]<alpha, simplexes)
+
+
+def unpack(fname):
+    pts = np.loadtxt(open(fname, "rb"), delimiter=",", skiprows=1)
+    xs = pts[:,0]
+    ys = pts[:,1]
+    zs = pts[:,2]
+    return xs,ys,zs
+
+
+#tri = Delaunay(pts)
+
+xr,yr,zr = unpack("v2.csv")
+xh,yh,zh = unpack("human.csv")
+
+Nr = xr.size
+
+Nh = xh.size
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(xr, yr, zr)
+plt.show()
