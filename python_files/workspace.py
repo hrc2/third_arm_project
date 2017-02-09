@@ -27,48 +27,50 @@ def PolyArea(x,y):
 def cc(arg):
     return mcolors.to_rgba(arg, alpha=0.6)
 
+
+def calculation(xr,yr,zr):
+    s = 50#**4 #Number of steps
+    h = (zr[-1] - zr[0])/s
+
+    Area = 0.0
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    verts = []
+    zs = []
+
+    for i in range(1,s+1):
+        args = np.where(abs(zr - (zr[0] + (i-1)*h + h/2) ) <= h)
+        x = xr[args]
+        y = yr[args]
+        zs.append(zr[0]+(i-0.5)*h)
+        hull = concave_hull.concaveHull(np.column_stack((x,y)),5)
+        hull = np.vstack(hull)
+        verts.append(list(hull))
+        Area += PolyArea(hull[:,0], hull[:,1])
+        if i==1 or i==s:
+            Area *= 0.5
+
+
+    poly = PolyCollection(verts)
+    poly.set_alpha(0.7)
+    ax.add_collection3d(poly, zs=zs)
+
+    Volume = h*Area
+
+    print Volume
+
+    ax.set_xlabel('X (m)')
+    ax.set_ylabel('Y (m)')
+    ax.set_zlabel('Z (m)')
+    plt.show()
+
+
 xr,yr,zr = unpack("v2.csv")
 xh,yh,zh = unpack("human.csv")
 
-#Calculation of v2 robot WS volume:
-s = 15#**4 #Number of steps
-h = (zr[-1] - zr[0])/s
-
-# x = xr[650:2280]
-# y = yr[650:2280]
-# tri = mtri.Triangulation(x,y)
-Area = 0.0
-
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-verts = []
-zs = []
-
-for i in range(1,s+1):
-    args = np.where(abs(zr - (zr[0] + (i-1)*h + h/2) ) <= h)
-    x = xr[args]
-    y = yr[args]
-    zs.append(zr[0]+(i-0.5)*h)
-    hull = concave_hull.concaveHull(np.column_stack((x,y)),5)
-    hull = np.vstack(hull)
-    verts.append(list(hull))
-    Area += PolyArea(hull[:,0], hull[:,1])
-    if i==1 or i==s:
-        Area *= 0.5
-
-
-poly = PolyCollection(verts)
-poly.set_alpha(0.7)
-ax.add_collection3d(poly, zs=zs)
-
-Volume = h*Area
-
-print Volume
-
-ax.set_xlabel('X (m)')
-ax.set_ylabel('Y (m)')
-ax.set_zlabel('Z (m)')
-plt.show()
+#calculation(xr,yr,zr)
+calculation(xh,yh,zh)
 
 # fig = plt.figure()
 # plt.gca().set_aspect('equal')
