@@ -29,7 +29,7 @@ def cc(arg):
 
 
 def calculation(xr,yr,zr):
-    s = 50#**4 #Number of steps
+    s = 10#**4 #Number of steps
     h = (zr[-1] - zr[0])/s
 
     Area = 0.0
@@ -63,11 +63,14 @@ def calculation(xr,yr,zr):
     ax.set_xlabel('X (m)')
     ax.set_ylabel('Y (m)')
     ax.set_zlabel('Z (m)')
+    ax.set_xlim([np.amin(xr),np.amax(xr)])
+    ax.set_ylim([np.amin(yr),np.amax(yr)])
+    ax.set_zlim([np.amin(zr),np.amax(zr)])
     plt.show()
 
 
-xr,yr,zr = unpack("v2.csv")
-xh,yh,zh = unpack("human.csv")
+xr,yr,zr = unpack("v2.csv") #Point cloud for Model II
+xh,yh,zh = unpack("human.csv") #Point cloud for human
 
 #calculation(xr,yr,zr)
 calculation(xh,yh,zh)
