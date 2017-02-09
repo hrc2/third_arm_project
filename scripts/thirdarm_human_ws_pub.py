@@ -10,12 +10,13 @@ from sensor_msgs.msg import JointState
 i = 0
 def callback(data):
 	pub = rospy.Publisher('/third_arm_joints', JointState, queue_size=1)
+	pub_human = rospy.Publisher('/joint_states', JointState, queue_size=1)
 	global i
 	i += 1
 	state = data
-	val1 = -1.57 + 3.14*random.random()
-	val2 = -1.57 + (30*math.pi/180 + 1.57)*random.random()
-	val3 = 0.15*random.random()
+	val1 = -1.57 + 3.14*random.betavariate(1, 1)
+	val2 = -1.57 + (30*math.pi/180 + 1.57)*random.betavariate(0.6, 0.6)
+	val3 = 0.15*random.betavariate(0.4, 0.4)
 	if i<100:
 		state.position = [val1,val2,val3,val1,val1,val1]
 	
@@ -28,6 +29,8 @@ def callback(data):
 	# 	incr = -1
 	# elif i<0:
 	# 	incr = 1
+	h_len = len(data.position)
+	h_state = data
 
 	pub.publish(state)
 

@@ -31,6 +31,25 @@ from visualization_msgs.msg import MarkerArray
 
 # 	pub.publish(state)
 
+def make_marker(trans,rgba):
+	marker = Marker()
+	marker.header.frame_id = "human/base"
+	marker.type = marker.SPHERE
+	marker.action = marker.ADD
+	marker.scale.x = 0.05
+	marker.scale.y = 0.05
+	marker.scale.z = 0.05
+	marker.color.a = rgba[3]
+	marker.color.r = rgba[0]
+	marker.color.g = rgba[1]
+	marker.color.b = rgba[2]
+	marker.pose.orientation.w = 1.0
+	marker.pose.position.x = trans[0]
+	marker.pose.position.y = trans[1] 
+	marker.pose.position.z = trans[2] 
+	marker.lifetime = rospy.Duration(0)
+	return marker
+
 if __name__ == '__main__':	
 
 	rospy.init_node('thirdarm_ws')
@@ -54,23 +73,9 @@ if __name__ == '__main__':
 
 		rospy.loginfo('Position of gripper motor {0}'.format(trans))
 		
+		rgb = [0.0,1.0,0.0,0.5]
+		marker = make_marker(trans,rgb)
 
-		marker = Marker()
-		marker.header.frame_id = "human/base"
-		marker.type = marker.SPHERE
-		marker.action = marker.ADD
-		marker.scale.x = 0.05
-		marker.scale.y = 0.05
-		marker.scale.z = 0.05
-		marker.color.a = 1.0
-		marker.color.r = 0.5
-		marker.color.g = 1.0
-		marker.color.b = 0.0
-		marker.pose.orientation.w = 1.0
-		marker.pose.position.x = trans[0]
-		marker.pose.position.y = trans[1] 
-		marker.pose.position.z = trans[2] 
-		marker.lifetime = rospy.Duration(0)
 
 		# We add the new marker to the MarkerArray, removing the oldest
 		# marker from it when necessary
