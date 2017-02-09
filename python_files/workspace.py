@@ -1,53 +1,99 @@
 
 from scipy.spatial import Delaunay
 import numpy as np
+import math
+import pylab
+from matplotlib import colors as mcolors
+from matplotlib.collections import LineCollection
+from matplotlib.collections import PolyCollection
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.tri as mtri
+import ConcaveHull as concave_hull
 
-
-def sq_norm(v): #squared norm
-    return np.linalg.norm(v)**2
-
-
-def circumcircle(points,simplex):
-    A=[points[simplex[k]] for k in range(3)]
-    M=[[1.0]*4]
-    M+=[[sq_norm(A[k]), A[k][0], A[k][1], 1.0 ] for k in range(3)]
-    M=np.asarray(M, dtype=np.float32)
-    S=np.array([0.5*np.linalg.det(M[1:,[0,2,3]]), -0.5*np.linalg.det(M[1:,[0,1,3]])])
-    a=np.linalg.det(M[1:, 1:])
-    b=np.linalg.det(M[1:, [0,1,2]])
-    return S/a,  np.sqrt(b/a+sq_norm(S)/a**2) #center=S/a, radius=np.sqrt(b/a+sq_norm(S)/a**2)
-
-
-def get_alpha_complex(alpha, points, simplexes):
-    #alpha is the parameter for the alpha shape
-    #points are given data points
-    #simplexes is the  list of indices in the array of points
-    #that define 2-simplexes in the Delaunay triangulation
-
-    return filter(lambda simplex: circumcircle(points,simplex)[1]<alpha, simplexes)
-
+#tri = Delaunay(pts)
 
 def unpack(fname):
     pts = np.loadtxt(open(fname, "rb"), delimiter=",", skiprows=1)
+    pts = pts[pts[:, 2].argsort()]
     xs = pts[:,0]
     ys = pts[:,1]
     zs = pts[:,2]
     return xs,ys,zs
 
+def PolyArea(x,y):
+    return 0.5*np.abs(np.dot(x,np.roll(y,1))-np.dot(y,np.roll(x,1)))
 
-#tri = Delaunay(pts)
+def cc(arg):
+    return mcolors.to_rgba(arg, alpha=0.6)
 
 xr,yr,zr = unpack("v2.csv")
 xh,yh,zh = unpack("human.csv")
 
-Nr = xr.size
+#Calculation of v2 robot WS volume:
+s = 15#**4 #Number of steps
+h = (zr[-1] - zr[0])/s
 
-Nh = xh.size
+# x = xr[650:2280]
+# y = yr[650:2280]
+# tri = mtri.Triangulation(x,y)
+Area = 0.0
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-ax.scatter(xr, yr, zr)
+verts = []
+zs = []
+
+for i in range(1,s+1):
+    args = np.where(abs(zr - (zr[0] + (i-1)*h + h/2) ) <= h)
+    x = xr[args]
+    y = yr[args]
+    zs.append(zr[0]+(i-0.5)*h)
+    hull = concave_hull.concaveHull(np.column_stack((x,y)),5)
+    hull = np.vstack(hull)
+    verts.append(list(hull))
+    Area += PolyArea(hull[:,0], hull[:,1])
+    if i==1 or i==s:
+        Area *= 0.5
+
+
+poly = PolyCollection(verts)
+poly.set_alpha(0.7)
+ax.add_collection3d(poly, zs=zs)
+
+Volume = h*Area
+
+print Volume
+
+ax.set_xlabel('X (m)')
+ax.set_ylabel('Y (m)')
+ax.set_zlabel('Z (m)')
 plt.show()
+
+# fig = plt.figure()
+# plt.gca().set_aspect('equal')
+#
+# #plt.triplot(tri,'go--', lw=1.0)
+# plt.plot(x,y,'go')
+# plt.plot(hull[:,0], hull[:,1], 'k-')
+# plt.show()
+
+
+
+# Nr = xr.size
+# cr = np.array([0.0, 0.0, 1.0, 0.1])
+# cr = np.tile(cr, (Nr,1))
+
+# Nh = xh.size
+# ch = np.array([1.0, 0.0, 0.0, 0.1])
+# ch = np.tile(ch, (Nh,1))
+
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection='3d')
+# ax.scatter(xr, yr, zr, c='green', alpha=0.07, marker='o', depthshade=False)
+# ax.scatter(xh, yh, zh, c='red', alpha=1, marker='o', depthshade=False)
+# ax.set_xlabel('X (m)')
+# ax.set_ylabel('Y (m)')
+# ax.set_zlabel('Z (m)')
+#
+# plt.show()
