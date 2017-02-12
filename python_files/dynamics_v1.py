@@ -61,15 +61,15 @@ def find_force_e(d2,thet): #For the elbows
 
     m1 = 2.5
     m2 = 1.45
-    m3 = 0.9
-    m4 = 0.6
+    m3 = 1.2
+    m4 = 0.8
     g = 9.81
 
     #d2 = 1 #Variable
     #thet = 1 #Variable
-    a = 0.075
-    d = 0.016
-    d1 = 0.264/2
+    a = 0.093
+    d = 0.085
+    d1 = 0.235/2
 
     ang = math.radians(-25)
 
@@ -93,7 +93,7 @@ def find_force_e(d2,thet): #For the elbows
     return fa,ma
 
 
-def force_shoulders_v2():
+def force_shoulders_v1():
     forces_mag = []
     moments_mag = []
 
@@ -102,7 +102,7 @@ def force_shoulders_v2():
 
 
     thets = np.linspace(math.radians(0),math.radians(-60),num=100)
-    d2 = np.linspace(0.256,0.256+0.16,num=100)
+    d2 = np.linspace(0.246,0.246+0.16,num=100)
 
     for thet in thets:
         force,moment = find_force(d2[0],thet)
@@ -132,7 +132,8 @@ def force_shoulders_v2():
     plt.show()
     return moments_mag
 
-def force_elbow_v2():
+
+def force_elbow_v1():
     forces_mag = []
     moments_mag = []
 
@@ -141,7 +142,7 @@ def force_elbow_v2():
 
 
     thets = np.linspace(math.radians(0),math.radians(-60),num=100)
-    d2 = np.linspace(0.256,0.256+0.16,num=100)
+    d2 = np.linspace(0.246,0.246+0.16,num=100)
 
     for thet in thets:
         force,moment = find_force_e(d2[0],thet)
@@ -166,19 +167,21 @@ def force_elbow_v2():
         forces_mag.append(np.linalg.norm(force))
         moments_mag.append(np.linalg.norm(moment))
 
-#    fs = np.vstack(moments)
+    #    fs = np.vstack(moments)
     plt.plot(moments_mag)
     plt.show()
     return moments_mag
 
 
-shoulder_moments = force_shoulders_v2()
-elbow_moments = force_elbow_v2()
+shoulder_moments = force_shoulders_v1()
+elbow_moments = force_elbow_v1()
 
-with open('v2_shoulder.csv','wb') as v2s:
-    writer = csv.writer(v2s)
-    writer.writerow(shoulder_moments)
+with open('v1_shoulder.csv','wb') as v1s:
+    writer = csv.writer(v1s)
+    for val in shoulder_moments:
+        writer.writerow([val])
 
-with open('v2_elbow.csv','wb') as v2e:
-    writer = csv.writer(v2e)
-    writer.writerow(elbow_moments)
+with open('v1_elbow.csv','wb') as v1e:
+    writer = csv.writer(v1e)
+    for el in elbow_moments:
+        writer.writerow([el])

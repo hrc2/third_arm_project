@@ -31,11 +31,23 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="dynamics_v2.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="dynamics_v2.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/dynamics_v2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.5932611">
-              <caret line="39" column="32" selection-start-line="39" selection-start-column="32" selection-end-line="39" selection-end-column="32" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="152" column="19" selection-start-line="152" selection-start-column="19" selection-end-line="152" selection-end-column="19" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="dynamics_v1.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/dynamics_v1.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.77496994">
+              <caret line="181" column="30" selection-start-line="181" selection-start-column="30" selection-end-line="181" selection-end-column="30" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -121,6 +133,7 @@
         <option value="$PROJECT_DIR$/workspace.py" />
         <option value="$PROJECT_DIR$/dynamics.py" />
         <option value="$PROJECT_DIR$/dynamics_v2.py" />
+        <option value="$PROJECT_DIR$/dynamics_v1.py" />
       </list>
     </option>
   </component>
@@ -184,7 +197,7 @@
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
-  <component name="RunManager" selected="Python.dynamics_v2">
+  <component name="RunManager" selected="Python.dynamics_v1">
     <configuration default="false" name="trisurf3d_demo" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -198,23 +211,6 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="PyPlots" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/trisurf3d_demo.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <method />
-    </configuration>
-    <configuration default="false" name="cylinder" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="PyPlots" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/cylinder.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -266,6 +262,23 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="PyPlots" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/dynamics_v2.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="dynamics_v1" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="PyPlots" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/dynamics_v1.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -394,18 +407,18 @@
     </configuration>
     <list size="5">
       <item index="0" class="java.lang.String" itemvalue="Python.trisurf3d_demo" />
-      <item index="1" class="java.lang.String" itemvalue="Python.cylinder" />
-      <item index="2" class="java.lang.String" itemvalue="Python.workspace" />
-      <item index="3" class="java.lang.String" itemvalue="Python.dynamics" />
-      <item index="4" class="java.lang.String" itemvalue="Python.dynamics_v2" />
+      <item index="1" class="java.lang.String" itemvalue="Python.workspace" />
+      <item index="2" class="java.lang.String" itemvalue="Python.dynamics" />
+      <item index="3" class="java.lang.String" itemvalue="Python.dynamics_v2" />
+      <item index="4" class="java.lang.String" itemvalue="Python.dynamics_v1" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.dynamics_v2" />
-        <item index="1" class="java.lang.String" itemvalue="Python.dynamics" />
-        <item index="2" class="java.lang.String" itemvalue="Python.workspace" />
-        <item index="3" class="java.lang.String" itemvalue="Python.trisurf3d_demo" />
-        <item index="4" class="java.lang.String" itemvalue="Python.cylinder" />
+        <item index="0" class="java.lang.String" itemvalue="Python.dynamics_v1" />
+        <item index="1" class="java.lang.String" itemvalue="Python.dynamics_v2" />
+        <item index="2" class="java.lang.String" itemvalue="Python.dynamics" />
+        <item index="3" class="java.lang.String" itemvalue="Python.workspace" />
+        <item index="4" class="java.lang.String" itemvalue="Python.trisurf3d_demo" />
       </list>
     </recent_temporary>
   </component>
@@ -463,7 +476,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="19" />
+      <option name="time" value="20" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -687,8 +700,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/dynamics_v2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5932611">
-          <caret line="39" column="32" selection-start-line="39" selection-start-column="32" selection-end-line="39" selection-end-column="32" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="152" column="19" selection-start-line="152" selection-start-column="19" selection-end-line="152" selection-end-column="19" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dynamics_v1.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.77496994">
+          <caret line="181" column="30" selection-start-line="181" selection-start-column="30" selection-end-line="181" selection-end-column="30" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
