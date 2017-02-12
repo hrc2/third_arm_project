@@ -177,8 +177,10 @@ elbow_moments = force_elbow_v2()
 
 with open('v2_shoulder.csv','wb') as v2s:
     writer = csv.writer(v2s)
-    writer.writerow(shoulder_moments)
+    for val in shoulder_moments:
+        writer.writerow([val])
 
 with open('v2_elbow.csv','wb') as v2e:
     writer = csv.writer(v2e)
-    writer.writerow(elbow_moments)
+    for el in elbow_moments:
+        writer.writerow([el])

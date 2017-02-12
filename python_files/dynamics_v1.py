@@ -19,15 +19,15 @@ def find_force(d2,thet):
 
     m1 = 2.5
     m2 = 1.45
-    m3 = 0.9
-    m4 = 0.6
+    m3 = 1.2
+    m4 = 0.8
     g = 9.81
 
     #d2 = 1 #Variable
     #thet = 1 #Variable
-    a = 0.075
-    d = 0.016
-    d1 = 0.264/2
+    a = 0.093
+    d = 0.085
+    d1 = 0.235/2
 
     ang = math.radians(-25)
 
@@ -128,8 +128,8 @@ def force_shoulders_v1():
         moments_mag.append(np.linalg.norm(moment))
 
 #    fs = np.vstack(moments)
-    plt.plot(moments_mag)
-    plt.show()
+    #plt.plot(moments_mag)
+    #plt.show()
     return moments_mag
 
 
@@ -168,13 +168,17 @@ def force_elbow_v1():
         moments_mag.append(np.linalg.norm(moment))
 
     #    fs = np.vstack(moments)
-    plt.plot(moments_mag)
-    plt.show()
+    #plt.plot(moments_mag)
+    #plt.show()
     return moments_mag
 
 
 shoulder_moments = force_shoulders_v1()
 elbow_moments = force_elbow_v1()
+
+plt.plot(shoulder_moments)
+plt.plot(elbow_moments)
+plt.show()
 
 with open('v1_shoulder.csv','wb') as v1s:
     writer = csv.writer(v1s)
