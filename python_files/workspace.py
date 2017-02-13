@@ -1,48 +1,104 @@
 
-% Transform matrices:
-T = eye(4);
+from scipy.spatial import Delaunay
+import numpy as np
+import math
+import pylab
+from matplotlib import colors as mcolors
+from matplotlib.collections import LineCollection
+from matplotlib.collections import PolyCollection
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.tri as mtri
+import ConcaveHull as concave_hull
 
-%Trans = matlabFunction(T);
+#tri = Delaunay(pts)
 
-%limits for workspace volume:
-thet1 = linspace(0,2*pi,10);
-thet2 = linspace(0,pi/2+pi/6,10);
-dist3 = linspace(280,430,10);
-thet4 = linspace(-pi,pi,10);
+def unpack(fname):
+    pts = np.loadtxt(open(fname, "rb"), delimiter=",", skiprows=1)
+    pts = pts[pts[:, 2].argsort()]
+    xs = pts[:,0]
+    ys = pts[:,1]
+    zs = pts[:,2]
+    return xs,ys,zs
 
-%Plot points
-plotpts = zeros(3,1)
+def PolyArea(x,y):
+    return 0.5*np.abs(np.dot(x,np.roll(y,1))-np.dot(y,np.roll(x,1)))
+
+def cc(arg):
+    return mcolors.to_rgba(arg, alpha=0.6)
+
+
+def calculation(xr,yr,zr):
+    s = 10#**4 #Number of steps
+    h = (zr[-1] - zr[0])/s
+
+    Area = 0.0
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    verts = []
+    zs = []
+
+    for i in range(1,s+1):
+        args = np.where(abs(zr - (zr[0] + (i-1)*h + h/2) ) <= h)
+        x = xr[args]
+        y = yr[args]
+        zs.append(zr[0]+(i-0.5)*h)
+        hull = concave_hull.concaveHull(np.column_stack((x,y)),5)
+        hull = np.vstack(hull)
+        verts.append(list(hull))
+        Area += PolyArea(hull[:,0], hull[:,1])
+        if i==1 or i==s:
+            Area *= 0.5
+
+
+    poly = PolyCollection(verts)
+    poly.set_alpha(0.7)
+    ax.add_collection3d(poly, zs=zs)
+
+    Volume = h*Area
+
+    print Volume
+
+    ax.set_xlabel('X (m)')
+    ax.set_ylabel('Y (m)')
+    ax.set_zlabel('Z (m)')
+    ax.set_xlim([np.amin(xr),np.amax(xr)])
+    ax.set_ylim([np.amin(yr),np.amax(yr)])
+    ax.set_zlim([np.amin(zr),np.amax(zr)])
+    plt.show()
+
+
+xr,yr,zr = unpack("v2.csv") #Point cloud for Model II
+xh,yh,zh = unpack("human.csv") #Point cloud for human
+
+#calculation(xr,yr,zr)
+calculation(xh,yh,zh)
+
+# fig = plt.figure()
+# plt.gca().set_aspect('equal')
+#
+# #plt.triplot(tri,'go--', lw=1.0)
+# plt.plot(x,y,'go')
+# plt.plot(hull[:,0], hull[:,1], 'k-')
+# plt.show()
 
 
 
+# Nr = xr.size
+# cr = np.array([0.0, 0.0, 1.0, 0.1])
+# cr = np.tile(cr, (Nr,1))
 
-%Using random sampling for faster plots:
-N = 1000;
-for i = 1:N
-    t1 = rand2val(-pi,pi);
-    %t1 = rand2val(-pi,pi/2);
-    %t2 = rand2val(-pi/2,pi/6);
-    t2 = rand2val(0,pi/2+pi/6);
-    %t2 = pi/3;
-    d3 = rand2val(280,430);
-    %d3 = 280;
-    t4 = rand2val(-pi,pi);
-    %t4 = 0;
+# Nh = xh.size
+# ch = np.array([1.0, 0.0, 0.0, 0.1])
+# ch = np.tile(ch, (Nh,1))
 
-    a = [112,0,0,0];
-    %alph = [pi/2,pi/2,0,0];
-    alph = [pi/2,pi/2,0,0];
-    %d = [0,0,d3,106];
-    d = [0,0,d3,106+430-280];
-    t = [t1,t2,pi/2,t4];
-
-    T = eye(4);
-    for h = 1:4
-        T = T * [cos(t(h)), -cos(alph(h))*sin(t(h)), sin(alph(h))*sin(t(h)), a(h)*cos(t(h));
-        sin(t(h)), cos(alph(h))*sin(t(h)), -sin(alph(h))*cos(t(h)), a(h)*sin(t(h));
-        0, sin(alph(h)), cos(alph(h)), d(h);
-        0, 0, 0, 1];
-    end
-
-    plotpts = [plotpts, T(1:3,4)];
-end
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection='3d')
+# ax.scatter(xr, yr, zr, c='green', alpha=0.07, marker='o', depthshade=False)
+# ax.scatter(xh, yh, zh, c='red', alpha=1, marker='o', depthshade=False)
+# ax.set_xlabel('X (m)')
+# ax.set_ylabel('Y (m)')
+# ax.set_zlabel('Z (m)')
+#
+# plt.show()
