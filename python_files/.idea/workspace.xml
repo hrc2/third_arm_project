@@ -21,11 +21,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="workspace.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="workspace.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/workspace.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="52" column="23" selection-start-line="52" selection-start-column="23" selection-end-line="52" selection-end-column="23" />
+            <state vertical-scroll-proportion="0.32490975">
+              <caret line="214" column="0" selection-start-line="214" selection-start-column="0" selection-end-line="214" selection-end-column="0" />
               <folding>
                 <element signature="e#37#55#0" expanded="true" />
               </folding>
@@ -45,10 +45,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ws_fixed_human_3dplot.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="ws_fixed_human_3dplot.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ws_fixed_human_3dplot.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.48856798">
+            <state vertical-scroll-proportion="0.0">
               <caret line="153" column="1" selection-start-line="153" selection-start-column="1" selection-end-line="153" selection-end-column="1" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
@@ -160,9 +160,9 @@
         <option value="$PROJECT_DIR$/dynamics_v2.py" />
         <option value="$PROJECT_DIR$/dynamics_v1.py" />
         <option value="$PROJECT_DIR$/load_plots.py" />
-        <option value="$PROJECT_DIR$/workspace.py" />
         <option value="$PROJECT_DIR$/ws_3dplot.py" />
         <option value="$PROJECT_DIR$/ws_fixed_human_3dplot.py" />
+        <option value="$PROJECT_DIR$/workspace.py" />
       </list>
     </option>
   </component>
@@ -847,16 +847,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/workspace.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="52" column="23" selection-start-line="52" selection-start-column="23" selection-end-line="52" selection-end-column="23" />
-          <folding>
-            <element signature="e#37#55#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ws_3dplot.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -869,10 +859,20 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ws_fixed_human_3dplot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.48856798">
+        <state vertical-scroll-proportion="0.0">
           <caret line="153" column="1" selection-start-line="153" selection-start-column="1" selection-end-line="153" selection-end-column="1" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/workspace.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.32490975">
+          <caret line="214" column="0" selection-start-line="214" selection-start-column="0" selection-end-line="214" selection-end-column="0" />
+          <folding>
+            <element signature="e#37#55#0" expanded="true" />
           </folding>
         </state>
       </provider>
