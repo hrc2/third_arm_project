@@ -54,7 +54,7 @@ if __name__ == '__main__':
 
 		rospy.loginfo('Position of gripper motor {0}'.format(trans))
 		
-		with open('v1.csv','a') as f:
+		with open('v1_fixed_human.csv','a') as f:
 			writer = csv.writer(f)
 			writer.writerow(trans)
 

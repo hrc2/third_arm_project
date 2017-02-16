@@ -54,13 +54,13 @@ if __name__ == '__main__':
 
 		rospy.loginfo('Position of gripper motor {0}'.format(trans))
 		
-		with open('v2.csv','a') as f:
+		with open('v2_new.csv','a') as f:
 			writer = csv.writer(f)
 			writer.writerow(trans)
 
-		with open('human.csv','a') as fh:
-			writer = csv.writer(fh)
-			writer.writerow(htrans)
+		# with open('human.csv','a') as fh:
+		# 	writer = csv.writer(fh)
+		# 	writer.writerow(htrans)
 
 		rgb = [0.0,1.0,0.0,0.8]
 		marker = make_marker(trans,rgb)

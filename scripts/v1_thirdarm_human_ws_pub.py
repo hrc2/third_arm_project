@@ -34,6 +34,14 @@ def callback(data):
 		hval2 = -1.57 + 3.927*random.betavariate(0.55, 0.55)
 		hval3 = -1.57 + 3.14*random.betavariate(0.6, 0.6)
 		hval4 = 1.57*random.betavariate(0.5, 0.5)
+
+		#For fixed human state, h_state should be default values := 0
+		#h_state.position[10:13] = [hval1,hval2,hval3,hval4]
+		hval1 = 0
+		hval2 = 1.57
+		hval3 = 0
+		hval4 = 0
+		
 		h_state.position[10:13] = [hval1,hval2,hval3,hval4]
 
 		pub.publish(state)
