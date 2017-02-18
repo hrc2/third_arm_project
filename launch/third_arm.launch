@@ -12,26 +12,16 @@
     <!-- Start Joint Position Controllers for each DoF -->
     <node name="ctrl_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
           args="--manager=dxl_manager
-                --port=head_port
+                --port=third_arm_port
                  base_swivel_controller
                  vertical_tilt_controller
                  arm_extension_controller
                  wrist_controller
-		 gripper_controller"
+		         gripper_controller"
           output="screen" />
 
     <!-- Start Meta Controllers for the whole Head -->
-    <node name="meta_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
-          args="--manager=dxl_manager
-                --port=head_port
-                --type=meta
-                 head_controller
-                 base_swivel_controller
-                 vertical_tilt_controller
-                 arm_extension_controller
-                 wrist_controller
-		 gripper_controller"
-          output="screen"/>
+    
 
     <!-- Start the Pose Goer -->
     <!-- node name="poser" pkg="third_arm" type="pose_goer.py" output="screen" -->
