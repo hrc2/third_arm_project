@@ -9,6 +9,7 @@ from geometry_msgs.msg import Vector3, Twist
 from sensor_msgs.msg import JointState
 import dynamixel_msgs.msg
 import numpy as np
+import csv
 
 class ThirdArm:	
 
@@ -43,18 +44,28 @@ class ThirdArm:
 		self.send_motor()
 
 	def send_motor(self):
-		base_val = self.h_state.position[0]
-		tilt_val = self.h_state.position[1]
+		base_val = -self.h_state.position[0]
+		tilt_val = -0.3 + (-self.h_state.position[1])
 		extend_val = -0.3 + (-2.0+0.3)*self.h_state.position[2]/0.15
 		gripper_val =  1.0 - self.h_state.position[4]
 		self.pub_motor5.publish(gripper_val)
 		self.pub_motor3.publish(extend_val)
+		self.pub_motor2.publish(tilt_val)
+		#tilt_val
+		self.pub_motor1.publish(base_val)
+		self.pub_motor4.publish(0.0)
 
 	def print_torque(self,data):
 		for j in range(2):
 			self.torque[j] = data.motor_states[j].load
 
-		rospy.loginfo('\nGripper torque is: {0} \n'.format(self.torque))	
+		
+
+		write_data = self.torque
+		with open('demo_task_1.csv','a') as f:
+		 	writer = csv.writer(f,quoting=csv.QUOTE_ALL)
+		 	writer.writerow(write_data)
+		 	rospy.loginfo('\nTorque is: {0} \n'.format(write_data))	
 		
 	def set_data1(self):
 		self.h_state.position = [0.0 for i in range(self.h_len)]
@@ -161,7 +172,7 @@ class ThirdArm:
 		self.sub.unregister()
 
 	def pubsub(self):
-		self.rate = rospy.Rate(3)
+		self.rate = rospy.Rate(6)
 
 		self.pub = rospy.Publisher('/third_arm_joints', JointState, queue_size=1)
 		self.pub_human = rospy.Publisher('/joint_states', JointState, queue_size=1)
@@ -174,9 +185,10 @@ class ThirdArm:
 		while not rospy.is_shutdown():
 			self.sub = rospy.Subscriber('/joint_states', JointState, self.sub_once)
 			#self.motor_sub = rospy.Subscriber('/gripper_controller/state', dynamixel_msgs.msg.JointState, self.get_torque)
-			self.motor_sub = rospy.Subscriber('/motor_states/third_arm_port', dynamixel_msgs.msg.MotorStateList, self.print_torque)
+			
 			self.push_data()
 			self.rate.sleep()
+			self.motor_sub = rospy.Subscriber('/motor_states/third_arm_port', dynamixel_msgs.msg.MotorStateList, self.print_torque)
 		
 		#rospy.spin()
 			
