@@ -20,6 +20,7 @@
 		         gripper_controller"
           output="screen" />
 
+    <!--node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" /-->      
     <!-- Start Meta Controllers for the whole Head -->
     
 
