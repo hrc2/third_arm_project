@@ -168,6 +168,6 @@ ax.set_xlabel('x (m)')
 ax.set_ylabel('y (m)')
 ax.set_zlabel('z (m)')
 
-#ax.set_zticks([])
-ax.view_init(azim=45, elev=45)
+ax.set_zticks([])
+ax.view_init(azim=0, elev=90)
 plt.show()
