@@ -172,7 +172,7 @@ class ThirdArm:
 		self.sub.unregister()
 
 	def pubsub(self):
-		self.rate = rospy.Rate(6)
+		self.rate = rospy.Rate(10)
 
 		self.pub = rospy.Publisher('/third_arm_joints', JointState, queue_size=1)
 		self.pub_human = rospy.Publisher('/joint_states', JointState, queue_size=1)
