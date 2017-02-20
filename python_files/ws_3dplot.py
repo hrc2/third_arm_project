@@ -125,6 +125,6 @@ ax.set_xlabel('x (m)')
 ax.set_ylabel('y (m)')
 ax.set_zlabel('z (m)')
 
-ax.set_xticks([])
-ax.view_init(azim=0, elev=0)
+ax.set_yticks([])
+ax.view_init(azim=90, elev=0)
 plt.show()
