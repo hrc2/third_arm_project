@@ -130,7 +130,7 @@ def force_shoulders_v1():
 #    fs = np.vstack(moments)
     #plt.plot(moments_mag)
     #plt.show()
-    return moments_mag
+    return moments_mag,forces_mag
 
 
 def force_elbow_v1():
@@ -170,11 +170,11 @@ def force_elbow_v1():
     #    fs = np.vstack(moments)
     #plt.plot(moments_mag)
     #plt.show()
-    return moments_mag
+    return moments_mag,forces_mag
 
 
-shoulder_moments = force_shoulders_v1()
-elbow_moments = force_elbow_v1()
+shoulder_moments,sf = force_shoulders_v1()
+elbow_moments,ef = force_elbow_v1()
 
 plt.plot(shoulder_moments)
 plt.plot(elbow_moments)

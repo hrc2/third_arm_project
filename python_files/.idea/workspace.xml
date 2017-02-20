@@ -21,11 +21,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="ws_3dplot.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ws_3dplot.py">
+      <file leaf-file-name="fetching_dynamics_v2.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/fetching_dynamics_v2.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="115" column="13" selection-start-line="115" selection-start-column="13" selection-end-line="115" selection-end-column="13" />
+              <caret line="145" column="16" selection-start-line="145" selection-start-column="16" selection-end-line="145" selection-end-column="16" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -33,23 +33,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="3d_slice_all3.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/3d_slice_all3.py">
+      <file leaf-file-name="handover_dynamics_v2.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/handover_dynamics_v2.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="23" column="31" selection-start-line="23" selection-start-column="31" selection-end-line="23" selection-end-column="31" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ws_fixed_human_3dplot.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ws_fixed_human_3dplot.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="170" column="0" selection-start-line="170" selection-start-column="0" selection-end-line="170" selection-end-column="0" />
+              <caret line="145" column="16" selection-start-line="145" selection-start-column="16" selection-end-line="145" selection-end-column="16" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -61,19 +49,7 @@
         <entry file="file://$PROJECT_DIR$/dynamics_v2.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="38" column="0" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="fetching_dynamics_v2.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/fetching_dynamics_v2.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="110" column="41" selection-start-line="110" selection-start-column="41" selection-end-line="110" selection-end-column="41" />
+              <caret line="164" column="30" selection-start-line="164" selection-start-column="30" selection-end-line="164" selection-end-column="30" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -85,7 +61,19 @@
         <entry file="file://$PROJECT_DIR$/dynamics_v1.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="29" column="16" selection-start-line="29" selection-start-column="16" selection-end-line="29" selection-end-column="16" />
+              <caret line="178" column="0" selection-start-line="178" selection-start-column="0" selection-end-line="178" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="sim_load_plots.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/sim_load_plots.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="9" column="29" selection-start-line="9" selection-start-column="29" selection-end-line="9" selection-end-column="29" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -97,7 +85,7 @@
         <entry file="file://$PROJECT_DIR$/load_plots.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="33" column="0" selection-start-line="33" selection-start-column="0" selection-end-line="33" selection-end-column="21" />
+              <caret line="37" column="38" selection-start-line="37" selection-start-column="26" selection-end-line="37" selection-end-column="38" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -105,11 +93,35 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="torque_plots.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="torque_plots.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/torque_plots.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.6817043">
-              <caret line="16" column="27" selection-start-line="16" selection-start-column="27" selection-end-line="16" selection-end-column="27" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="49" column="51" selection-start-line="49" selection-start-column="51" selection-end-line="49" selection-end-column="51" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="torque_plots_traj2.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/torque_plots_traj2.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="49" column="52" selection-start-line="49" selection-start-column="52" selection-end-line="49" selection-end-column="52" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="torque_plots_traj3.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/torque_plots_traj3.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.6522262">
+              <caret line="56" column="21" selection-start-line="56" selection-start-column="21" selection-end-line="56" selection-end-column="21" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -147,23 +159,27 @@
         <option value="D:/Python27/Lib/site-packages/scipy/__init__.py" />
         <option value="$PROJECT_DIR$/ConcaveHull.py" />
         <option value="$PROJECT_DIR$/dynamics.py" />
-        <option value="$PROJECT_DIR$/dynamics_v2.py" />
-        <option value="$PROJECT_DIR$/dynamics_v1.py" />
-        <option value="$PROJECT_DIR$/load_plots.py" />
         <option value="$PROJECT_DIR$/workspace.py" />
         <option value="$PROJECT_DIR$/ws_3dplot.py" />
         <option value="$PROJECT_DIR$/ws_fixed_human_3dplot.py" />
         <option value="$PROJECT_DIR$/3d_slice_all3.py" />
+        <option value="$PROJECT_DIR$/dynamics_v1.py" />
+        <option value="$PROJECT_DIR$/dynamics_v2.py" />
+        <option value="$PROJECT_DIR$/sim_load_plots.py" />
+        <option value="$PROJECT_DIR$/load_plots.py" />
         <option value="$PROJECT_DIR$/fetching_dynamics_v2.py" />
+        <option value="$PROJECT_DIR$/handover_dynamics_v2.py" />
         <option value="$PROJECT_DIR$/torque_plots.py" />
+        <option value="$PROJECT_DIR$/torque_plots_traj2.py" />
+        <option value="$PROJECT_DIR$/torque_plots_traj3.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
     <option name="x" value="-8" />
     <option name="y" value="-8" />
-    <option name="width" value="1382" />
-    <option name="height" value="744" />
+    <option name="width" value="1936" />
+    <option name="height" value="1176" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -190,7 +206,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -212,6 +227,7 @@
         </subPane>
       </pane>
       <pane id="Scope" />
+      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -219,8 +235,8 @@
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
-  <component name="RunManager" selected="Python.torque_plots">
-    <configuration default="false" name="ws_3dplot" type="PythonConfigurationType" factoryName="Python" temporary="true">
+  <component name="RunManager" selected="Python.torque_plots_traj3">
+    <configuration default="false" name="handover_dynamics_v2" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -232,41 +248,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="PyPlots" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ws_3dplot.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <method />
-    </configuration>
-    <configuration default="false" name="ws_fixed_human_3dplot" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="PyPlots" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ws_fixed_human_3dplot.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <method />
-    </configuration>
-    <configuration default="false" name="3d_slice_all3" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="PyPlots" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/3d_slice_all3.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/handover_dynamics_v2.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -301,6 +283,40 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="PyPlots" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/torque_plots.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="torque_plots_traj2" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="PyPlots" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/torque_plots_traj2.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="torque_plots_traj3" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="PyPlots" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/torque_plots_traj3.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -428,19 +444,19 @@
       <method />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Python.ws_3dplot" />
-      <item index="1" class="java.lang.String" itemvalue="Python.ws_fixed_human_3dplot" />
-      <item index="2" class="java.lang.String" itemvalue="Python.3d_slice_all3" />
-      <item index="3" class="java.lang.String" itemvalue="Python.fetching_dynamics_v2" />
-      <item index="4" class="java.lang.String" itemvalue="Python.torque_plots" />
+      <item index="0" class="java.lang.String" itemvalue="Python.handover_dynamics_v2" />
+      <item index="1" class="java.lang.String" itemvalue="Python.fetching_dynamics_v2" />
+      <item index="2" class="java.lang.String" itemvalue="Python.torque_plots" />
+      <item index="3" class="java.lang.String" itemvalue="Python.torque_plots_traj2" />
+      <item index="4" class="java.lang.String" itemvalue="Python.torque_plots_traj3" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.torque_plots" />
-        <item index="1" class="java.lang.String" itemvalue="Python.fetching_dynamics_v2" />
-        <item index="2" class="java.lang.String" itemvalue="Python.3d_slice_all3" />
-        <item index="3" class="java.lang.String" itemvalue="Python.ws_fixed_human_3dplot" />
-        <item index="4" class="java.lang.String" itemvalue="Python.ws_3dplot" />
+        <item index="0" class="java.lang.String" itemvalue="Python.torque_plots_traj3" />
+        <item index="1" class="java.lang.String" itemvalue="Python.torque_plots_traj2" />
+        <item index="2" class="java.lang.String" itemvalue="Python.torque_plots" />
+        <item index="3" class="java.lang.String" itemvalue="Python.handover_dynamics_v2" />
+        <item index="4" class="java.lang.String" itemvalue="Python.fetching_dynamics_v2" />
       </list>
     </recent_temporary>
   </component>
@@ -458,19 +474,19 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1176" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17349927" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1234375" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32649842" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19418387" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39868668" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.26266417" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -506,35 +522,64 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/fetching_dynamics_v2.py</url>
-          <line>87</line>
-          <option name="timeStamp" value="46" />
+          <line>137</line>
+          <option name="timeStamp" value="58" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/torque_plots.py</url>
-          <line>35</line>
-          <option name="timeStamp" value="52" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/torque_plots.py</url>
-          <line>39</line>
-          <option name="timeStamp" value="53" />
+          <url>file://$PROJECT_DIR$/handover_dynamics_v2.py</url>
+          <line>147</line>
+          <option name="timeStamp" value="60" />
         </line-breakpoint>
       </breakpoints>
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="54" />
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+      <option name="time" value="62" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/torque_plots_traj2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="14" column="28" selection-start-line="14" selection-start-column="28" selection-end-line="14" selection-end-column="28" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/torque_plots_traj3.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="38" column="27" selection-start-line="38" selection-start-column="27" selection-end-line="38" selection-end-column="27" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/version1_2d.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="15" column="20" selection-start-line="15" selection-start-column="20" selection-end-line="15" selection-end-column="20" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/workspace.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#37#55#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -572,9 +617,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="19" column="16" selection-start-line="19" selection-start-column="16" selection-end-line="19" selection-end-column="16" />
-          <folding>
-            <element signature="e#263#281#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -582,7 +624,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -600,9 +641,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="48" column="0" selection-start-line="48" selection-start-column="0" selection-end-line="50" selection-end-column="18" />
-          <folding>
-            <element signature="e#0#18#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -610,9 +648,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#37#55#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -637,9 +672,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="48" column="0" selection-start-line="48" selection-start-column="0" selection-end-line="50" selection-end-column="18" />
-          <folding>
-            <element signature="e#0#18#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -647,7 +679,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="49" column="32" selection-start-line="49" selection-start-column="32" selection-end-line="49" selection-end-column="32" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -655,9 +686,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#37#55#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -682,9 +710,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="50" column="18" selection-start-line="50" selection-start-column="18" selection-end-line="50" selection-end-column="18" />
-          <folding>
-            <element signature="e#0#18#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -692,7 +717,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="49" column="32" selection-start-line="49" selection-start-column="32" selection-end-line="49" selection-end-column="32" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -700,9 +724,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#37#55#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -727,9 +748,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="22" column="40" selection-start-line="22" selection-start-column="40" selection-end-line="22" selection-end-column="40" />
-          <folding>
-            <element signature="e#0#18#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -737,7 +755,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="49" column="32" selection-start-line="49" selection-start-column="32" selection-end-line="49" selection-end-column="32" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -752,7 +769,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="49" column="32" selection-start-line="49" selection-start-column="32" selection-end-line="49" selection-end-column="32" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -767,9 +783,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="48" column="0" selection-start-line="48" selection-start-column="0" selection-end-line="50" selection-end-column="18" />
-          <folding>
-            <element signature="e#0#18#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -777,7 +790,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -785,9 +797,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="19" column="16" selection-start-line="19" selection-start-column="16" selection-end-line="19" selection-end-column="16" />
-          <folding>
-            <element signature="e#263#281#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -795,7 +804,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.7781403">
           <caret line="4585" column="0" selection-start-line="4585" selection-start-column="0" selection-end-line="4585" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -803,7 +811,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.33278957">
           <caret line="568" column="0" selection-start-line="568" selection-start-column="0" selection-end-line="568" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -811,9 +818,45 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="214" column="0" selection-start-line="214" selection-start-column="0" selection-end-line="214" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/Python27/Lib/site-packages/matplotlib/path.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33278957">
+          <caret line="140" column="0" selection-start-line="140" selection-start-column="0" selection-end-line="140" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ws_3dplot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="115" column="13" selection-start-line="115" selection-start-column="13" selection-end-line="115" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/3d_slice_all3.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="23" column="31" selection-start-line="23" selection-start-column="31" selection-end-line="23" selection-end-column="31" />
           <folding>
-            <element signature="e#37#55#0" expanded="false" />
+            <element signature="e#0#18#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ws_fixed_human_3dplot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="170" column="0" selection-start-line="170" selection-start-column="0" selection-end-line="170" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/pydevd.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.66721046">
+          <caret line="2410" column="0" selection-start-line="2410" selection-start-column="0" selection-end-line="2410" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -827,18 +870,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://D:/Python27/Lib/site-packages/matplotlib/path.py">
+    <entry file="file://D:/Python27/Lib/lib-tk/Tkinter.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.33278957">
-          <caret line="140" column="0" selection-start-line="140" selection-start-column="0" selection-end-line="140" selection-end-column="0" />
-          <folding />
+        <state vertical-scroll-proportion="0.33333334">
+          <caret line="1531" column="0" selection-start-line="1531" selection-start-column="0" selection-end-line="1531" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ws_3dplot.py">
+    <entry file="file://$PROJECT_DIR$/dynamics_v1.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="115" column="13" selection-start-line="115" selection-start-column="13" selection-end-line="115" selection-end-column="13" />
+          <caret line="178" column="0" selection-start-line="178" selection-start-column="0" selection-end-line="178" selection-end-column="0" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
@@ -848,37 +890,17 @@
     <entry file="file://$PROJECT_DIR$/dynamics_v2.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="38" column="0" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
+          <caret line="164" column="30" selection-start-line="164" selection-start-column="30" selection-end-line="164" selection-end-column="30" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dynamics_v1.py">
+    <entry file="file://$PROJECT_DIR$/sim_load_plots.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="29" column="16" selection-start-line="29" selection-start-column="16" selection-end-line="29" selection-end-column="16" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fetching_dynamics_v2.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="110" column="41" selection-start-line="110" selection-start-column="41" selection-end-line="110" selection-end-column="41" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/3d_slice_all3.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="23" column="31" selection-start-line="23" selection-start-column="31" selection-end-line="23" selection-end-column="31" />
+          <caret line="9" column="29" selection-start-line="9" selection-start-column="29" selection-end-line="9" selection-end-column="29" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
@@ -888,35 +910,57 @@
     <entry file="file://$PROJECT_DIR$/load_plots.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="33" column="0" selection-start-line="33" selection-start-column="0" selection-end-line="33" selection-end-column="21" />
+          <caret line="37" column="38" selection-start-line="37" selection-start-column="26" selection-end-line="37" selection-end-column="38" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ws_fixed_human_3dplot.py">
+    <entry file="file://$PROJECT_DIR$/fetching_dynamics_v2.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="170" column="0" selection-start-line="170" selection-start-column="0" selection-end-line="170" selection-end-column="0" />
+          <caret line="145" column="16" selection-start-line="145" selection-start-column="16" selection-end-line="145" selection-end-column="16" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/pydevd.py">
+    <entry file="file://$PROJECT_DIR$/handover_dynamics_v2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.66721046">
-          <caret line="2410" column="0" selection-start-line="2410" selection-start-column="0" selection-end-line="2410" selection-end-column="0" />
-          <folding />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="145" column="16" selection-start-line="145" selection-start-column="16" selection-end-line="145" selection-end-column="16" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/torque_plots.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6817043">
-          <caret line="16" column="27" selection-start-line="16" selection-start-column="27" selection-end-line="16" selection-end-column="27" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="49" column="51" selection-start-line="49" selection-start-column="51" selection-end-line="49" selection-end-column="51" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/torque_plots_traj2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="49" column="52" selection-start-line="49" selection-start-column="52" selection-end-line="49" selection-end-column="52" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/torque_plots_traj3.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.6522262">
+          <caret line="56" column="21" selection-start-line="56" selection-start-column="21" selection-end-line="56" selection-end-column="21" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>

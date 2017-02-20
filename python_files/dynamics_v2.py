@@ -128,9 +128,9 @@ def force_shoulders_v2():
         moments_mag.append(np.linalg.norm(moment))
 
 #    fs = np.vstack(moments)
-    plt.plot(moments_mag)
-    plt.show()
-    return moments_mag
+#     plt.plot(moments_mag)
+#     plt.show()
+    return moments_mag,forces_mag
 
 def force_elbow_v2():
     forces_mag = []
@@ -169,17 +169,19 @@ def force_elbow_v2():
 #    fs = np.vstack(moments)
     plt.plot(moments_mag)
     plt.show()
-    return moments_mag
+    return moments_mag,forces_mag
 
 
-shoulder_moments = force_shoulders_v2()
-elbow_moments = force_elbow_v2()
+shoulder_moments,sf = force_shoulders_v2()
+elbow_moments,ef = force_elbow_v2()
+
+#print 'Stop'
 
 with open('v2_shoulder.csv','wb') as v2s:
     writer = csv.writer(v2s)
     for val in shoulder_moments:
         writer.writerow([val])
-
+#
 with open('v2_elbow.csv','wb') as v2e:
     writer = csv.writer(v2e)
     for el in elbow_moments:
