@@ -42,12 +42,12 @@ def write_data(fname,datavec):
 #write_data("for_smoothing_fetch_dof_1.csv",m1plot)
 #write_data("for_smoothing_fetch_dof_2.csv",m2plot)
 
-m1plot = np.absolute(np.array(read_data('motor1_fetch_filtered.csv')).astype(float))
-m2plot = np.absolute(np.array(read_data('motor2_fetch_filtered.csv')).astype(float))
+m1plot = np.absolute(np.array(read_data('motor1_hand_filtered.csv')).astype(float))
+m2plot = np.absolute(np.array(read_data('motor2_hand_filtered.csv')).astype(float))
 x = np.linspace(0,len(m1plot)/10000.0,num=len(m1plot))
 
 fig1 = plt.figure()
-fig1.suptitle('Torque Load on Motors while Fetching',fontsize=20)
+fig1.suptitle('Torque Load on Motors during Handover',fontsize=20)
 ax1 = fig1.add_subplot(111)
 l1 = ax1.plot(x, m1plot ,label='DoF 1',linewidth=2.0,c='r')
 l2 = ax1.plot(x, m2plot ,label='DoF 2',linewidth=2.0,c='g')

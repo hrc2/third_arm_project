@@ -83,9 +83,9 @@ def moment_v2_traj1():
     me = []
 
     N = 100
-    thets = np.linspace(0, -1.42, num=N)
+    thets = np.linspace(0, 1.00, num=N)
     d3 = np.linspace(0.256-0.157/2, 0.256+0.160-0.157/2, num=N)
-    phi = np.linspace(0, -0.68, num=N)
+    phi = np.linspace(0, 0.1, num=N)
 
     for i in range(N):
         f1,m1,f2,m2 = find_force(d3[i],thets[i],phi[i])
@@ -99,9 +99,9 @@ def moment_v2_traj1():
         me_mag.append(np.linalg.norm(m2))
 
     N = 200
-    thets = np.linspace(thets[-1], 1.00, num=N)
+    thets = np.linspace(thets[-1], -3.00, num=N)
     d3 = np.linspace(d3[-1], d3[0], num=N)
-    phi = np.linspace(phi[-1], 0.22, num=N)
+    phi = np.linspace(phi[-1], 0.3, num=N)
 
     for i in range(N):
         f1,m1,f2,m2 = find_force(d3[i],thets[i],phi[i])
@@ -118,12 +118,12 @@ def moment_v2_traj1():
 #     plt.plot(ms_mag, c='r')
 #     plt.plot(me_mag, c='b')
 #     plt.show()
-    return ms_mag,me_mag
+    return ms_mag,me_mag,fs_mag,fe_mag
 
 
 
 
-shoulder_moments, elbow_moments = moment_v2_traj1()
+shoulder_moments, elbow_moments,sf,ef = moment_v2_traj1()
 
 # with open('fetching_shooulder.csv','wb') as v2s:
 #     writer = csv.writer(v2s)
@@ -136,7 +136,7 @@ shoulder_moments, elbow_moments = moment_v2_traj1()
 #         writer.writerow([el])
 
 fig1 = plt.figure()
-fig1.suptitle('Moment Loads for Fetching',fontsize=20)
+fig1.suptitle('Moment loads for Assisted Handover',fontsize=20)
 ax1 = fig1.add_subplot(111)
 l1 = ax1.plot(shoulder_moments,label='Shoulder',linewidth=3.0, c='r')
 l2 = ax1.plot(elbow_moments,label='Elbow',linewidth=3.0, c='b',ls='dashed')
@@ -144,5 +144,15 @@ ax1.set_ylim([0,24])
 ax1.set_xlabel('Time step',fontsize=14)
 ax1.set_ylabel('Magnitude of moment (Nm)',fontsize=14)
 ax1.legend(loc=2)
+
+# fig2 = plt.figure()
+# fig2.suptitle('Force loads for Assisted Handover',fontsize=20)
+# ax1 = fig2.add_subplot(111)
+# l1 = ax1.plot(sf,label='Shoulder',linewidth=3.0, c='r')
+# l2 = ax1.plot(ef,label='Elbow',linewidth=3.0, c='b',ls='dashed')
+# ax1.set_ylim([0,60])
+# ax1.set_xlabel('Time step')
+# ax1.set_ylabel('Magnitude of force (N)')
+# ax1.legend(loc=1)
 
 plt.show()
