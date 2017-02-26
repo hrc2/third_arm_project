@@ -136,7 +136,7 @@ shoulder_moments, elbow_moments,sf,ef = moment_v2_traj1()
 #         writer.writerow([el])
 
 fig1 = plt.figure()
-fig1.suptitle('Moment loads for Assisted Handover',fontsize=20)
+fig1.suptitle('Bio-Mechanical Loads for Assisted Handover',fontsize=20)
 ax1 = fig1.add_subplot(111)
 l1 = ax1.plot(shoulder_moments,label='Shoulder',linewidth=3.0, c='r')
 l2 = ax1.plot(elbow_moments,label='Elbow',linewidth=3.0, c='b',ls='dashed')

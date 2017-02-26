@@ -212,12 +212,12 @@ xr,yr,zr = unpack("v2.csv") #Point cloud for Model II
 xh,yh,zh = unpack("human.csv") #Point cloud for human
 xp,yp,zp = unpack("v1.csv") #Point cloud for Model I
 
-calculation(xr,yr,zr)
-#calculation(xh,yh,zh)
+#calculation(xr,yr,zr)
+calculation(xh,yh,zh)
 #calculation(xp,yp,zp)
 
 # Plotting the full point clouds
-full_plot(xr,yr,zr,xh,yh,zh,xp,yp,zp)
+#full_plot(xr,yr,zr,xh,yh,zh,xp,yp,zp)
 
 # Plotting the Cutaway
 #plot_cutaway(xr,yr,zr,xh,yh,zh,xp,yp,zp)
