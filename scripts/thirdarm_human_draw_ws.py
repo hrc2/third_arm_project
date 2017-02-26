@@ -58,9 +58,9 @@ if __name__ == '__main__':
 		# 	writer = csv.writer(f)
 		# 	writer.writerow(trans)
 
-		# with open('human.csv','a') as fh:
-		# 	writer = csv.writer(fh)
-		# 	writer.writerow(htrans)
+		with open('human.csv','a') as fh:
+			writer = csv.writer(fh)
+			writer.writerow(htrans)
 
 		rgb = [0.0,1.0,0.0,0.8]
 		marker = make_marker(trans,rgb)

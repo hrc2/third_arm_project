@@ -19,9 +19,12 @@ def callback(data):
 	if j<math.pow(10,9):
 		state = data
 		#val1 = -3.14 + 6.28*random.betavariate(1, 1)
-		val1 = -3.14 + 6.28*random.betavariate(1, 1)
-		val2 = -1.57 + (30*math.pi/180 + 1.57)*random.betavariate(0.6, 0.6)
-		val3 = 0.15*random.betavariate(0.4, 0.4)
+		# val1 = -3.14 + 6.28*random.betavariate(1, 1)
+		# val2 = -1.57 + (30*math.pi/180 + 1.57)*random.betavariate(0.6, 0.6)
+		# val3 = 0.15*random.betavariate(0.4, 0.4)
+		val1 = 0
+		val2 = 0
+		val3 = 0
 		#if i<100:
 		state.position = [val1,val2,val3,val1,val1,val1]
 		
@@ -30,10 +33,10 @@ def callback(data):
 		h_state.position = [0.0 for i in range(h_len)]
 		h_state.position[0:5] = [val1,val2,val3,val1,val1,val1]#state.position
 
-		hval1 = -1.57 + 3.14*random.betavariate(0.6, 0.6)
-		hval2 = -1.57 + 3.927*random.betavariate(0.55, 0.55)
-		hval3 = -1.57 + 3.14*random.betavariate(0.6, 0.6)
-		hval4 = 1.57*random.betavariate(0.5, 0.5)
+		hval1 = -1.57 + 3.14*random.betavariate(0.5, 0.5)
+		hval2 = -1.57 + 3.927*random.betavariate(0.65, 0.65)
+		hval3 = -1.57 + 3.14*random.betavariate(0.5, 0.5)
+		hval4 = 3.14*random.betavariate(0.5, 0.5)
 		
 		#For fixed human state, set h_state to default vals :=0
 		# hval1 = 0
