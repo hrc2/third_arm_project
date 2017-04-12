@@ -43,7 +43,7 @@ if __name__ == '__main__':
 	#while not rospy.is_shutdown():
 	#rospy.Subscriber('/joint_states', JointState, callback)
 
-	rate = rospy.Rate(10.0)
+	rate = rospy.Rate(20.0)
 	
 	while not rospy.is_shutdown():
 		try:

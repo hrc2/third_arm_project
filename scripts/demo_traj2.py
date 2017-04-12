@@ -21,6 +21,7 @@ class ThirdArm:
 	h_state = JointState([],h_names,hvals,[],[])
 	h_len = len(h_names)
 	state = JointState([],h_names,dofvals,[],[])
+	m_states = []
 
 	move = 1
 	i = 0
@@ -38,16 +39,20 @@ class ThirdArm:
 		
 		rospy.loginfo('To be pubbed: {0} and counter: {1}'.format(self.h_state.position,self.i))
 
-		self.pub_human.publish(self.h_state)
-		self.pub.publish(self.state)
+		#self.pub_human.publish(self.h_state)
+		#self.pub.publish(self.state)
 
 		self.send_motor()
 
 	def send_motor(self):
-		base_val = -self.h_state.position[0]
-		tilt_val = -0.3 + (-self.h_state.position[1])
-		extend_val = -0.3 + (-2.0+0.3)*self.h_state.position[2]/0.15
-		gripper_val =  1.0 - self.h_state.position[4]
+		# base_val = -self.h_state.position[0]
+		# tilt_val = -0.3 + (-self.h_state.position[1])
+		# extend_val = -0.3 + (-2.0+0.3)*self.h_state.position[2]/0.15
+		# gripper_val =  1.3 - self.h_state.position[4]
+		base_val = -self.dofvals[0]
+		tilt_val = -0.3 + (-self.dofvals[1])
+		extend_val = -0.3 + (-2.0+0.3)*self.dofvals[2]/0.15
+		gripper_val =  1.3 - self.dofvals[4]
 		self.pub_motor5.publish(gripper_val)
 		self.pub_motor3.publish(extend_val)
 		self.pub_motor2.publish(tilt_val)
@@ -84,7 +89,7 @@ class ThirdArm:
 
 		#First movement: Inwards
 		val1 = np.linspace(0,1.00,num)
-		val2 = np.linspace(0,0.1,num)
+		val2 = np.linspace(0,0.05,num)
 		val3 = np.linspace(0,0.15,num)
 
 
@@ -95,6 +100,7 @@ class ThirdArm:
 		self.hvals = [hval1,hval2,hval3,hval4]
 		#self.state.position = self.dofvals
 		self.h_state.position[0:6] = [v1,v2,v3,val4,val5,-val5]
+		self.m_states = [v1,v2,v3,val4,val5,-val5]
 		self.h_state.position[13] = 1.57
 		rospy.loginfo('H_state pos is: {0}'.format(self.h_state.position))
 		
@@ -108,8 +114,8 @@ class ThirdArm:
 	def set_data2(self):
 		#Second movement: Gripper on
 		self.h_state.position = [0.0 for i in range(self.h_len)]
-		self.dofvals[4:6] = [0.1,-0.1]
-
+		self.dofvals[4:6] = [0.0,-0.0]
+		
 		hval1 = 0
 		hval2 = 1.57
 		hval3 = 0
@@ -127,7 +133,7 @@ class ThirdArm:
 		i = self.i
 
 		#Third movement: Outwards
-		val1 = np.linspace(1.00,-3.00,num)
+		val1 = np.linspace(1.00,-3.15,num)
 		val2 = np.linspace(0.1,0.3,num)
 		val3 = np.linspace(0.15,0.0,num)
 			
@@ -172,7 +178,7 @@ class ThirdArm:
 		self.sub.unregister()
 
 	def pubsub(self):
-		self.rate = rospy.Rate(10)
+		self.rate = rospy.Rate(13)
 
 		self.pub = rospy.Publisher('/third_arm_joints', JointState, queue_size=1)
 		self.pub_human = rospy.Publisher('/joint_states', JointState, queue_size=1)

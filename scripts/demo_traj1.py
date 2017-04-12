@@ -47,7 +47,7 @@ class ThirdArm:
 		base_val = -self.h_state.position[0]
 		tilt_val = -0.3 + (-self.h_state.position[1])
 		extend_val = -0.3 + (-2.0+0.3)*self.h_state.position[2]/0.15
-		gripper_val =  1.0 - self.h_state.position[4]
+		gripper_val =  1.3 - self.h_state.position[4]
 		self.pub_motor5.publish(gripper_val)
 		self.pub_motor3.publish(extend_val)
 		self.pub_motor2.publish(tilt_val)
@@ -80,7 +80,7 @@ class ThirdArm:
 		val2 = 0
 		val3 = 0
 		val4 = 0
-		val5 = 0.8
+		val5 = 1.0
 
 		#First movement: Outwards
 		val1 = np.linspace(0,-1.42,num)
@@ -108,7 +108,7 @@ class ThirdArm:
 	def set_data2(self):
 		#Second movement: Gripper on
 		self.h_state.position = [0.0 for i in range(self.h_len)]
-		self.dofvals[4:6] = [0.1,-0.1]
+		self.dofvals[4:6] = [0.0,-0.0]
 
 		hval1 = 0
 		hval2 = 1.57
@@ -172,7 +172,7 @@ class ThirdArm:
 		self.sub.unregister()
 
 	def pubsub(self):
-		self.rate = rospy.Rate(10)
+		self.rate = rospy.Rate(15)
 
 		self.pub = rospy.Publisher('/third_arm_joints', JointState, queue_size=1)
 		self.pub_human = rospy.Publisher('/joint_states', JointState, queue_size=1)
