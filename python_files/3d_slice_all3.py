@@ -19,7 +19,7 @@ def find_nearest(array,value):
     return array[idx]
 
 patches = []
-fname = 'human_concave_hull.csv'
+fname = 'human_concave_hull2.csv'
 X = np.loadtxt(open(fname, "rb"), delimiter=",", skiprows=1)
 hmid = find_nearest(X[:,2],0.5)
 hindex = (np.where(X[:,2] == hmid))

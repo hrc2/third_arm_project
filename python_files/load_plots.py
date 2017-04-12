@@ -27,7 +27,7 @@ v2_shoulder = read_data('v2_shoulder.csv')
 
 
 fig1 = plt.figure()
-fig1.suptitle('Moment Loads for Prototype Comparison',fontsize=20)
+fig1.suptitle('Bio-Mechanical Loads for Prototype Comparison',fontsize=20)
 ax1 = fig1.add_subplot(111)
 l1 = ax1.plot(v1_elbow,label='Model I Elbow',linewidth=1.0,ls='dashed',c='m')
 l2 = ax1.plot(v2_elbow,label='Model II Elbow',linewidth=3.0,ls='dashed',c='b')

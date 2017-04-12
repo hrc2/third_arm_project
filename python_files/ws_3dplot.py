@@ -30,7 +30,7 @@ def get_hull_points(xr,yr,zr,s):
     #s = 70 #Number of steps
     h = (zr[-1] - zr[0])/s
 
-    #Area = 0.0
+    Area = 0.0
 
     #fig = plt.figure()
     #ax = fig.add_subplot(111, projection='3d')
@@ -45,16 +45,19 @@ def get_hull_points(xr,yr,zr,s):
         hull = np.vstack(hull)
         sh = hull.shape
         verts.append(list( np.append(hull, np.vstack(np.tile(zs,sh[0])), axis=1)))
-        # Area += PolyArea(hull[:,0], hull[:,1])
-        # if i==1 or i==s:
-        #     Area *= 0.5
+        Area += PolyArea(hull[:,0], hull[:,1])
+        if i==1 or i==s:
+            Area *= 0.5
+
+    Volume = h*Area
+    print Volume
 
     return np.vstack(verts)
     # poly = PolyCollection(verts)
     # poly.set_alpha(0.7)
     # ax.add_collection3d(poly, zs=zs)
     #
-    # Volume = h*Area
+
 
     # print Volume
     #
@@ -70,9 +73,9 @@ def get_hull_points(xr,yr,zr,s):
 # xr,yr,zr = unpack("v2.csv")
 # sr=70
 # X = get_hull_points(xr,yr,zr,sr)
-#xh,yh,zh = unpack("human.csv")
-#X = get_hull_points(xh,yh,zh,20)
-#np.savetxt('human_concave_hull.csv', X, delimiter=',')
+# xh,yh,zh = unpack("human.csv")
+# X = get_hull_points(xh,yh,zh,70)
+# np.savetxt('human_concave_hull2.csv', X, delimiter=',')
 
 #xp,yp,zp = unpack("v1.csv")
 #Xp = get_hull_points(xp,yp,zp,40)
@@ -85,7 +88,7 @@ def get_hull_points(xr,yr,zr,s):
 #X = np.random.rand(100,3)
 #X = np.column_stack((xh,yh,zh))
 
-fname = 'human_concave_hull.csv'
+fname = 'human_concave_hull2.csv'
 X = np.loadtxt(open(fname, "rb"), delimiter=",", skiprows=1)
 fname = 'v1_concave_hull.csv'
 Xp = np.loadtxt(open(fname, "rb"), delimiter=",", skiprows=1)
