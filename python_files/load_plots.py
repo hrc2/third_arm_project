@@ -35,9 +35,9 @@ l2 = ax1.plot(v2_elbow,label='Model II Elbow',linewidth=3.0,ls='dashed',c='b')
 l3 = ax1.plot(v1_shoulder,label='Model I Shoulder',linewidth=1.0,c='k')
 l4 = ax1.plot(v2_shoulder,label='Model II Shoulder',linewidth=3.0,c='r')
 ax1.set_ylim([0,24])
-ax1.set_xlabel('Time step',fontsize=14)
-ax1.set_ylabel('Magnitude of moment (Nm)',fontsize=14)
-ax1.legend(loc=6)
+ax1.set_xlabel('Time step',fontsize=18)
+ax1.set_ylabel('Magnitude of moment (Nm)',fontsize=18)
+ax1.legend(loc=6,prop={'size':18})
 
 
 # fig1 = plt.figure()

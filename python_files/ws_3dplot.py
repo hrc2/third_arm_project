@@ -108,9 +108,9 @@ x2, y2, z2 = Xr.T
 
 # # cvx.simplices contains an (nfacets, 3) array specifying the indices of
 # # the vertices for each simplical facet
-tri = mtri.Triangulation(x, y, triangles=cvx.simplices)
-tri1 = mtri.Triangulation(x1, y1, triangles=cvx1.simplices)
-tri2 = mtri.Triangulation(x2, y2, triangles=cvx2.simplices)
+tri = mtri.Triangulation(x, y, triangles=cvx.simplices) #Human
+tri1 = mtri.Triangulation(x1, y1, triangles=cvx1.simplices) #Model 1
+tri2 = mtri.Triangulation(x2, y2, triangles=cvx2.simplices) #Model 2
 # # c = np.array([1,2,3,4])
 # # np.tile(c,(4,1))
 #
@@ -118,7 +118,7 @@ fig = plt.figure()
 ax = fig.gca(projection='3d')
 ax.hold(True)
 ax.plot_trisurf(tri, z, linewidth=0.001, antialiased=True, color='r',alpha=0.4)
-ax.plot_trisurf(tri1, z1, linewidth=0.001, antialiased=True, color='b',alpha=0.2)
+#ax.plot_trisurf(tri1, z1, linewidth=0.001, antialiased=True, color='b',alpha=0.2)
 ax.plot_trisurf(tri2, z2, linewidth=0.001, antialiased=True, color='y',alpha=0.1)
 # #ax.plot_trisurf(x,y, z, linewidth=0.2, antialiased=True, color='g',alpha=0.2)
 # #ax.plot_wireframe(x, y, z, color='r')
@@ -128,6 +128,6 @@ ax.set_xlabel('x (m)')
 ax.set_ylabel('y (m)')
 ax.set_zlabel('z (m)')
 
-ax.set_yticks([])
-ax.view_init(azim=90, elev=0)
+#ax.set_zticks([])
+ax.view_init(azim=135, elev=45)
 plt.show()
