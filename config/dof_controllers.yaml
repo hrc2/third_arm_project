@@ -17,7 +17,7 @@ vertical_tilt_controller:
         module: joint_position_controller
         type: JointPositionController
     joint_name: vertical_tilt
-    joint_speed: 0.157
+    joint_speed: 0.5
     motor:
         id: 2
         init: 2048

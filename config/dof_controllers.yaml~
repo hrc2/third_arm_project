@@ -7,8 +7,8 @@ base_swivel_controller:
     joint_speed: 0.314
     motor:
         id: 1
-        #init: 2490
-        min: 450
+        init: 2490
+        min: 0
         max: 4096
 
 vertical_tilt_controller:
@@ -20,7 +20,7 @@ vertical_tilt_controller:
     joint_speed: 0.157
     motor:
         id: 2
-        #init: 2048
+        init: 2048
         min: 0
         max: 4096
         
@@ -33,9 +33,10 @@ arm_extension_controller:
     joint_speed: 0.5
     motor:
         id: 3
-        #init: 3808
-        min: 2700
-        max: 3808
+        init: 3808
+        min: 0
+        max: 4096
+
         
 wrist_controller:
     controller:
@@ -46,9 +47,9 @@ wrist_controller:
     joint_speed: 0.5
     motor:
         id: 4
-        #init: 512
-        min: 211
-        max: 821
+        init: 512
+        min: 0
+        max: 1024
 
 gripper_controller:
     controller:
@@ -59,9 +60,11 @@ gripper_controller:
     joint_speed: 0.5
     motor:
         id: 5
-        #init: 970
-        min: 970
-        max: 2000
+        init: 970
+        min: 0
+        max: 4096
+        range: 360
+
 
 
 # This is the meta controller configuration
