@@ -19,11 +19,11 @@ def read_data(fname):
 
 
 
-v1_elbow = read_data('v1_elbow.csv')
-v2_elbow = read_data('v2_elbow.csv')
+v1_elbow = read_data('demo_traj_v1_elbow_moment.csv')
+v2_elbow = read_data('demo_traj_v2_elbow_moment.csv')
 
-v1_shoulder = read_data('v1_shoulder.csv')
-v2_shoulder = read_data('v2_shoulder.csv')
+v1_shoulder = read_data('demo_traj_v1_shoulder_moment.csv')
+v2_shoulder = read_data('demo_traj_v2_shoulder_moment.csv')
 
 
 fig1 = plt.figure()
@@ -34,11 +34,37 @@ l2 = ax1.plot(v2_elbow,label='Model II Elbow',linewidth=3.0,ls='dashed',c='b')
 
 l3 = ax1.plot(v1_shoulder,label='Model I Shoulder',linewidth=1.0,c='k')
 l4 = ax1.plot(v2_shoulder,label='Model II Shoulder',linewidth=3.0,c='r')
-ax1.set_ylim([0,24])
+ax1.set_ylim([0,30])
 ax1.set_xlabel('Time step',fontsize=18)
 ax1.set_ylabel('Magnitude of moment (Nm)',fontsize=18)
-ax1.legend(loc=6,prop={'size':18})
+ax1.legend(loc=6,prop={'size':14})
 
+
+shoulder_moments = read_data('v2_traj1_shoulder_moment.csv')
+elbow_moments = read_data('v2_traj1_elbow_moment.csv')
+fig2 = plt.figure()
+fig2.suptitle('Bio-Mechanical Loads for Fetching',fontsize=20)
+ax2 = fig2.add_subplot(111)
+l1 = ax2.plot(shoulder_moments,label='Shoulder',linewidth=3.0, c='r')
+l2 = ax2.plot(elbow_moments,label='Elbow',linewidth=3.0, c='b',ls='dashed')
+ax2.set_ylim([0,28])
+ax2.set_xlabel('Time step',fontsize=18)
+ax2.set_ylabel('Magnitude of moment (Nm)',fontsize=18)
+ax2.legend(loc=3,prop={'size':18})
+
+shoulder_moments = read_data('v2_traj2_shoulder_moment.csv')
+elbow_moments = read_data('v2_traj2_elbow_moment.csv')
+fig3 = plt.figure()
+fig3.suptitle('Bio-Mechanical Loads for Assisted Handover',fontsize=20)
+ax3 = fig3.add_subplot(111)
+l1 = ax3.plot(shoulder_moments,label='Shoulder',linewidth=3.0, c='r')
+l2 = ax3.plot(elbow_moments,label='Elbow',linewidth=3.0, c='b',ls='dashed')
+ax3.set_ylim([0,28])
+ax3.set_xlabel('Time step',fontsize=18)
+ax3.set_ylabel('Magnitude of moment (Nm)',fontsize=18)
+ax3.legend(loc=3,prop={'size':18})
+
+plt.show()
 
 # fig1 = plt.figure()
 # fig1.suptitle('Load at the elbow',fontsize=16)
