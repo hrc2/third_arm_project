@@ -28,6 +28,7 @@ class ThirdArm:
 	end = 10
 	goal_data = []
 	pos_data = []
+	jj = 0
 
 	def push_data(self):	
 		
@@ -40,11 +41,14 @@ class ThirdArm:
 		# tilt_val = -0.3 + (-self.h_state.position[1])
 		# extend_val = -0.3 + (-2.0+0.3)*self.h_state.position[2]/0.15
 		# gripper_val =  1.3 - self.h_state.position[4]
-		base_val = -2.9 # -3.1 to -2.4, -2.9init
-		tilt_val = -2.9 #-2.4 to -3.1, -2.9init
-		extend_val = -1.0 #-1.0 to -2.8, -1.0init
-		gripper_val =  self.dofvals[4] #0.6 to 1.6, 1.60init 
-		wrist_val = 0.0 #-1.57/3 to 1.57/3, 0init
+		base_val = self.dofvals[0]#-2.9 # -3.1 to -2.4, -2.9init
+		tilt_val = -2.9#self.dofvals[1] #-2.9 #-2.4 to -3.1, -2.9init
+		extend_val = -1.0#self.dofvals[2] #-1.0 to -2.8, -1.0init
+		gripper_val =  1.60 #self.dofvals[4] #0.6 to 1.6, 1.60init 
+		wrist_val =  0.0#self.dofvals[3]  #-1.57/3 to 1.57/3, 0init
+
+		self.jj = 0
+
 		self.pub_motor5.publish(gripper_val)
 		self.pub_motor3.publish(extend_val)
 		self.pub_motor2.publish(tilt_val)		
@@ -53,14 +57,14 @@ class ThirdArm:
 
 	def print_position(self,data):
 		
-		self.position = data.motor_states[0].position
+		self.position = data.motor_states[self.jj].position
 		
 		self.pos_data.append(self.position)
 		# with open('sys_id_dof3_pos.csv','a') as f:
 		#  	writer = csv.writer(f,quoting=csv.QUOTE_ALL)
 		#  	writer.writerow(write_data)
 
-		self.goal = data.motor_states[0].goal
+		self.goal = data.motor_states[self.jj].goal
 
 		self.goal_data.append(self.goal)
 		# with open('sys_id_dof3_goal.csv','a') as f2:
@@ -113,14 +117,18 @@ class ThirdArm:
 			self.rate.sleep()
 			self.motor_sub = rospy.Subscriber('/motor_states/third_arm_port', dynamixel_msgs.msg.MotorStateList, self.print_position)
 
-		with open('pid_tune_dof5_pos.csv','a') as f:
-		 	writer = csv.writer(f,quoting=csv.QUOTE_ALL)
-		 	writer.writerow(self.pos_data)
+		with open('pid_tune_dof1_pos.csv','a') as f:
+			for i in range(0,len(self.pos_data)):
+				p_dat = self.pos_data[i]
+			 	writer = csv.writer(f,quoting=csv.QUOTE_ALL)
+			 	writer.writerow([p_dat])
 
-		with open('pid_tune_dof5_goal.csv','a') as f2:
-		 	writer = csv.writer(f2,quoting=csv.QUOTE_ALL)
-		 	writer.writerow(self.goal_data)
-		
+		with open('pid_tune_dof1_goal.csv','a') as f2:
+			for i in range(0,len(self.goal_data)):
+				g_dat = self.goal_data[i]
+			 	writer = csv.writer(f2,quoting=csv.QUOTE_ALL)
+			 	writer.writerow([g_dat])
+			
 		#rospy.spin()
 			
 
