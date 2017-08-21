@@ -11,6 +11,8 @@ import dynamixel_msgs.msg
 import numpy as np
 import csv
 
+# Test out the tuned PID controllers for ech dof
+
 class ThirdArm:	
 
 	h_names = ['base_to_motor1', 'swivel_to_motor2', 'extension', 'wrist_motor_to_extension', 'finger1_to_gripper_motor', 'finger2_to_gripper_motor', 'spine_0', 'spine_1', 'spine_2', 'neck_0', 'neck_1', 'neck_2', 'right_shoulder_0', 'right_shoulder_1', 'right_shoulder_2', 'right_elbow_0', 'right_wrist_0', 'right_wrist_1', 'right_wrist_2', 'left_shoulder_0', 'left_shoulder_1', 'left_shoulder_2', 'left_elbow_0', 'left_wrist_0', 'left_wrist_1', 'left_wrist_2', 'right_hip_0', 'right_hip_1', 'right_hip_2', 'right_knee_0', 'right_ankle_0', 'right_ankle_1', 'left_hip_0', 'left_hip_1', 'left_hip_2', 'left_knee_0', 'left_ankle_0', 'left_ankle_1']
@@ -38,15 +40,14 @@ class ThirdArm:
 		# tilt_val = -0.3 + (-self.h_state.position[1])
 		# extend_val = -0.3 + (-2.0+0.3)*self.h_state.position[2]/0.15
 		# gripper_val =  1.3 - self.h_state.position[4]
-		base_val = self.dofvals[0]
-		tilt_val = -2.9   #-2.4 to -3.1
-		extend_val = -1.0  #-1.0 to -2.8
-		gripper_val =  1.60 #0.6 to 1.6
-		wrist_val = 0.0 #-1.57/3 to 1.57/3
+		base_val = -2.9 # -3.1 to -2.4, -2.9init
+		tilt_val = -2.9 #-2.4 to -3.1, -2.9init
+		extend_val = -1.0 #-1.0 to -2.8, -1.0init
+		gripper_val =  self.dofvals[4] #0.6 to 1.6, 1.60init 
+		wrist_val = 0.0 #-1.57/3 to 1.57/3, 0init
 		self.pub_motor5.publish(gripper_val)
 		self.pub_motor3.publish(extend_val)
-		self.pub_motor2.publish(tilt_val)
-		#tilt_val
+		self.pub_motor2.publish(tilt_val)		
 		self.pub_motor1.publish(base_val)
 		self.pub_motor4.publish(wrist_val)
 
@@ -72,10 +73,18 @@ class ThirdArm:
 	def set_data1(self):
 		if self.flag%2 == 0:
 			base_val = -2.4
+			tilt_val = -2.4
+			extend_val = -2.8
+			wrist_val = -1.57/3.0
+			gripper_val = 0.6
 		else: 
 			base_val = -3.1
+			tilt_val = -3.1
+			extend_val = -1.0
+			wrist_val = 1.57/3.0
+			gripper_val = 1.63
 		
-		self.dofvals = [base_val,0,0,0,0];
+		self.dofvals = [base_val,tilt_val,extend_val,wrist_val,gripper_val];
 
 	def sub_once(self,data):
 		self.state = data
@@ -104,11 +113,11 @@ class ThirdArm:
 			self.rate.sleep()
 			self.motor_sub = rospy.Subscriber('/motor_states/third_arm_port', dynamixel_msgs.msg.MotorStateList, self.print_position)
 
-		with open('sys_id_dof1_pos.csv','a') as f:
+		with open('pid_tune_dof5_pos.csv','a') as f:
 		 	writer = csv.writer(f,quoting=csv.QUOTE_ALL)
 		 	writer.writerow(self.pos_data)
 
-		with open('sys_id_dof1_goal.csv','a') as f2:
+		with open('pid_tune_dof5_goal.csv','a') as f2:
 		 	writer = csv.writer(f2,quoting=csv.QUOTE_ALL)
 		 	writer.writerow(self.goal_data)
 		
@@ -120,7 +129,7 @@ class ThirdArm:
 
 
 if __name__ == '__main__':
-	rospy.init_node('publish_states_example_traj')
+	rospy.init_node('pid_tune_motor_test')
 	
 	third = ThirdArm()
 
