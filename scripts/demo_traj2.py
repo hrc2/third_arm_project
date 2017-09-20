@@ -16,11 +16,21 @@ class ThirdArm:
 	h_names = ['base_to_motor1', 'swivel_to_motor2', 'extension', 'wrist_motor_to_extension', 'finger1_to_gripper_motor', 'finger2_to_gripper_motor', 'spine_0', 'spine_1', 'spine_2', 'neck_0', 'neck_1', 'neck_2', 'right_shoulder_0', 'right_shoulder_1', 'right_shoulder_2', 'right_elbow_0', 'right_wrist_0', 'right_wrist_1', 'right_wrist_2', 'left_shoulder_0', 'left_shoulder_1', 'left_shoulder_2', 'left_elbow_0', 'left_wrist_0', 'left_wrist_1', 'left_wrist_2', 'right_hip_0', 'right_hip_1', 'right_hip_2', 'right_knee_0', 'right_ankle_0', 'right_ankle_1', 'left_hip_0', 'left_hip_1', 'left_hip_2', 'left_knee_0', 'left_ankle_0', 'left_ankle_1']
 	arm_names = ['base_to_motor1', 'swivel_to_motor2', 'extension', 'wrist_motor_to_extension', 'finger1_to_gripper_motor', 'finger2_to_gripper_motor']
 	dofvals = []
-	hvals = []
-	torque = [0.0 for i in range(5)]
-	h_state = JointState([],h_names,hvals,[],[])
 	h_len = len(h_names)
-	state = JointState([],h_names,dofvals,[],[])
+	torque = [0.0 for i in range(5)]
+	
+	
+	state = JointState([],arm_names,dofvals,[],[])
+	
+	hvals = [0.0 for i in range(h_len)]
+
+	hvals[12] = 0.0
+	hvals[13] = 1.57
+	hvals[14] = -0.0
+	hvals[15] = 0
+	
+	h_state = JointState([],h_names,hvals,[],[])
+	
 	m_states = []
 
 	move = 1
@@ -39,8 +49,8 @@ class ThirdArm:
 		
 		rospy.loginfo('To be pubbed: {0} and counter: {1}'.format(self.h_state.position,self.i))
 
-		#self.pub_human.publish(self.h_state)
-		#self.pub.publish(self.state)
+		self.pub_human.publish(self.h_state)
+		self.pub.publish(self.state)
 
 		self.send_motor()
 
@@ -75,9 +85,9 @@ class ThirdArm:
 	def set_data1(self):
 		self.h_state.position = [0.0 for i in range(self.h_len)]
 		i = self.i
-		hval1 = 0
+		hval1 = 0.0
 		hval2 = 1.57
-		hval3 = 0
+		hval3 = -0.0
 		hval4 = 0
 		num = 50
 
@@ -97,11 +107,11 @@ class ThirdArm:
 		v2 = val2[i]
 		v3 = val3[i]
 		self.dofvals = [v1,v2,v3,val4,val5,-val5]
-		self.hvals = [hval1,hval2,hval3,hval4]
-		#self.state.position = self.dofvals
+		# self.hvals = [hval1,hval2,hval3,hval4]
+		self.state.position = self.dofvals
 		self.h_state.position[0:6] = [v1,v2,v3,val4,val5,-val5]
 		self.m_states = [v1,v2,v3,val4,val5,-val5]
-		self.h_state.position[13] = 1.57
+		# self.h_state.position[12:16] = self.hvals
 		rospy.loginfo('H_state pos is: {0}'.format(self.h_state.position))
 		
 
@@ -116,9 +126,9 @@ class ThirdArm:
 		self.h_state.position = [0.0 for i in range(self.h_len)]
 		self.dofvals[4:6] = [0.0,-0.0]
 		
-		hval1 = 0
+		hval1 = 0.0
 		hval2 = 1.57
-		hval3 = 0
+		hval3 = -0
 		hval4 = 0
 		self.hvals = [hval1,hval2,hval3,hval4]
 		self.h_state.position[12:16] = self.hvals
@@ -142,9 +152,9 @@ class ThirdArm:
 		v2 = val2[i]
 		v3 = val3[i]
 		self.dofvals[0:3] = [v1,v2,v3]
-		hval1 = 0
+		hval1 = 0.0
 		hval2 = 1.57
-		hval3 = 0
+		hval3 = -0
 		hval4 = 0
 		self.hvals = [hval1,hval2,hval3,hval4]
 		self.h_state.position[12:16] = self.hvals
@@ -160,9 +170,9 @@ class ThirdArm:
 	#Fourth movement: grip open 
 		self.h_state.position = [0.0 for i in range(self.h_len)]
 		self.dofvals[4:6] = [0.8,-0.8]
-		hval1 = 0
+		hval1 = 0.0
 		hval2 = 1.57
-		hval3 = 0
+		hval3 = -0
 		hval4 = 0
 		self.hvals = [hval1,hval2,hval3,hval4]
 		self.h_state.position[12:16] = self.hvals

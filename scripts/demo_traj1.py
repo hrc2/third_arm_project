@@ -16,10 +16,20 @@ class ThirdArm:
 	h_names = ['base_to_motor1', 'swivel_to_motor2', 'extension', 'wrist_motor_to_extension', 'finger1_to_gripper_motor', 'finger2_to_gripper_motor', 'spine_0', 'spine_1', 'spine_2', 'neck_0', 'neck_1', 'neck_2', 'right_shoulder_0', 'right_shoulder_1', 'right_shoulder_2', 'right_elbow_0', 'right_wrist_0', 'right_wrist_1', 'right_wrist_2', 'left_shoulder_0', 'left_shoulder_1', 'left_shoulder_2', 'left_elbow_0', 'left_wrist_0', 'left_wrist_1', 'left_wrist_2', 'right_hip_0', 'right_hip_1', 'right_hip_2', 'right_knee_0', 'right_ankle_0', 'right_ankle_1', 'left_hip_0', 'left_hip_1', 'left_hip_2', 'left_knee_0', 'left_ankle_0', 'left_ankle_1']
 	arm_names = ['base_to_motor1', 'swivel_to_motor2', 'extension', 'wrist_motor_to_extension', 'finger1_to_gripper_motor', 'finger2_to_gripper_motor']
 	dofvals = []
-	hvals = []
-	torque = [0.0 for i in range(5)]
-	h_state = JointState([],h_names,hvals,[],[])
 	h_len = len(h_names)
+	torque = [0.0 for i in range(5)]
+
+	hvals = [0.0 for i in range(h_len)]
+
+	hvals[12] = 0.0
+	hvals[13] = 1.57
+	hvals[14] = -0.0
+	hvals[15] = 0
+	
+	h_state = JointState([],h_names,hvals,[],[])
+
+	#h_state = JointState([],h_names,hvals,[],[])
+	
 	state = JointState([],h_names,dofvals,[],[])
 
 	move = 1
@@ -61,11 +71,11 @@ class ThirdArm:
 
 		
 
-		write_data = self.torque
-		with open('demo_task_1.csv','a') as f:
-		 	writer = csv.writer(f,quoting=csv.QUOTE_ALL)
-		 	writer.writerow(write_data)
-		 	rospy.loginfo('\nTorque is: {0} \n'.format(write_data))	
+		# write_data = self.torque
+		# with open('demo_task_1.csv','a') as f:
+		#  	writer = csv.writer(f,quoting=csv.QUOTE_ALL)
+		#  	writer.writerow(write_data)
+		#  	rospy.loginfo('\nTorque is: {0} \n'.format(write_data))	
 		
 	def set_data1(self):
 		self.h_state.position = [0.0 for i in range(self.h_len)]
