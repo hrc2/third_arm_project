@@ -20,7 +20,8 @@ import PyKDL
 import dynamic_reconfigure.server
 import argparse
 
-from sensor_msgs.msg import Imu
+import sensor_msgs.msg
+from sensor_msgs.msg import Imu, JointState
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Point, Pose, Quaternion, Twist, TwistWithCovariance, Vector3
 from std_msgs.msg import ColorRGBA, Float32, Bool, Float64
@@ -34,6 +35,7 @@ import arbotix_msgs.srv
 #from geometry_msgs.msg import Vector3, Twist
 #from sensor_msgs.msg import JointState
 import dynamixel_msgs.msg
+from diagnostic_msgs.msg import DiagnosticArray
 #import numpy as np
 import csv
 
@@ -52,7 +54,7 @@ class thirdarm_joystick:
         pygame.joystick.init()
         self.j1 = pygame.joystick.Joystick(0)
         self.j1.init()
-
+        self.count = 0
 
         #print pygame.joystick.get_count()
         
@@ -66,16 +68,19 @@ class thirdarm_joystick:
         self.pubvec = [self.pub_motor1,self.pub_motor2,self.pub_motor3,self.pub_motor4,self.pub_motor5 ]
     
     def arm_callback(self, data):
-
-        for i in range(len(self.currval)):
-            self.currval[i] = data.motor_states[i].position
-
-        self.get_joystick() 
+        print(data)
+        self.currval[self.count] = data.position
+        #for i in range(len(self.currval)):
+         #   self.currval[i] = data.motor_states[i].position
+            #self.currval[i] = float(data.status[i].values[1].value)
+            #print self.currval[i]
+        #print("Current DoF values are: " + str(self.currval))
+        #self.get_joystick() 
         
         
 
     def get_joystick(self):
-        pygame.event.get()
+        pygame.event.wait()
         # Axis, buttons in use:
         # Axis 0: D-Pad Left Right
         # Axis 1: D-Pad Up Down
@@ -84,6 +89,7 @@ class thirdarm_joystick:
         # Axis 4: Left Analog Left Right
         # Axis 5: Left Analog Up Down
         # Button 0: Blue X
+        # Button 1: Green A
 
         # Mapping to DoFs:
         # Dof1: Base Swivel: Axis 2 : Right analog L/R
@@ -94,34 +100,36 @@ class thirdarm_joystick:
 
 
 
-        c1 = self.j1.get_axis(2)
+        #c1 = self.j1.get_axis(2)
+        self.cx1 = self.j1.get_button(6)
+        self.cx2 = self.j1.get_button(7)
         (cx,c2) = self.j1.get_hat(0)
-        c3 = -self.j1.get_axis(1)
+        #c2 = c2*(-1)
+        c3 = self.j1.get_axis(1)
         c4 = self.j1.get_axis(0)
         c5 = self.j1.get_button(0)
-        c6 = self.j1.get_button(1)
-        # c1 = j1.get_axis(2)
-        # c2 = j1.get_axis(3)
-        # c3 = j1.get_axis(5)
-        # c4 = j1.get_axis(0)
-        # c5 = j1.get_button(0)
-        
+        c6 = self.j1.get_button(1)        
 
         # Assign commands for each Dof:
+        c1  = 0
+        if self.cx1>0:
+            c1 = -1
+        elif self.cx2>0:
+            c1 = 1
 
-        cvec = [c1,c2,c3,c4,c5]
-        cmd_scale = [0.2, 0.2, 0.1, 0.3, 1]
+        self.cvec = [c1,c2,c3,c4,c5,c6]
+        # cmd_scale = [0.1, 0.1, 0.1, 0.1, 1]
 
-        grip_close = -0.3
-        grip_open = 0.3
+        # grip_close = -0.1
+        # grip_open = 0.1
 
-        for i in range(len(cvec)):
-            if not i == 4:
-                self.command[i] = self.currval[i] + np.sign(cvec[i])*cmd_scale[i]
-            elif c5 > 0 :
-                self.command[i] = self.currval[i] + grip_close
-            elif c6 > 0 :
-                self.command[i] = self.currval[i] + grip_open
+        # for i in range(len(cvec)):
+        #     if not i == 4:
+        #         self.command[i] = self.currval[i] + np.sign(cvec[i])*cmd_scale[i]
+        #     elif c5 > 0 :
+        #         self.command[i] = self.currval[i] + grip_close
+        #     elif c6 > 0 :
+        #         self.command[i] = self.currval[i] + grip_open
             # elif cvec[i] == True:
             #     if math.fabs(self.currval[i] - grip_close)<0.2:
             #         self.command[i] = grip_open
@@ -132,23 +140,77 @@ class thirdarm_joystick:
         
 
         #rospy.loginfo('Command to be published: {0}', str(self.command))                    
-        print self.command
+        #print self.command
+        #self.test_seq()
         self.publish_cmd()
 
+    def get_current_state(self):
+        topic_list = ['/base_swivel_controller/state' , '/vertical_tilt_controller/state' , '/arm_extension_controller/state' , '/wrist_controller/state' , '/gripper_controller/state']
+        print("Waiting for joint states")
+        self.count = 0
+        for topic in topic_list:
+            print("Topic name : " + topic)
+            #self.motor_sub = rospy.Subscriber(topic, dynamixel_msgs.msg.JointState, self.arm_callback)
+            #self.count +=  1           
+            data = rospy.wait_for_message(topic, dynamixel_msgs.msg.JointState)
+            print("JS data: " + str(data.current_pos))
+            self.currval[self.count] = data.current_pos
+            self.count += 1
+            # print data.position
+
+
     def publish_cmd(self):
+
+        cmd_scale = [0.3, 0.5, 0.6, 0.5, 1]
+
+        grip_close = -0.3
+        grip_open = 0.3
+
+        #data = rospy.wait_for_message('/diagnostics', DiagnosticArray)
+        self.get_current_state()        
+        #rospy.Subscriber('/diagnostics', DiagnosticArray, self.arm_callback)           
+        # for i in range(len(self.currval)):
+        #     #self.currval[i] = data.motor_states[i].position
+        #     self.currval[i] = float(data.status[i].values[1].value)
+        
+        print("Current DoF values are: " + str(self.currval))
+
+        for i in range(len(self.cvec) - 1):
+            if i < 4:
+                self.command[i] = self.currval[i] + np.sign(self.cvec[i])*cmd_scale[i]
+            elif self.cvec[4] > 0 :
+                self.command[i] = self.currval[i] + grip_close
+            elif self.cvec[5] > 0 :
+                self.command[i] = self.currval[i] + grip_open
+        
+        print("Command Values are " + str(self.command))
+        
+        
         for i in range(len(self.pubvec)):
-            self.pubvec[i].publish(self.command[i])
+           self.pubvec[i].publish(self.command[i])
+
+        #self.cmd_reset()
+    
+    def cmd_reset(self):
+        self.command = [0.0, 0.0, 0.0, 0.0, 0.0]
 
     def execute(self):
         r = rospy.Rate(10.0)
         clock = pygame.time.Clock()
         while not rospy.is_shutdown():
             clock.tick(10)
-            self.motor_sub = rospy.Subscriber('/motor_states/third_arm_port', dynamixel_msgs.msg.MotorStateList, self.arm_callback)           
+            #self.motor_sub = rospy.Subscriber('/diagnostics', dynamixel_msgs.msg.MotorStateList, self.arm_callback)           
+            self.motor_sub = rospy.Subscriber('/diagnostics', DiagnosticArray, self.arm_callback)           
             r.sleep()
+    
+    def run(self):
+        #clock = pygame.time.Clock()
+        while not rospy.is_shutdown():
+            #pygame.time.delay(10)
+            self.get_joystick()
 
     def test_joystick(self):
-        pygame.event.get()
+        pygame.event.wait()
         name = self.j1.get_name()
         print "Joystick name: " + name + "\n"
         
@@ -182,5 +244,5 @@ class thirdarm_joystick:
 
 if __name__ == '__main__':
     t1 = thirdarm_joystick()
-    t1.test()
+    t1.run()
     
