@@ -38,10 +38,32 @@ class thirdarm_joystick:
 
         self.pubvec = [self.pub_motor1, self.pub_motor2, self.pub_motor3, self.pub_motor4, self.pub_motor5]
 
+        self.js = Joy
+
+    def check(self,ax,bu):
+		ch = 0
+		if np.count_nonzero(np.asarray(ax)) >= 1:
+			ch = 1
+		elif np.count_nonzero(np.asarray(bu)) >= 1:
+			ch = 1
+		else:
+			ch = 0
+
+		#print ("Check: " + str(ch))
+		return ch
+
+
 
     def run(self):
-   		rospy.Subscriber("joy", Joy, self.get_joystick)
-   		rospy.spin()
+   		#rospy.Subscriber("joy", Joy, self.test_joystick)
+   		#rospy.Subscriber("joy", Joy, self.get_joystick)
+   		#rospy.spin()
+   		while not rospy.is_shutdown():
+   			self.js = rospy.wait_for_message("joy", Joy)
+   			if self.check(self.js.axes , self.js.buttons) == 1: #Non-zero input received
+   				self.get_joystick()
+   			else:
+   				continue
         
     def get_current_state(self):
         topic_list = ['/base_swivel_controller/state' , '/vertical_tilt_controller/state' , '/arm_extension_controller/state' , '/wrist_controller/state' , '/gripper_controller/state']
@@ -54,18 +76,37 @@ class thirdarm_joystick:
             self.count += 1
         print("JS data: " + str(self.currval))
 
-    def get_joystick(self, js):
+    def test_joystick(self):
+		self.get_current_state()
+		
+		js = self.js		            
+		grip_state = 0
+		if js.buttons[0] > 0.1:
+			grip_state = -1
+		elif js.buttons[1] > 0.1:
+			grip_state = +1
+		
+		cvec = [js.axes[4] , js.axes[3] , js.axes[1] , js.axes[0] , grip_state]
+		cmd_scale = [-0.3, 0.5, -0.6, -0.5, 0.3]
+		for i in range(len(self.command)):
+			self.command[i] = self.currval[i] + cmd_scale[i]*np.sign(cvec[i])
+		print("Command Values are " + str(self.command))      	
+
+    def get_joystick(self):
 
     	self.get_current_state()
 
-    	if js.buttons(0) > 0.1:
-    		grip_state = +1
-    	elif js.buttons(1) > 0.1:
+    	js = self.js
+
+    	grip_state = 0
+    	if js.buttons[0] > 0.1:
     		grip_state = -1
+    	elif js.buttons[1] > 0.1:
+    		grip_state = +1
 
-    	cvec = [js.axes(4) , js.axes(3) , js.axes(1) , js.axes(0) , grip_state]
+    	cvec = [js.axes[4] , js.axes[3] , js.axes[1] , js.axes[0] , grip_state]
 
-    	cmd_scale = [-0.3, 0.5, 0.6, -0.5, 0.3]
+    	cmd_scale = [-0.2, 0.3, -0.4, -0.3, 0.2]
 
     	for i in range(len(self.command)):
     		self.command[i] = self.currval[i] + cmd_scale[i]*np.sign(cvec[i])
@@ -75,26 +116,8 @@ class thirdarm_joystick:
         for i in range(len(self.pubvec)):
        		self.pubvec[i].publish(self.command[i])
 
-	def test_joystick(self, js):
-
-		self.get_current_state()
-
-		if js.buttons(0) > 0.1:
-			grip_state = +1
-		elif js.buttons(1) > 0.1:
-			grip_state = -1
-
-		cvec = [js.axes(4) , js.axes(3) , js.axes(1) , js.axes(0) , grip_state]
-
-		cmd_scale = [-0.3, 0.5, 0.6, -0.5, 0.3]
-
-		for i in range(len(self.command)):
-			self.command[i] = self.currval[i] + cmd_scale[i]*np.sign(cvec[i])
-
-		print("Command Values are " + str(self.command))        
+   
 	        
-        # for i in range(len(self.pubvec)):
-        #    self.pubvec[i].publish(self.command[i])
 
 
 
