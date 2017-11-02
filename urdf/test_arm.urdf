@@ -18,7 +18,7 @@
 
   <link name="block_to_base">
     <visual>
-		<origin xyz="0 0 0" rpy ="0 1.5708  0"/>
+		<origin  rpy ="0 1.5708  0"/>
       <material name="Gray">
        <color rgba="0.3 0.3 0.3 1.0"/>
       </material> 	
@@ -28,6 +28,166 @@
     </visual>
   </link>
 
+  <link name="base_motor">
+    <inertial>
+      <origin  rpy ="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+    </inertial>
+    <visual>
+    <origin  rpy ="0 0  0"/>
+      <material name="Yellow">
+       <color rgba="1.0 1.0 0.0 1.0"/>
+      </material>   
+      <geometry>
+        <cylinder length="0.1" radius="0.11"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="swivel_link">
+    <visual>
+    <origin  rpy ="0 0 0"/>
+      <material name="Blue">
+       <color rgba="0 0.0 1.0 1.0"/>
+      </material>   
+      <geometry>
+        <box size="0.2 .15 .1"/>
+      </geometry>
+    </visual>
+  </link>
+
+
+  <link name="lift_motor">
+    <inertial>
+      <origin  rpy ="0 1.5708  0"/>
+      <mass value="1"/>
+      <inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+    </inertial>
+    <visual>
+    <origin  rpy ="0 1.5708 0"/>
+      <material name="Yellow">
+       <color rgba="1.0 1.0 0.0 1.0"/>
+      </material>   
+      <geometry>
+        <cylinder length="0.1" radius="0.05"/>
+      </geometry>
+    </visual>
+  </link>
+
+
+  <link name="extend_link1">
+    <visual>
+    <origin  rpy ="0 0 0"/>
+      <material name="Blue">
+       <color rgba="0 0.0 1.0 0.1"/>
+      </material>   
+      <geometry>
+        <box size="0.1 .26 .1"/>
+      </geometry>
+    </visual>
+  </link>
+
+
+  <link name="extend_link2">
+    <visual>
+    <origin  rpy ="0 0 0"/>
+      <material name="Blue2">
+       <color rgba="0.2 0.2 1.0 1.0"/>
+      </material>   
+      <geometry>
+        <box size="0.07 .20 .07"/>
+      </geometry>
+    </visual>
+  </link>
+
+
+  <link name="wrist_motor">
+    <inertial>
+      <origin  rpy =" 1.5708 0  0"/>
+      <mass value="1"/>
+      <inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+    </inertial>
+    <visual>
+    <origin  rpy ="1.5708 0 0"/>
+      <material name="Yellow">
+       <color rgba="1.0 1.0 0.0 1.0"/>
+      </material>   
+      <geometry>
+        <cylinder length="0.05" radius="0.03"/>
+      </geometry>
+    </visual>
+  </link>
+
+
+  <link name="gripper_motor">
+    <inertial>
+      <origin  rpy =" 1.5708 0  0"/>
+      <mass value="1"/>
+      <inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+    </inertial>
+    <visual>
+    <origin  rpy ="0 0 0"/>
+      <material name="Yellow">
+       <color rgba="1.0 1.0 0.0 1.0"/>
+      </material>   
+      <geometry>
+        <cylinder length="0.07" radius="0.01"/>
+      </geometry>
+    </visual>
+  </link>
+
+
+  <link name="wrist_plate">
+    <visual>
+    <origin  rpy ="0 0 0"/>
+      <material name="Blue">
+       <color rgba="0.0 0.0 1.0 1.0"/>
+      </material>   
+      <geometry>
+        <box size="0.07 .02 .07"/>
+      </geometry>
+    </visual>
+  </link>
+
+
+  <link name="finger1">
+    <inertial>
+      <origin  rpy =" 0 0  0"/>
+      <mass value="1"/>
+      <inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+    </inertial>   
+    <visual>
+    <origin  rpy ="0 0 0"/>
+      <material name="Orange1">
+       <color rgba="1.0 0.65 0.0 1.0"/>
+      </material>   
+      <geometry>
+        <box size="0.01 .1 .02"/>
+      </geometry>
+    </visual>
+  </link>
+
+
+  <link name="finger2">
+    <inertial>
+      <origin  rpy =" 0 0  0"/>
+      <mass value="1"/>
+      <inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+    </inertial>
+    <visual>
+    <origin  rpy ="0 0 0"/>
+      <material name="Orange2">
+       <color rgba="1.0 0.55 0.0 1.0"/>
+      </material>   
+      <geometry>
+        <box size="0.01 .1 .02"/>
+      </geometry>
+    </visual>
+  </link>
+
+
+
   <joint name="brace_block_link" type="fixed">
   	<origin xyz="0 -0.2 -0.15" rpy="0 0 0" />
     <parent link="base_link"/>
@@ -35,22 +195,6 @@
   </joint>
 
 
-  <link name="base_motor">
-  	<inertial>
-  		<origin xyz="0 0 0" rpy ="0 0 0"/>
-  		<mass value="1"/>
-  		<inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
-  	</inertial>
-    <visual>
-		<origin xyz="0 0 0" rpy ="0 0  0"/>
-      <material name="Yellow">
-       <color rgba="1.0 1.0 0.0 1.0"/>
-      </material> 	
-      <geometry>
-        <cylinder length="0.1" radius="0.11"/>
-      </geometry>
-    </visual>
-  </link>
 
 
   <joint name="base_to_motor1" type="revolute">
@@ -61,17 +205,6 @@
     <child link="base_motor"/>
   </joint>
 
-  <link name="swivel_link">
-    <visual>
-		<origin xyz="0 0 0" rpy ="0 0 0"/>
-      <material name="Blue">
-       <color rgba="0 0.0 1.0 1.0"/>
-      </material> 	
-      <geometry>
-        <box size="0.2 .15 .1"/>
-      </geometry>
-    </visual>
-  </link>
 
   <joint name="motor1_to_swivel_link" type="fixed">
   	<origin xyz="0 0.185 0" rpy="0 0 0" />
@@ -79,22 +212,6 @@
     <child link="swivel_link"/>
   </joint>
 
-  <link name="lift_motor">
-  	<inertial>
-  		<origin xyz="0 0 0" rpy ="0 1.5708  0"/>
-  		<mass value="1"/>
-  		<inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
-  	</inertial>
-    <visual>
-		<origin xyz="0 0 0" rpy ="0 1.5708 0"/>
-      <material name="Yellow">
-       <color rgba="1.0 1.0 0.0 1.0"/>
-      </material> 	
-      <geometry>
-        <cylinder length="0.1" radius="0.05"/>
-      </geometry>
-    </visual>
-  </link>
 
   <joint name="swivel_to_motor2" type="revolute">
   	<axis xyz="1 0 0"/>
@@ -104,17 +221,6 @@
     <child link="lift_motor"/>
   </joint>
 
-  <link name="extend_link1">
-    <visual>
-		<origin xyz="0 0 0" rpy ="0 0 0"/>
-      <material name="Blue">
-       <color rgba="0 0.0 1.0 0.1"/>
-      </material> 	
-      <geometry>
-        <box size="0.1 .26 .1"/>
-      </geometry>
-    </visual>
-  </link>
 
   <joint name="motor2_to_extend1" type="fixed">
   	<origin xyz="0 0.18 0" rpy="0 0 0" />
@@ -122,17 +228,6 @@
     <child link="extend_link1"/>
   </joint>
 
-  <link name="extend_link2">
-    <visual>
-		<origin xyz="0 0 0" rpy ="0 0 0"/>
-      <material name="Blue2">
-       <color rgba="0.2 0.2 1.0 1.0"/>
-      </material> 	
-      <geometry>
-        <box size="0.07 .20 .07"/>
-      </geometry>
-    </visual>
-  </link>
 
   <joint name="extension" type="prismatic">
   	<axis xyz="0 1 0"/>
@@ -143,22 +238,7 @@
   </joint>
 
 
-  <link name="wrist_motor">
-  	<inertial>
-  		<origin xyz="0 0 0" rpy =" 1.5708 0  0"/>
-  		<mass value="1"/>
-  		<inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
-  	</inertial>
-    <visual>
-		<origin xyz="0 0 0" rpy ="1.5708 0 0"/>
-      <material name="Yellow">
-       <color rgba="1.0 1.0 0.0 1.0"/>
-      </material> 	
-      <geometry>
-        <cylinder length="0.05" radius="0.03"/>
-      </geometry>
-    </visual>
-  </link>
+
 
   <joint name="wrist_motor_to_extension" type="revolute">
   	<axis xyz="0 1 0"/>
@@ -168,17 +248,6 @@
     <child link="wrist_motor"/>
   </joint>
 
-  <link name="wrist_plate">
-    <visual>
-		<origin xyz="0 0 0" rpy ="0 0 0"/>
-      <material name="Blue">
-       <color rgba="0.0 0.0 1.0 1.0"/>
-      </material> 	
-      <geometry>
-        <box size="0.07 .02 .07"/>
-      </geometry>
-    </visual>
-  </link>
 
   <joint name="wrist_motor_to_plate" type="fixed">
   	<origin xyz="0 0.035 0" rpy="0 0 0" />
@@ -186,22 +255,7 @@
     <child link="wrist_plate"/>
   </joint>
 
-  <link name="gripper_motor">
-  	<inertial>
-  		<origin xyz="0 0 0" rpy =" 1.5708 0  0"/>
-  		<mass value="1"/>
-  		<inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
-  	</inertial>
-    <visual>
-		<origin xyz="0 0 0" rpy ="0 0 0"/>
-      <material name="Yellow">
-       <color rgba="1.0 1.0 0.0 1.0"/>
-      </material> 	
-      <geometry>
-        <cylinder length="0.07" radius="0.01"/>
-      </geometry>
-    </visual>
-  </link>
+
 
   <joint name="gripper_motor_to_plate" type="fixed">
   	<origin xyz="0 0.02 0" rpy="0 0 0" />
@@ -209,22 +263,7 @@
     <child link="gripper_motor"/>
   </joint>
 
-  <link name="finger1">
-  	<inertial>
-  		<origin xyz="0 0.06 0" rpy =" 0 0  0"/>
-  		<mass value="1"/>
-  		<inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
-  	</inertial>  	
-    <visual>
-		<origin xyz="0 0.06 0" rpy ="0 0 0"/>
-      <material name="Orange1">
-       <color rgba="1.0 0.65 0.0 1.0"/>
-      </material> 	
-      <geometry>
-        <box size="0.01 .1 .02"/>
-      </geometry>
-    </visual>
-  </link>
+
 
   <joint name="finger1_to_gripper_motor" type="revolute">
   	<axis xyz="0 0 1"/>
@@ -234,22 +273,7 @@
     <child link="finger1"/>
   </joint>
 
-  <link name="finger2">
-  	<inertial>
-  		<origin xyz="0 0.06 0" rpy =" 0 0  0"/>
-  		<mass value="1"/>
-  		<inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
-  	</inertial>
-    <visual>
-		<origin xyz="0 0.06 0" rpy ="0 0 0"/>
-      <material name="Orange2">
-       <color rgba="1.0 0.55 0.0 1.0"/>
-      </material> 	
-      <geometry>
-        <box size="0.01 .1 .02"/>
-      </geometry>
-    </visual>
-  </link>
+
 
   <joint name="finger2_to_gripper_motor" type="revolute">
   	<axis xyz="0 0 1"/>
