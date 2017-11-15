@@ -4,10 +4,10 @@ base_swivel_controller:
         module: joint_position_controller
         type: JointPositionController
     joint_name: base_swivel
-    joint_speed: 0.314
+    joint_speed: 1.57
     motor:
         id: 1
-        init: 2490
+        init: 2048
         min: 0
         max: 4096
 
@@ -33,9 +33,9 @@ arm_extension_controller:
     joint_speed: 0.5
     motor:
         id: 3
-        init: 3808
-        min: 0
-        max: 4096
+        init: 3508
+        min: 2600
+        max: 3500
 
         
 wrist_controller:
@@ -44,9 +44,22 @@ wrist_controller:
         module: joint_position_controller
         type: JointPositionController
     joint_name: wrist_rotation
-    joint_speed: 0.5
+    joint_speed: 0.2
     motor:
         id: 4
+        init: 512
+        min: 0
+        max: 1024
+
+wrist_tilt_controller:
+    controller:
+        package: dynamixel_controllers
+        module: joint_position_controller
+        type: JointPositionController
+    joint_name: wrist_tilt
+    joint_speed: 0.5
+    motor:
+        id: 5
         init: 512
         min: 0
         max: 1024
@@ -59,7 +72,7 @@ gripper_controller:
     joint_name: gripper
     joint_speed: 0.5
     motor:
-        id: 5
+        id: 6
         init: 970
         min: 0
         max: 4096

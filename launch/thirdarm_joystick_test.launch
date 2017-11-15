@@ -20,6 +20,15 @@
                  wrist_tilt_controller
 		             gripper_controller"
           output="screen" />
+    
+
+
+    <node name="joy_node" pkg="joy" type="joy_node">
+      <param name="deadzone" value="0.01" />
+      <param name="autorepeat_rate" value="50" />
+    </node>
+
+    <node name = "thirdarm_joystick" pkg="third_arm" type="third_arm_joystick_testing.py"/>
 
     <!--node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" /-->      
     <!-- Start Meta Controllers for the whole Head -->

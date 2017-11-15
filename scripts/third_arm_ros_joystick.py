@@ -34,9 +34,10 @@ class thirdarm_joystick:
         self.pub_motor2 = rospy.Publisher('/vertical_tilt_controller/command', Float64, queue_size=1)
         self.pub_motor3 = rospy.Publisher('/arm_extension_controller/command', Float64, queue_size=1)
         self.pub_motor4 = rospy.Publisher('/wrist_controller/command', Float64, queue_size=1)
-        self.pub_motor5 = rospy.Publisher('/gripper_controller/command', Float64, queue_size=1)
+        self.pub_motor5 = rospy.Publisher('/wrist_tilt_controller/command', Float64, queue_size=1)
+        self.pub_motor6 = rospy.Publisher('/gripper_controller/command', Float64, queue_size=1)
 
-        self.pubvec = [self.pub_motor1, self.pub_motor2, self.pub_motor3, self.pub_motor4, self.pub_motor5]
+        self.pubvec = [self.pub_motor1, self.pub_motor2, self.pub_motor3, self.pub_motor4, self.pub_motor6]
 
         self.js = Joy
 
@@ -115,6 +116,8 @@ class thirdarm_joystick:
         
         for i in range(len(self.pubvec)):
        		self.pubvec[i].publish(self.command[i])
+       	self.pub_motor5.publish(0.0)
+
 
    
 	        
