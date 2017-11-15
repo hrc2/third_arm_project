@@ -50,22 +50,29 @@ class thirdarm_js_test:
 		return ch
 
 	def run(self):
+		t_prev = time.time()
+		r = rospy.Rate(10)
 		while not rospy.is_shutdown():
 			self.js = rospy.wait_for_message("joy", Joy)
+			t_new = time.time()
+			rospy.loginfo('Rate = {0}'.format(1.0/(t_new-t_prev)))
+			t_prev = t_new			
 			if self.check(self.js.axes , self.js.buttons) == 1: #Non-zero input received
 				self.get_send_joystick()
 			else:
-				continue
+				continue			
+			r.sleep()
+			
 
 	def get_current_state(self):
 		topic = '/base_swivel_controller/state'
 		print("Waiting for joint states")
-		self.count = 0        
-		print("Topic name : " + topic)
+		self.count = 0        		
+		#print("Topic name : " + topic)
 		data = rospy.wait_for_message(topic, dynamixel_msgs.msg.JointState)            
 		self.currval[self.count] = data.current_pos
 		#self.count += 1
-		print("JS data: " + str(self.currval))   	
+		#print("JS data: " + str(self.currval))   	
 
 	def get_send_joystick(self):
 		self.get_current_state()
@@ -73,10 +80,18 @@ class thirdarm_js_test:
 		js = self.js
 
 		js_cmd = js.axes[4]
+		js_fine = js.buttons[7]
 
-		cmd_scale = [-0.4, 0.3, -0.4, -0.3, 0.2]	
+		if js_fine == 1:
+			base_cmd = -0.15
+		else:
+			base_cmd = -0.3
+
+		cmd_scale = [base_cmd, 0.3, -0.4, -0.3, 0.2]	
 
 		command = self.currval[0] + np.sign(js_cmd)*cmd_scale[0]
+		print('Command = '+str(command))
+		self.set_speed1((math.pi/0.8)*np.fabs(cmd_scale[0]))
 		self.pub_motor1.publish(command)
 
 		# rate = 50 #Rate in Hertz

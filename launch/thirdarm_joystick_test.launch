@@ -19,7 +19,7 @@
                  wrist_controller
                  wrist_tilt_controller
 		             gripper_controller"
-          output="screen" />
+           />
     
 
 
@@ -28,7 +28,7 @@
       <param name="autorepeat_rate" value="50" />
     </node>
 
-    <node name = "thirdarm_joystick" pkg="third_arm" type="third_arm_joystick_testing.py"/>
+    <node name = "thirdarm_joystick" pkg="third_arm" type="third_arm_joystick_testing.py" output ='screen'/>
 
     <!--node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" /-->      
     <!-- Start Meta Controllers for the whole Head -->
