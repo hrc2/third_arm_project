@@ -138,6 +138,56 @@
     <child link="wrist_motor"/>
   </joint>
 
+  <link name="wrist_motor2">
+    <inertial>
+      <origin xyz="0 0 0" rpy ="1.5708 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+    </inertial>
+    <visual>
+    <origin xyz="0 0 0" rpy ="1.5708 0 0"/>
+      <material name="Yellow">
+       <color rgba="1.0 1.0 0.0 1.0"/>
+      </material>   
+      <geometry>
+        <cylinder length="0.05" radius="0.03"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="wrist_motor_to_wrist_motor2" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.5708" upper="1.5708" effort="5" velocity="0.5"/>
+    <origin xyz="0 0.05 0" rpy="0 0 0" />
+    <parent link="wrist_motor"/>
+    <child link="wrist_motor2"/>
+  </joint>
+
+  <link name="wrist_motor3">
+    <inertial>
+      <origin xyz="0 0 0" rpy ="0 0 1.5708"/>
+      <mass value="1"/>
+      <inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+    </inertial>
+    <visual>
+    <origin xyz="0 0 0" rpy ="0 0 1.5708"/>
+      <material name="Yellow">
+       <color rgba="1.0 1.0 0.0 1.0"/>
+      </material>   
+      <geometry>
+        <cylinder length="0.05" radius="0.03"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="wrist_motor2_to_wrist_motor3" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit lower="-1.5708" upper="1.5708" effort="5" velocity="0.5"/>
+    <origin xyz="0 0.05 0" rpy="0 0 0" />
+    <parent link="wrist_motor2"/>
+    <child link="wrist_motor3"/>
+  </joint>
+
   <link name="wrist_tilt_motor">
     <inertial>
       <origin xyz="0 0 0" rpy ="0 1.5708 0"/>
@@ -159,7 +209,7 @@
     <axis xyz="1 0 0"/>
     <limit lower="-1.5708" upper="1.5708" effort="5" velocity="0.5"/>
     <origin xyz="0 0.06 0" rpy="0 0 0" />
-    <parent link="wrist_motor"/>
+    <parent link="wrist_motor3"/>
     <child link="wrist_tilt_motor"/>
   </joint>
 

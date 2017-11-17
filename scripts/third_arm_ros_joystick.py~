@@ -124,7 +124,7 @@ class thirdarm_joystick:
 
     	print("Command Values are " + str(self.command))        
         
-        #self.set_speed1((0.2*math.pi/0.8)*np.fabs(cmd_scale[0]))
+        self.set_speed1((0.2*math.pi/0.8)*np.fabs(cmd_scale[0]))
 
         for i in range(len(self.pubvec)):
        		self.pubvec[i].publish(self.command[i])

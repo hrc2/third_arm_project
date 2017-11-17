@@ -17,8 +17,9 @@
                  vertical_tilt_controller
                  arm_extension_controller
                  wrist_controller
+                 wrist_tilt_controller
 		             gripper_controller"
-          output="screen" />
+          />
     
 
 
@@ -27,7 +28,7 @@
       <param name="autorepeat_rate" value="50" />
     </node>
 
-    <node name = "thirdarm_joystick" pkg="third_arm" type="third_arm_ros_joystick.py"/>
+    <node name = "thirdarm_joystick" pkg="third_arm" type="third_arm_ros_joystick.py" output='screen'/>
 
     <!--node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" /-->      
     <!-- Start Meta Controllers for the whole Head -->
