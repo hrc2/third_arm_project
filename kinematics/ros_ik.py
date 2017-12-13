@@ -17,16 +17,6 @@ from pyquaternion import Quaternion
 linkLengths = [-0.08,0.045, 0.135] # [m]
 linkConstraints = []
 
-#T = np.ones((4,4), dtype=float)
-
-# test position is default arm position
-#test1 = np.array([[0,0,0,0],[0,pi/2,0,0.54],[0,0,0,-0.25],[0,0,0,1]],dtype=np.float64)
-# arm slightly turned to right 
-#test2 = np.array([[0,0,0,0],[0,0,0,0.54],[0,0,0,-0.25],[0,0,0,1]],dtype=np.float64)
-#print test1
-
-#t_pred = np.zeros(5)
-
 def callback(data):
 	start_time = time.time()
 
@@ -45,6 +35,10 @@ def callback(data):
 	FK = forwardKinematics(joint)
 	rospy.loginfo('Forward Kinematics')
 	rospy.loginfo(FK)
+
+	# convert the raw joint values into joint values in move_it joint space
+	move_it_joint = [joint[0], joint[1] - pi/2, joint[2] - 0.33, joint[3], joint[4] - pi/2]
+	
 
 def ros_control():
 	# Intialize the node and name it
@@ -101,6 +95,7 @@ def getJointAngles(T):
 	t_pred = np.zeros(5)
 	tVector = np.reshape(T,(1,16))
 	goalVec = tVector[0]
+	rospy.loginfo(goalVec)
 
 	t_pred[0] = calcTheta1(goalVec,linkLengths[2])
 
@@ -114,19 +109,19 @@ def getJointAngles(T):
 
 	return t_pred
 
-def calcTheta1(vars, linkLength):
-	r1y = vars[1]
+def calcTheta1(vars, link3):
+	r1y = vars[4]
 	r1x = vars[0]
-	py = vars[13]
-	px = vars[12]
+	py = vars[7]
+	px = vars[3]
 
-	theta1 = np.arctan2(py- linkLength*r1y, px - linkLength*r1x)
+	theta1 = np.arctan2(py- link3*r1y, px - link3*r1x)
 	return theta1
 
 def reCalcTheta1(vars, theta2, c4):
-	r2x = vars[4]
+	r2x = vars[1]
 	r2y = vars[5]
-	r2z = vars[6]
+	r2z = vars[9]
 
 	A = np.array([[c4, cot(theta2)*r2z], [cot(theta2)*r2z, -c4]])
 	b = np.array([r2x,r2y])
@@ -137,9 +132,9 @@ def reCalcTheta1(vars, theta2, c4):
 	return theta1
 
 def calcTheta2(vars, theta1):
-	r2x = vars[4]
+	r2x = vars[1]
 	r2y = vars[5]
-	r2z = vars[6]
+	r2z = vars[9]
 
 	A = np.array([[sin(theta1), cos(theta1)*r2z],[-cos(theta1), sin(theta1)*r2z]],dtype=np.float64)
 	b = np.array([[r2x],[r2y]])	
@@ -147,13 +142,11 @@ def calcTheta2(vars, theta1):
 	sol = np.linalg.solve(A,b)
 	sol1 = sol[0]
 	sol2 = sol[1]
-	print 'solution 2 %s' %sol2
 	# This also gives us cos(theta4)
 	c4 = sol1
 
 	# check range: [0,pi/2]
-	#candidate = np.arctan2(1,sol2)\
-	candidate = sol2
+	candidate = np.arctan2(1,sol2)
 	if candidate >0 and candidate <pi/2:
 		theta2 = candidate
 	elif candidate>pi/2 and candidate <= pi:
@@ -168,7 +161,7 @@ def calcTheta3(vars, theta2, theta4, theta5, links):
 	# Calculate joint variable 3 = extension length
 	# range [0.33, 0.45]
 
-	pz = vars[14]
+	pz = vars[11]
 	l1 = links[0]
 	l2 = links[1]
 	l3 = links[2]
@@ -179,7 +172,7 @@ def calcTheta3(vars, theta2, theta4, theta5, links):
 def calcTheta4(vars, theta2, c4):
 	# range [-pi,pi]
 
-	r2z = vars[6]
+	r2z = vars[9]
 	s4 = -r2z/sin(theta2)
 	theta4 = np.arctan2(s4,c4)
 	return theta4
@@ -187,7 +180,7 @@ def calcTheta4(vars, theta2, c4):
 def calcTheta5(vars, theta2, c4):
 	# range [0,pi]
 
-	r1z = vars[2]
+	r1z = vars[8]
 	r3z = vars[10]
 
 	A = np.array([[-cos(theta2), -c4*sin(theta2)],[-c4*sin(theta2), cos(theta2)]])
@@ -213,13 +206,13 @@ def forwardKinematics(joint):
 	# Performs forward kinematics on the third_arm using the Denavit-Hartenberg method
 
 	FK = np.identity(4) # Identity matrix
-	alphas = [pi/2, pi/2, 0, pi/2, pi/2]
-	ais = np.array([0, linkLengths[0], 0, 0, linkLengths[2]])
-	D = [0, 0, joint[2], linkLengths[1], 0]
-	thetas = joint
-	thetas[2] = pi # theta 3 is not a rotation
+	alphas = [pi/2, pi/2, 0, pi/2, pi/2, 0]
+	ais = np.array([0, 0, 0, 0, 0, linkLengths[2]])
+	D = [linkLengths[0], 0, joint[2], linkLengths[1], 0, 0]
+	thetas = [joint[0], joint[1], pi, joint[3], joint[4], 0]
+	#thetas[2] = pi # theta 3 is not a rotation
 
-	for i in range(5):
+	for i in range(6):
 		new_Transform = np.array([[cos(thetas[i]), -cos(alphas[i])*sin(thetas[i]), sin(alphas[i])*sin(thetas[i]), ais[i]*cos(thetas[i])],
                      [sin(thetas[i]), cos(alphas[i])*cos(thetas[i]), -sin(alphas[i])*cos(thetas[i]), ais[i]*sin(thetas[i])],
                      [0, sin(alphas[i]), cos(alphas[i]), D[i]],
@@ -227,8 +220,6 @@ def forwardKinematics(joint):
 		FK = np.dot(FK,new_Transform)
 
 	return FK
-
-
 
 
 #getJointAngles(test1)

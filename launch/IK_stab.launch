@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<launch>
+
+    <!-- Start the Dynamixel Controller -->
+    <node name="dynamixel_manager" pkg="dynamixel_controllers" type="controller_manager.py" required="true" output="screen">
+        <rosparam file="$(find third_arm)/config/manager.yaml" command="load" />
+    </node>
+
+    <rosparam file="$(find third_arm)/config/dof_controllers.yaml" command="load"/>
+
+    <!-- Start Joint Position Controllers for each DoF -->
+    <node name="ctrl_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --port=third_arm_port
+                 base_swivel_controller
+                 vertical_tilt_controller
+                 arm_extension_controller
+                 wrist_controller
+                 wrist_tilt_controller
+		             gripper_controller"
+          output="screen" />
+
+    <!-- Start the vicon pose fetching node -->
+    <node name = "vicon_node" pkg="third_arm" type="vicon_pose_node.py" output ='screen'>
+    </node>
+
+    <!-- Start the IK stabilization node -->
+    <node name = "vicon_stabilization" pkg="third_arm" type="vicon_stabilization.py" output='screen'>
+    </node>
+
+</launch>

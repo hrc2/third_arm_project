@@ -20,8 +20,12 @@ def control():
 	# Intialize the node and name it
 	rospy.init_node('ik_test', anonymous=True)
 
+	initPos = [0,0,.33,0,0]
+	initPose = jointToPose(initPos)
+	print "===== init pose"
+	print initPose
 
-	testJ = [0, 0, 0, 0, 0]
+	testJ = [.1, .1, .1, .1, .1]
 	rospy.loginfo(testJ)
 	newPose = jointToPose(testJ)
 	pub.publish(newPose)
@@ -33,6 +37,7 @@ def jointToPose(joint):
 	FK = forwardKinematics(joint)
 	quat = Quaternion(matrix=FK)
 
+	rospy.loginfo(FK)
 	newPose = Pose()
 
 	newPose.position.x = FK[0][3]
@@ -52,13 +57,13 @@ def forwardKinematics(joint):
 	# Performs forward kinematics on the third_arm using the Denavit-Hartenberg method
 
 	FK = np.identity(4) # Identity matrix
-	alphas = [pi/2, pi/2, 0, pi/2, pi/2]
-	ais = np.array([0, linkLengths[0], 0, 0, linkLengths[2]])
-	D = [0, 0, joint[2], linkLengths[1], 0]
-	thetas = joint
-	thetas[2] = pi # theta 3 is not a rotation
+	alphas = [pi/2, pi/2, 0, pi/2, pi/2, 0]
+	ais = np.array([0, 0, 0, 0, 0, linkLengths[2]])
+	D = [linkLengths[0], 0, joint[2], linkLengths[1], 0, 0]
+	thetas = [joint[0], joint[1], pi, joint[3], joint[4], 0]
+	#thetas[2] = pi # theta 3 is not a rotation
 
-	for i in range(5):
+	for i in range(6):
 		new_Transform = np.array([[cos(thetas[i]), -cos(alphas[i])*sin(thetas[i]), sin(alphas[i])*sin(thetas[i]), ais[i]*cos(thetas[i])],
                      [sin(thetas[i]), cos(alphas[i])*cos(thetas[i]), -sin(alphas[i])*cos(thetas[i]), ais[i]*sin(thetas[i])],
                      [0, sin(alphas[i]), cos(alphas[i]), D[i]],
