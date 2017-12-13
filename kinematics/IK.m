@@ -6,7 +6,7 @@ function joint_vars = IK(T)
 lengths = [-0.08, 0.045, 0.135];
 
 % Compute IK
-t_pred = zeros(size(t_test));
+t_pred = zeros(5,1);
 
 for j = 1:size(t_pred,1)
     v = reshape(T, [16,1]);
