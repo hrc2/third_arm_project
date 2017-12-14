@@ -79,24 +79,27 @@ def control():
 
     endEffector = ViconTrackerPoseHandler(None, None, "", 51042, "EE")
 
-    while 1:
+    while  not rospy.is_shutdown():
         EE_data = endEffector.getPose()
 
-        # convert euler to quaternion
-        q = Quaternion(axis = [EE_data[3], EE_data[4], EE_data[5]])
+        if not EE_data.all():
+            print "no data"
+        else:
+            # convert euler to quaternion
+            q = Quaternion(axis=(EE_data[3], EE_data[4], EE_data[5]))
 
-        EE_pose = Pose()
-        EE_pose.position.x = EE_data[0]
-        EE_pose.position.y = EE_data[1]
-        EE_pose.position.z = EE_data[2]
+            EE_pose = Pose()
+            EE_pose.position.x = EE_data[0]
+            EE_pose.position.y = EE_data[1]
+            EE_pose.position.z = EE_data[2]
 
-        EE_pose.orientation.w = q.q[0]
-        EE_pose.orientation.x = q.q[1]
-        EE_pose.orientation.y = q.q[2]
-        EE_pose.orientation.z = q.q[3]
+            EE_pose.orientation.w = q.q[0]
+            EE_pose.orientation.x = q.q[1]
+            EE_pose.orientation.y = q.q[2]
+            EE_pose.orientation.z = q.q[3]
 
-        pub.publish(EE_pose)
-        time.sleep(0.02)
+            pub.publish(EE_pose)
+            time.sleep(0.02)
 
 
 if __name__ == "__main__":
@@ -104,28 +107,3 @@ if __name__ == "__main__":
         control()
     except rospy.ROSInterruptException:
         pass
-
-    #torso = ViconTrackerPoseHandler(None, None, "",51039, "torso")
-    #upper_arm = ViconTrackerPoseHandler(None, None, "", 51040, "upper_arm")
-    #lower_arm = ViconTrackerPoseHandler(None, None, "", 51041, "upper_arm")
-
-    endEffector = ViconTrackerPoseHandler(None, None, "", 51042, "EE")
-    ftm = time.mktime(time.localtime())
-    fname = 'Vicon' + str(ftm) + '.csv'
-    while 1:
-        EE_pose = endEffector.getPose()
-
-    	t_pose = torso.getPose()
-    	u_pose = upper_arm.getPose()
-    	l_pose = lower_arm.getPose()
-    	data = []
-    	data.extend(t_pose)
-    	data.extend(u_pose)
-    	data.extend(l_pose)
-    	print data
-    	
-    	with open(fname,'a') as f:
-    		writer = csv.writer(f)
-    		writer.writerow(data)
-    	time.sleep(0.02)
-
