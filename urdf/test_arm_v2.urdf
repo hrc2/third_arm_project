@@ -55,7 +55,7 @@
 
   <joint name="base_to_motor1" type="revolute">
   	<axis xyz="0 0 1"/>
-  	<limit lower="-1.5708" upper="1.5708" effort="10" velocity="0.314"/>
+  	<limit lower="-3.14" upper="3.14" effort="10" velocity="0.314"/>
   	<origin xyz="0 0 -0.1" rpy="0 0 0" />
     <parent link="block_to_base"/>
     <child link="base_motor"/>

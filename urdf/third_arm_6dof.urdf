@@ -256,7 +256,7 @@
     <child link="gripper_motor"/>
   </joint>
 
-  <!--
+  
   <link name="finger1">
   	<inertial>
   		<origin xyz="0 0.06 0" rpy =" 0 0  0"/>
@@ -307,5 +307,5 @@
     <parent link="gripper_motor"/>
     <child link="finger2"/>
   </joint>
-  -->
+  
 </robot>

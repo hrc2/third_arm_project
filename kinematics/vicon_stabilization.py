@@ -8,8 +8,8 @@ from numpy import *
 import rospy
 import geometry_msgs.msg
 from pyquaternion import Quaternion
-from random import randint
-from std_msgs.msg import String
+import random
+from std_msgs.msg import String, Float64
 
 # API Documentation
 # http://docs.ros.org/indigo/api/moveit_commander/html/classmoveit__commander_1_1move__group_1_1MoveGroupCommander.html
@@ -28,9 +28,10 @@ pub_motor6 = rospy.Publisher('/gripper_controller/command', Float64, queue_size=
 def stabilization_setup():
   # Initial setup
   # Intialize the node and name it
+  
   rospy.init_node('ik_stab', anonymous=True)
-
-  rospy.Subscriber("EEPose", Pose, stabilization_callback)
+  getIK()
+  #rospy.Subscriber("EEPose", Pose, stabilization_callback)
 
   print "Moving to initial position..."
   init_vals = [-0.4, 1.3, 0.08, 0.1, 1.8]
@@ -38,8 +39,9 @@ def stabilization_setup():
   rospy.sleep(10) # give arm time to move to the initial position
 
   print "Starting stabilization loop..."
+
   # once everything is set up start the stabilization
-  stabilization_loop(init_vals)
+  #stabilization_loop(init_vals)
 
 
 def stabilization_loop(init_joint):
@@ -68,7 +70,7 @@ def valid_joint_vals(joint):
   # checks if the calculated joint values are within the joint limits
   if joint[0]>=-pi and joint[0]<= pi:
     if joint[1]>0 and joint[1] <= pi/2:
-      if joint[2]>= 0.33 and joint <= 0.48:
+      if joint[2]>= 0.33 and joint[2] <= 0.48:
         if joint[3]>= -pi and joint[3]<= pi:
           if joint[4]>= 0 and joint[4]<= pi:
             return True
@@ -84,31 +86,40 @@ def cmdJoints(joint):
   pub_motor5.publish(joint[4])
 
 
-def getIK(data):
-  start_time = time.time()
-  # convert given joint values into Ik joint space
-  print "=======================received: "
-  print data
+def getIK():
 
-  T = poseToMatrix(data)
+  numValid = 0
+  numInvalid = 0
+  sumTime = 0
+  N = 100000
 
-  joint = getJointAngles(T)
-  #rospy.loginfo('==================Joint Angles===================')
-  #rospy.loginfo(joint)
+  for i in range(0,N):
+    # generate a random set of valid joints
+    joints = [0,0,0,0,0]
+    joints[0] = 2*pi*random.random() - pi
+    joints[1] = pi/2*random.random()
+    joints[2] = 0.33 + 0.15*random.random()
+    joints[3] = 2*pi*random.random() - pi
+    joints[4] = pi*random.random()
 
-  if isSingular(joint):
-    rospy.loginfo('WARNING: Calculated IK solution is singular!')
-  else:
-    elapsed_time = time.time() - start_time
-    rospy.loginfo('IK solution calculated in %s seconds' % elapsed_time)
+    start_time = time.time()
+    T = forwardKinematics(joints)
 
-  FK = forwardKinematics(joint)
-  rospy.loginfo('Forward Kinematics')
-  #rospy.loginfo(FK)
+    joint = getJointAngles(T)
 
-  # convert the raw joint values into joint values in move_it joint space
-  move_it_joint = [joint[0], joint[1], joint[2] - 0.33, joint[3], joint[4]]
-  return move_it_joint
+    if not valid_joint_vals(joint):
+      numInvalid = numInvalid + 1
+    else:
+      #print joints
+      elapsed_time = time.time() - start_time
+      numValid = numValid +1
+      sumTime = sumTime + elapsed_time
+
+  avgTime = sumTime/numValid
+  print "Valid Ik solutions: %s" % numValid
+  print "invalid  ik solutions: %s" % numInvalid
+  print "average computation time: %s" % avgTime
+
 
 def poseToMatrix(pose):
 
@@ -167,7 +178,7 @@ def calcTheta2(vars, theta1):
   sol = np.linalg.solve(A,b)
   sol1 = sol[0]
   sol2 = sol[1]
-  
+
   # This also gives us cos(theta4)
   c4 = sol1
 
