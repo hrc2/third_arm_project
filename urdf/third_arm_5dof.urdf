@@ -95,10 +95,10 @@
   </link>
 
 
-  <joint name="base_to_motor1" type="revolute">
+  <joint name="horizontal_panning" type="revolute">
   	<axis xyz="0 0 1"/>
-  	<limit lower="-3.14" upper="3.14" effort="10" velocity="0.314"/>
-  	<origin xyz="0 0 0.0" rpy="0 0 0" />
+  	<limit lower="-3.14" upper="3.14" effort="10" velocity="3.14"/>
+  	<origin xyz="0 0 0.0" rpy="0 0 -1.5708" />
     <parent link="base_link"/>
     <child link="base_motor"/>
   </joint>
@@ -121,7 +121,7 @@
     </visual>
   </link>
 
-  <joint name="swivel_to_motor2" type="revolute">
+  <joint name="vertical_pitching" type="revolute">
   	<axis xyz="0 0 1"/>
   	<limit lower="0" upper="1.5708" effort="10" velocity="0.314"/>
   	<origin xyz="0 0 -0.08" rpy="1.5708 3.14159 1.5708" />
@@ -159,10 +159,10 @@
     </visual>
   </link>
   
-  <joint name="extension" type="prismatic">
+  <joint name="length_extension" type="prismatic">
   	<axis xyz="0 1 0"/>
   	<limit lower="0" upper="0.12" effort="10" velocity="5"/>
-  	<origin xyz="0 0.1 0" rpy="0 0 0" />
+  	<origin xyz="0 0.065 0" rpy="0 0 0" />
     <parent link="extend_link1"/>
     <child link="extend_link2"/>
   </joint>
@@ -185,9 +185,9 @@
     </visual>
   </link>
 
-  <joint name="wrist_motor_to_extension" type="revolute">
+  <joint name="wrist_rotation" type="revolute">
   	<axis xyz="0 1 0"/>
-  	<limit lower="-1.5708" upper="1.5708" effort="5" velocity="0.5"/>
+  	<limit lower="-3.14" upper="3.14" effort="5" velocity="0.5"/>
   	<origin xyz="0 0.165 0" rpy="0 0 0" />
     <parent link="extend_link2"/>
     <child link="wrist_rotation_motor"/>
@@ -210,7 +210,7 @@
     </visual>
   </link>
 
-  <joint name="wrist_motor2_to_wrist_tilt_motor" type="revolute">
+  <joint name="wrist_pitching" type="revolute">
     <axis xyz="0 0 1"/>
     <limit lower="0" upper="3.14159" effort="5" velocity="0.5"/>
     <origin xyz="0 0.045 0" rpy="0 0 -1.5708" />

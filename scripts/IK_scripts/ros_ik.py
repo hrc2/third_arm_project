@@ -17,6 +17,8 @@ from pyquaternion import Quaternion
 linkLengths = [-0.08,0.045, 0.135] # [m]
 linkConstraints = []
 
+fail_flag = 0
+
 # def callback(data):
 # 	start_time = time.time()
 
@@ -55,6 +57,8 @@ def IK(pose):
 	T = poseToMatrix(pose)
 	joint = getJointAngles(T)
 	return [joint[0], joint[1] , joint[2] -0.33 , joint[3], joint[4]]
+	if fail_flag:
+		print("No solution found! Returning default value of d3")
 
 def poseToMatrix(pose):
 
@@ -97,10 +101,11 @@ def quatToMatrix(x, y, z, w):
 
 def getJointAngles(T):
 	linkLengths = [-0.08,0.045, 0.135]; # [m]
+	d3range = [0.33, 0.45]
 	t_pred = np.zeros(5)
 	tVector = np.reshape(T,(1,16))
 	goalVec = tVector[0]
-	rospy.loginfo(goalVec)
+	#rospy.loginfo(goalVec)
 
 	t_pred[0] = calcTheta1(goalVec,linkLengths[2])
 
@@ -110,7 +115,7 @@ def getJointAngles(T):
 
 	t_pred[4] = calcTheta5(goalVec, t_pred[1], c4)
 
-	t_pred[2] = calcTheta3(goalVec, t_pred[1], t_pred[3], t_pred[4], linkLengths)
+	t_pred[2] = calcTheta3(goalVec, t_pred[0], t_pred[1], t_pred[3], t_pred[4], linkLengths, d3range)
 
 	return t_pred
 
@@ -162,7 +167,7 @@ def calcTheta2(vars, theta1):
 		theta2 = -candidate
 	return c4, theta2
 
-def calcTheta3(vars, theta2, theta4, theta5, links):
+def calcTheta3(vars, theta1, theta2, theta4, theta5, links, range):
 	# Calculate joint variable 3 = extension length
 	# range [0.33, 0.45]
 
@@ -170,8 +175,23 @@ def calcTheta3(vars, theta2, theta4, theta5, links):
 	l1 = links[0]
 	l2 = links[1]
 	l3 = links[2]
+	px = vars[3]
+	py = vars[7]
 
-	extension = (-pz + l1 - l3*cos(theta2)*sin(theta5) - l3*cos(theta4)*cos(theta5)*sin(theta2) - l2*cos(theta2))/cos(theta2)
+	cand1 = (-pz + l1 - l3*cos(theta2)*sin(theta5) - l3*cos(theta4)*cos(theta5)*sin(theta2) - l2*cos(theta2))/cos(theta2)
+	cand2 = (px -l2*cos(theta1)*sin(theta2) + l3*(cos(theta5)*sin(theta1)*sin(theta4) + cos(theta5)*cos(theta1)*cos(theta2)*cos(theta4)) - l3*cos(theta1)*sin(theta2)*sin(theta5))/(cos(theta1)*sin(theta2))
+	cand3 = (py - l2*sin(theta1)*sin(theta2) - l3*(cos(theta5)*cos(theta1)*sin(theta4) + cos(theta5)*sin(theta1)*cos(theta2)*cos(theta4)) - l3*sin(theta1)*sin(theta2)*sin(theta5))/(sin(theta1)*sin(theta2))
+
+	if cand1 >= range[0] and cand1 <= range[1]:
+		extension = cand1
+	elif cand2 >= range[0] and cand2 <= range[1]:
+		extension = cand2
+	elif cand3 >= range[0] and cand3 <= range[1]:
+		extension = cand3
+	else:
+		extension = range[0]
+		fail_flag = 1
+
 	return extension
 
 def calcTheta4(vars, theta2, c4):
