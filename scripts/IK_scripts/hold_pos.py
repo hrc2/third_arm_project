@@ -17,6 +17,8 @@ from visualization_msgs.msg import Marker
 import csv
 #import base_gen
 
+write_flag = False
+
 class thirdArm5dof:
 
 	def __init__(self):
@@ -39,9 +41,10 @@ class thirdArm5dof:
 		return pose_data
 
 	def write_to_file(self, data):
-		with open(self.fname,'a') as f:						
-			writer = csv.writer(f, quoting=csv.QUOTE_ALL)			
-			writer.writerow([data])
+		if write_flag:
+			with open(self.fname,'a') as f:						
+				writer = csv.writer(f, quoting=csv.QUOTE_ALL)			
+				writer.writerow([data])
 
 	def read_tf(self):
 		while not rospy.is_shutdown():
@@ -81,7 +84,7 @@ class thirdArm5dof:
    		dof = [0, 0, 0]
    		dof.append(0.3*(-math.pi + 2*math.pi*random.random()))
    		dof.append(math.pi/6 + (math.pi/3)*random.random())
-   		dof.append(0.11*random.random())
+   		dof.append(0.05+ 0.06*random.random())
    		dof.append((-math.pi + 2*math.pi*random.random()))
    		dof.append(math.pi*random.random())
    		   		
@@ -107,10 +110,10 @@ class thirdArm5dof:
 
    	def traj_gen(self):
    		t = time.time()
-   		scale = 0.01
-   		xt = 0.01*cos(1.5*t)*cos(t)
-   		yt = 0.01*cos(1.5*t)*sin(t)
-   		zt = 0.01*sin(1.5*t)
+   		scale = 0.02
+   		xt = scale*cos(1.5*t)*cos(t)
+   		yt = scale*cos(1.5*t)*sin(t)
+   		zt = scale*sin(1.5*t)
    		old_pos = self.js.position
    		self.new_pos = [xt, yt, zt, old_pos[3], old_pos[4], old_pos[5], old_pos[6], old_pos[7]]
    		self.js.position = self.new_pos
@@ -134,15 +137,15 @@ class thirdArm5dof:
    	def start(self):
    		# Move third arm to random pose in mid joint-space, hold end-effector at that pose
    		self.initialize()
-   		rate = rospy.Rate(2)
+   		rate = rospy.Rate(50)
    		while not rospy.is_shutdown():
    			#rate.sleep()
    			# Generating random trajectory for the base link
    			self.traj_gen()
-   			rate.sleep()
+   			#rate.sleep()
    			# Moving arm to new position to compensate
    			self.solve_ik()
-   			rate.sleep()
+   			#rate.sleep()
    		
 
 

@@ -58,7 +58,7 @@ def IK(pose):
 	joint = getJointAngles(T)
 	return [joint[0], joint[1] , joint[2] -0.33 , joint[3], joint[4]]
 	if fail_flag:
-		print("No solution found! Returning default value of d3")
+		rospy.loginfo("No solution found! Returning default value of d3")
 
 def poseToMatrix(pose):
 
@@ -189,7 +189,7 @@ def calcTheta3(vars, theta1, theta2, theta4, theta5, links, range):
 	elif cand3 >= range[0] and cand3 <= range[1]:
 		extension = cand3
 	else:
-		extension = range[0]
+		extension = 0.5*(range[0] + range[1])
 		fail_flag = 1
 
 	return extension
