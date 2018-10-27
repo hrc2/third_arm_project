@@ -141,7 +141,7 @@ def reCalcTheta1(vars, theta2, c4):
 	theta1 = np.arctan2(avec[0],avec[1])
 	return theta1
 
-def calcTheta2(vars, theta1):
+def calcTheta2(vars, theta1): 
 	r2x = vars[1]
 	r2y = vars[5]
 	r2z = vars[9]
