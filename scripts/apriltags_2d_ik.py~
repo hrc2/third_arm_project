@@ -41,6 +41,8 @@ class ik_2d_apriltags:
         #self.pub_motor6 = rospy.Publisher('/gripper_controller/command', Float64, queue_size=1)
 
         self.set_speed1 = rospy.ServiceProxy('base_swivel_controller/set_speed', dynamixel_controllers.srv.SetSpeed)
+        self.set_speed3 = rospy.ServiceProxy('arm_extension_controller/set_speed', dynamixel_controllers.srv.SetSpeed)
+        self.trans = tf.TransformListener()
 
         #self.pubvec = [self.pub_motor1, self.pub_motor2, self.pub_motor3, self.pub_motor4, self.pub_motor5, self.pub_motor6]
 
@@ -59,11 +61,13 @@ class ik_2d_apriltags:
 		return ch
 
     def positions_update(self, data):		
-	self.base_x = data.detections[0].pose.pose.position.x
-	self.base_y = data.detections[0].pose.pose.position.y
-	self.ee_x = data.detections[1].pose.pose.position.x
-	self.ee_y = data.detections[1].pose.pose.position.y
-        print("Base- X: " + str(self.base_x) + " Y: " + str(self.base_y))
+        #(pos,rot) = self.trans.lookupTransform('/base_frame','/camera_rgb_optical_frame', rospy.Time())
+        #print("Base: " + str(pos))# + " , " + str(rot))
+        self.base_x = data.detections[0].pose.pose.position.x
+        self.base_y = data.detections[0].pose.pose.position.y
+        self.ee_x = data.detections[1].pose.pose.position.x
+        self.ee_y = data.detections[1].pose.pose.position.y
+        #print("Base- X: " + str(self.base_x) + " Y: " + str(self.base_y))
         print("Gripper- X: " + str(self.ee_x) + " Y: " + str(self.ee_y))
 
     def pos_msg_update(self):
@@ -95,62 +99,10 @@ class ik_2d_apriltags:
     		time.sleep(1)
 
 		while not rospy.is_shutdown():
-		    	self.pos_sub = rospy.Subscriber('/tag_detections', AprilTagDetectionArray, self.positions_update)
-			self.rate.sleep()
+		    	#self.pos_sub = rospy.Subscriber('/tag_detections', AprilTagDetectionArray, self.positions_update)
+			#self.rate.sleep()
+			self.pos_msg_update()
 		    	#self.positions_display()
-
-
-    	
-
-   		#while not rospy.is_shutdown():
-   		#	self.tags = rospy.wait_for_message('/tag_detections', AprilTagDetectionArray)
-
-   			
-        
-    def get_current_state(self):
-        topic_list = ['/base_swivel_controller/state' , '/vertical_tilt_controller/state' , '/arm_extension_controller/state' , '/wrist_controller/state' , '/wrist_tilt_controller/state', '/gripper_controller/state']
-        print("Waiting for joint states")
-        self.count = 0
-        for topic in topic_list:
-            #print("Topic name : " + topic)
-            data = rospy.wait_for_message(topic, dynamixel_msgs.msg.JointState)            
-            self.currval[self.count] = data.current_pos
-            self.count += 1
-
-    def get_joystick(self):
-
-    	self.get_current_state()
-
-    	js = self.js
-
-    	grip_state = 0
-    	if js.buttons[0] > 0.1:
-    		grip_state = -1
-    	elif js.buttons[1] > 0.1:
-    		grip_state = +1
-
-	wrist_tilt_state = 0
-    	if js.buttons[6] > 0.1:
-		wrist_tilt_state = -1
-	elif js.buttons[7] > 0.1:
-		wrist_tilt_state = +1
-
-
-    	cvec = [js.axes[4] , js.axes[3] , js.axes[1] , js.axes[0] , wrist_tilt_state , grip_state]
-
-    	cmd_scale = [-0.3, 0.3, -0.4, -0.3, 0.2, 0.2]
-
-    	for i in range(len(self.command)):
-    		self.command[i] = self.currval[i] + cmd_scale[i]*np.sign(cvec[i])
-
-    	print("Command Values are " + str(self.command))        
-        
-        #self.set_speed1((0.2*math.pi/0.8)*np.fabs(cmd_scale[0]))
-
-        for i in range(len(self.pubvec)):
-       		self.pubvec[i].publish(self.command[i])
-       	#self.pub_motor5.publish(0.0)
-
 
 
 

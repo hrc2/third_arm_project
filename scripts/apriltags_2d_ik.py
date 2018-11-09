@@ -42,6 +42,7 @@ class ik_2d_apriltags:
 
         self.set_speed1 = rospy.ServiceProxy('base_swivel_controller/set_speed', dynamixel_controllers.srv.SetSpeed)
         self.set_speed3 = rospy.ServiceProxy('arm_extension_controller/set_speed', dynamixel_controllers.srv.SetSpeed)
+        self.trans = tf.TransformListener()
 
         #self.pubvec = [self.pub_motor1, self.pub_motor2, self.pub_motor3, self.pub_motor4, self.pub_motor5, self.pub_motor6]
 
@@ -60,21 +61,24 @@ class ik_2d_apriltags:
 		return ch
 
     def positions_update(self, data):		
-	self.base_x = data.detections[0].pose.pose.position.x
-	self.base_y = data.detections[0].pose.pose.position.y
-	self.ee_x = data.detections[1].pose.pose.position.x
-	self.ee_y = data.detections[1].pose.pose.position.y
-        print("Base- X: " + str(self.base_x) + " Y: " + str(self.base_y))
-        print("Gripper- X: " + str(self.ee_x) + " Y: " + str(self.ee_y))
+        (pos,rot) = self.trans.lookupTransform('/base_frame','/camera_rgb_frame', rospy.Time())
+        #print("Base: " + str(pos))# + " , " + str(rot))
+        self.base_x = data.detections[0].pose.pose.position.x
+        self.base_y = data.detections[0].pose.pose.position.y
+        self.base_z = data.detections[0].pose.pose.position.z
+        #self.ee_x = data.detections[1].pose.pose.position.x
+        #self.ee_y = data.detections[1].pose.pose.position.y
+        print("Base- X: " + str(self.base_x) + " Y: " + str(self.base_y) + " Z: " + str(self.base_z))
+        #print("Gripper- X: " + str(self.ee_x) + " Y: " + str(self.ee_y))
 
     def pos_msg_update(self):
 	data = rospy.wait_for_message('/tag_detections', AprilTagDetectionArray)
 	self.base_x = data.detections[0].pose.pose.position.x
 	self.base_y = data.detections[0].pose.pose.position.y
-	self.ee_x = data.detections[1].pose.pose.position.x
-	self.ee_y = data.detections[1].pose.pose.position.y
+	#self.ee_x = data.detections[1].pose.pose.position.x
+	#self.ee_y = data.detections[1].pose.pose.position.y
         print("Base- X: " + str(self.base_x) + " Y: " + str(self.base_y))
-        print("Gripper- X: " + str(self.ee_x) + " Y: " + str(self.ee_y))
+        #print("Gripper- X: " + str(self.ee_x) + " Y: " + str(self.ee_y))
 
     def positions_display(self):
     	print("Base- X: " + str(self.base_x) + " Y: " + str(self.base_y))
@@ -82,7 +86,7 @@ class ik_2d_apriltags:
 
     def run(self):
     	self.tags = rospy.wait_for_message('/tag_detections', AprilTagDetectionArray)
-    	print("Detected Initial State")
+    	print("Detected Initial States: ")
     	time.sleep(1)
     	self.rate = rospy.Rate(1)
     	if self.tags.detections[0].pose.pose.position.x != 0 and self.tags.detections[1].pose.pose.position.x != 0:
