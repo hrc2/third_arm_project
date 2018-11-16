@@ -41,7 +41,7 @@ class apriltags_motor_control:
         self.pub_motor6 = rospy.Publisher('/gripper_controller/command', Float64, queue_size=1)
 	
 	self.pubvec = [self.pub_motor1, self.pub_motor2, self.pub_motor3, self.pub_motor4, self.pub_motor5, self.pub_motor6]
-	self.initial_angles = [0.0, -0.06, 1.5, 0.0, -0.64, 0.0]	
+	self.initial_angles = [0.0, -0.06, 1.55, 0.0, -0.64, 0.0]	
 
         self.speed_topics = ['base_swivel_controller/set_speed', '/vertical_tilt_controller/set_speed' , '/arm_extension_controller/set_speed' , '/wrist_controller/set_speed' , '/wrist_tilt_controller/set_speed', '/gripper_controller/set_speed']
         self.motor_max_speeds = [0.4, 0.2, 0.8, 0.5, 0.5, 0.5]
@@ -100,30 +100,87 @@ class apriltags_motor_control:
         print("Base- X: " + str(self.base_x_avg) + " Y: " + str(self.base_y_avg))
         print("Gripper- X: " + str(self.ee_x_avg) + " Y: " + str(self.ee_y_avg))
 	
+	self.l0 = math.sqrt((self.base_x_avg - self.ee_x_avg)**2 + (self.base_y_avg - self.ee_y_avg)**2)
+	self.thet0 = math.atan2((self.ee_y_avg - self.base_y_avg), (self.ee_x_avg - self.base_x_avg))	
+	self.length_calibrate()
+
+    def update_theta_state(self,data):
+	self.theta = data
+
+    def update_l_state(self,data):
+	self.l = data
+			
     def update_base_pose(self, data):
 	self.base_x = data.x
 	self.base_y = data.y
-        print("Base- X: " + str(self.base_x) + " Y: " + str(self.base_y))
+        #print("Base- X: " + str(self.base_x) + " Y: " + str(self.base_y))
     
     def update_ee_pose(self, data):
 	self.ee_x = data.x
 	self.ee_y = data.y
-        print("Gripper- X: " + str(self.ee_x) + " Y: " + str(self.ee_y))
+        #print("Gripper- X: " + str(self.ee_x) + " Y: " + str(self.ee_y))
+	self.closed_loop_control()
+    
+    def length_calibrate(self):
+	self.pubvec[2].publish(0.0)
+	time.sleep(1)
+	t0 = time.time()
+        t = time.time()
+        timeout = 2.0
+	print("Calibrating length: " + str(timeout) +" seconds averaged")        
+        ee_x_avg = 0.0
+        ee_y_avg = 0.0
+        count = 0
+        while(t < t0 + timeout):
+		ee_pose = rospy.wait_for_message('/ee_pose', Point)
+		ee_x_avg += ee_pose.x
+		ee_y_avg += ee_pose.y    	   
+		count += 1
+		t = time.time()
+        ee_x_avg /= count
+        ee_y_avg /= count
+ 	
+	self.l_max = math.sqrt((self.base_x_avg - ee_x_avg)**2 + (self.base_y_avg - ee_y_avg)**2)
+	self.pubvec[2].publish(1.55)
+	time.sleep(1)
+
 
     def closed_loop_control(self):
-	print('Closed Loop Controller')
+	#print('Closed Loop Controller')
+	self.del_x = self.base_x - self.base_x_avg
+	self.del_y = self.base_y - self.base_y_avg
 	
+	self.theta_command = math.atan2((self.ee_y_avg - self.base_y), (self.ee_x_avg - self.base_x))
+	self.l_command = math.sqrt((self.ee_x_avg - self.base_x)**2 + (self.ee_y_avg - self.base_y)**2)
+	#print("Theta Change : " + str(self.theta_command - self.thet0))
+	#print("Length Change : " + str(self.l_command - self.l0))
+	
+	m1_command = self.theta_command	
+	m3_command = ((self.l_command - self.l_max)/(self.l0 - self.l_max))*1.55
+	
+	if math.fabs(self.del_x) > 0.005 and math.fabs(self.del_y) > 0.005:		
+		print("Base command : " + str(m1_command))
+		print("Extension command : " + str(m3_command))
+		self.pubvec[0].publish(m1_command)
+		if m3_command < 1.55:
+			self.pubvec[2].publish(m3_command)
+	#print("Del X : " + str(self.del_x))
+	#print("Del Y : " + str(self.del_y))
+	
+
     def run(self):
 	#rospy.Subscriber("joy", Joy, self.test_joystick)
 	#rospy.Subscriber("joy", Joy, self.get_joystick)
 	#rospy.spin()
 	self.get_initial_motor_states()
-    	self.get_initial_frame_poses()
-	print("Subscribing to topics:")
+    	self.get_initial_frame_poses()	
+	self.closed_loop_control()
+	rospy.Subscriber('/base_swivel_controller/state', dynamixel_msgs.msg.JointState, self.update_theta_state)
+	rospy.Subscriber('/arm_extension_controller/state', dynamixel_msgs.msg.JointState, self.update_l_state)
+	
 	rospy.Subscriber('/base_pose', Point, self.update_base_pose)
 	rospy.Subscriber('/ee_pose', Point, self.update_ee_pose)
-	self.closed_loop_control()	
-	#rospy.spin()
+	rospy.spin()	
 		#self.get_initial_motor_states()
 		#self.get_frame_poses()
 		
