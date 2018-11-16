@@ -20,9 +20,9 @@ vertical_tilt_controller:
     joint_speed: 0.3
     motor:
         id: 2
-        init: 2048
+        init: 3431
         min: 0
-        max: 4096
+        max: 3431
         
 arm_extension_controller:
     controller:
