@@ -41,10 +41,13 @@ class apriltags_motor_control:
         self.pub_motor6 = rospy.Publisher('/gripper_controller/command', Float64, queue_size=1)
 	
 	self.pubvec = [self.pub_motor1, self.pub_motor2, self.pub_motor3, self.pub_motor4, self.pub_motor5, self.pub_motor6]
-	self.initial_angles = [0.0, -0.06, 1.55, 0.0, -0.64, 0.0]	
+	self.full_out = 0.21
+	self.full_in = 1.48	
+	self.initial_angles = [0.0, -0.06, self.full_in, 0.0, -0.64, 0.0]	
 
         self.speed_topics = ['base_swivel_controller/set_speed', '/vertical_tilt_controller/set_speed' , '/arm_extension_controller/set_speed' , '/wrist_controller/set_speed' , '/wrist_tilt_controller/set_speed', '/gripper_controller/set_speed']
-        self.motor_max_speeds = [0.4, 0.2, 0.8, 0.5, 0.5, 0.5]
+        self.motor_max_speeds = [0.4, 0.2, 1.0, 0.5, 0.5, 0.5]
+	
 	
 	print('Setting motor max speeds')
 	for i in range(len(self.motor_max_speeds)):
@@ -122,7 +125,7 @@ class apriltags_motor_control:
 	self.closed_loop_control()
     
     def length_calibrate(self):
-	self.pubvec[2].publish(0.0)
+	self.pubvec[2].publish(self.full_out)
 	time.sleep(1)
 	t0 = time.time()
         t = time.time()
@@ -141,7 +144,7 @@ class apriltags_motor_control:
         ee_y_avg /= count
  	
 	self.l_max = math.sqrt((self.base_x_avg - ee_x_avg)**2 + (self.base_y_avg - ee_y_avg)**2)
-	self.pubvec[2].publish(1.55)
+	self.pubvec[2].publish(self.full_in)
 	time.sleep(1)
 
 
@@ -156,13 +159,13 @@ class apriltags_motor_control:
 	#print("Length Change : " + str(self.l_command - self.l0))
 	
 	m1_command = self.theta_command - self.thet0	
-	m3_command = ((self.l_command - self.l_max)/(self.l0 - self.l_max))*1.55
+	m3_command = self.full_out + (self.l_command - self.l_max)* ((self.full_in - self.full_out)/(self.l0 - self.l_max))
 	
 	if math.fabs(self.del_x) > 0.005 and math.fabs(self.del_y) > 0.005:		
 		print("Base command : " + str(m1_command))
 		print("Extension command : " + str(m3_command))
 		self.pubvec[0].publish(m1_command)
-		if m3_command < 1.55:
+		if m3_command < self.full_in and m3_command > self.full_out:
 			self.pubvec[2].publish(m3_command)
 	#print("Del X : " + str(self.del_x))
 	#print("Del Y : " + str(self.del_y))
