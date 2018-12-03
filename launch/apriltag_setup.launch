@@ -2,7 +2,8 @@
 <launch>
 
   <include file="$(find third_arm)/launch/third_arm.launch"/>
-  <include file="$(find openni_launch)/launch/openni.launch"/>
+  <!--include file="$(find openni_launch)/launch/openni.launch"/-->
+  <include file="$(find astra_launch)/launch/astra.launch"/>
   
   <arg name="rvizconfig" default="$(find third_arm)/urdf/apriltag_config.rviz"/>
   
@@ -23,8 +24,8 @@
 
     <!-- Describe the tags -->
     <rosparam param="tag_descriptions">[      
-      {id: 1, size: 0.1, frame_id: base_frame},
-      {id: 2, size: 0.1, frame_id: ee_frame}]
+      {id: 7, size: 0.1, frame_id: base_frame},
+      {id: 6, size: 0.1, frame_id: ee_frame}]
     </rosparam>
   </node>
 
