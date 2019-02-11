@@ -31,8 +31,6 @@ from statsmodels.tsa.ar_model import AR
 CHOICE = 0 # 0 for AR model, 1 for ARMA model
 ARFILE = '/home/hriclass/catkin_ws/src/third_arm/scripts/ClosedLoopIK/data/ar_params.csv'
 ARMAFILE = '/home/hriclass/catkin_ws/src/third_arm/scripts/ClosedLoopIK/data/arma_params.csv'
-GROUND_TRUTH = '/home/hriclass/catkin_ws/src/third_arm/scripts/ClosedLoopIK/data/base_pos.csv'
-PREDICTION = '/home/hriclass/catkin_ws/src/third_arm/scripts/ClosedLoopIK/data/base_predict.csv'
 
 class apriltags_2d_predict:
 	
