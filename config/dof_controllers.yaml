@@ -23,7 +23,8 @@ vertical_tilt_controller:
         init: 3431
         min: 0
         max: 3431
-        
+
+#Extension should be in multi-turn mode        
 arm_extension_controller:
     controller:
         package: dynamixel_controllers
@@ -33,9 +34,12 @@ arm_extension_controller:
     joint_speed: 0.8
     motor:
         id: 3
-        init: 2700
-        min: 2400
-        max: 4000
+        #init: 28672
+        init: 0
+        #min: 0
+        #max: 57343
+        min: 0
+        max: 4095
 
         
 wrist_controller:

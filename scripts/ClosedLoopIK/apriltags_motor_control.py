@@ -41,12 +41,12 @@ class apriltags_motor_control:
         self.pub_motor6 = rospy.Publisher('/gripper_controller/command', Float64, queue_size=1)
 	
 	self.pubvec = [self.pub_motor1, self.pub_motor2, self.pub_motor3, self.pub_motor4, self.pub_motor5, self.pub_motor6]
-	self.full_out = 0.7
-	self.full_in = 2.1	
+	self.full_out = 3.1
+	self.full_in = 4.85	
 	self.initial_angles = [0.0, -0.06, self.full_in, 0.0, -0.64, 0.0]	
 
         self.speed_topics = ['base_swivel_controller/set_speed', '/vertical_tilt_controller/set_speed' , '/arm_extension_controller/set_speed' , '/wrist_controller/set_speed' , '/wrist_tilt_controller/set_speed', '/gripper_controller/set_speed']
-        self.motor_max_speeds = [1.7, 0.2, 2.6, 0.5, 0.5, 0.5]
+        self.motor_max_speeds = [1.7, 0.2, 2.0, 0.5, 0.5, 0.5]
 	
 	
 	print('Setting motor max speeds')

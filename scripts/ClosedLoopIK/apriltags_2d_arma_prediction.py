@@ -35,7 +35,9 @@ class apriltags_2d_predict:
 	
 	def __init__(self):
         rospy.init_node('apriltags_2d_predict')
-        self.pub_base_predict_next = rospy.Publisher('/base_pose_prediction', Point, queue_size=1)
+        self.pub_base_predict_next = rospy.Publisher('/base_pose_next_prediction', Point, queue_size=1) # Predict next time step
+        self.pub_base_predict_nth = rospy.Publisher('/base_pose_nth_prediction', Point, queue_size=1) # Predict N time steps into the future
+        self.N = 10
         self.base_pos = rospy.wait_for_message('/base_pose', Point)
         print("Base Position Message Detected")
         self.msg_count = 0
@@ -55,9 +57,13 @@ class apriltags_2d_predict:
     	else:
     		self.pos_buffer = np.roll(self.pos_buffer, 1, axis=0)
     		self.pos_buffer[-1, :] = np.array([data.x, data.y, data.z])
-    		self.next_prediciton = np.matmul(self.pos_buffer, np.flip(self.pred_params, 0))
-    		self.pub_base_predict_next.publish(self.next_prediciton)
+    		self.next_predict()
+    		
 
+    def next_predict(self):
+    	print("Predicting one time step into the future")
+    	self.next_prediciton = np.matmul(self.pos_buffer, np.flip(self.pred_params, 0))
+    	self.pub_base_predict_next.publish(self.next_prediciton)
     
     def run(self):
     	self.base_pos_sub = rospy.Subscriber('/base_pose', Point, self.update_buffer)
