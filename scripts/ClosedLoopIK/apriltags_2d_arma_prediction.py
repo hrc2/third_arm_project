@@ -32,7 +32,8 @@ CHOICE = 0  # 0 for AR model, 1 for ARMA model
 ARFILE = '/home/hriclass/catkin_ws/src/third_arm/scripts/ClosedLoopIK/data/ar_params.csv'
 ARMAFILE = '/home/hriclass/catkin_ws/src/third_arm/scripts/ClosedLoopIK/data/arma_params.csv'
 GROUND_TRUTH = '/home/hriclass/catkin_ws/src/third_arm/scripts/ClosedLoopIK/data/base_pos.csv'
-PREDICTION = '/home/hriclass/catkin_ws/src/third_arm/scripts/ClosedLoopIK/data/base_predict.csv'
+PREDICTION_ONE_STEP = '/home/hriclass/catkin_ws/src/third_arm/scripts/ClosedLoopIK/data/base_predict_next.csv'
+PREDICTION_NTH_STEP = '/home/hriclass/catkin_ws/src/third_arm/scripts/ClosedLoopIK/data/base_predict_nth.csv'
 
 
 class apriltags_2d_predict:
@@ -45,6 +46,7 @@ class apriltags_2d_predict:
                                                     queue_size=1)  # Predict N time steps into the future
         self.N = 50
         self.msg_count = 0
+        self.init_time = time.time()
 
     def param_read(self):
         print("Read AR/ARMA parameters from file")
@@ -61,8 +63,12 @@ class apriltags_2d_predict:
         else:
             self.pos_buffer = np.roll(self.pos_buffer, 1, axis=0)
             self.pos_buffer[-1, :] = np.array([data.x, data.y, data.z])
+
             self.next_predict()
+            self.write_to_file(GROUND_TRUTH, np.array([data.x, data.y, data.z]))
+
             self.n_step_predict()
+
 
     def next_predict(self):
         # print("Predicting one time step into the future")
@@ -71,6 +77,7 @@ class apriltags_2d_predict:
             next_pred[i] = np.dot(np.flip(self.pos_buffer[:, i], 0), self.pred_params[:, i])
         self.next_prediciton_msg = Point(x=next_pred[0], y=next_pred[1], z=next_pred[2])
         self.pub_base_predict_next.publish(self.next_prediciton_msg)
+        self.write_to_file(PREDICTION_ONE_STEP, next_pred)
 
     def n_step_predict(self):
         #print("Predicting " + str(self.N) + " time steps into the future")
@@ -83,6 +90,11 @@ class apriltags_2d_predict:
             curr_buffer[-1, :] = nth_pred
         self.nth_prediciton_msg = Point(x=nth_pred[0], y=nth_pred[1], z=nth_pred[2])
         self.pub_base_predict_nth.publish(self.nth_prediciton_msg)
+        self.write_to_file(PREDICTION_NTH_STEP, nth_pred)
+
+    def write_to_file(self, fname, data):
+        with open(fname, 'a') as f:
+            np.savetxt(f, [np.append(data, time.time() - self.init_time)], fmt='%1.10f', delimiter=',')
 
     def run(self):
         self.base_pos = rospy.wait_for_message('/base_pose', Point)
