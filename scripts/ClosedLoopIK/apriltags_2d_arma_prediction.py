@@ -33,6 +33,7 @@ ARFILE = '/home/hriclass/catkin_ws/src/third_arm/scripts/ClosedLoopIK/data/ar_pa
 AR_SIGMA_FILE = '/home/hriclass/catkin_ws/src/third_arm/scripts/ClosedLoopIK/data/ar_sigmas.csv'
 ARMAFILE = '/home/hriclass/catkin_ws/src/third_arm/scripts/ClosedLoopIK/data/arma_params.csv'
 GROUND_TRUTH = '/home/hriclass/catkin_ws/src/third_arm/scripts/ClosedLoopIK/data/base_pos.csv'
+EE_POSE = '/home/hriclass/catkin_ws/src/third_arm/scripts/ClosedLoopIK/data/ee_pos.csv'
 PREDICTION_ONE_STEP = '/home/hriclass/catkin_ws/src/third_arm/scripts/ClosedLoopIK/data/base_predict_next.csv'
 PREDICTION_NTH_STEP = '/home/hriclass/catkin_ws/src/third_arm/scripts/ClosedLoopIK/data/base_predict_nth.csv'
 
@@ -45,7 +46,8 @@ class apriltags_2d_predict:
                                                      queue_size=1)  # Predict next time step
         self.pub_base_predict_nth = rospy.Publisher('/base_pose_nth_prediction', Point,
                                                     queue_size=1)  # Predict N time steps into the future
-        self.N = 10
+        self.N = 0
+        self.Nplus = 10
         self.msg_count = 0
         self.init_time = time.time()
 
@@ -55,53 +57,61 @@ class apriltags_2d_predict:
             self.pred_params = np.genfromtxt(ARFILE, delimiter='')
             self.pos_buffer = np.zeros([self.pred_params.shape[0], 3])
             self.sigma = np.sqrt(np.genfromtxt(AR_SIGMA_FILE, delimiter=''))
+            self.N = self.pred_params.shape[0]
         elif CHOICE == 1:
             self.pred_params = np.genfromtxt(ARMAFILE, delimiter='')
 
     def update_buffer(self, data):
-        if self.msg_count < self.pred_params.shape[0]:
-            self.pos_buffer[self.msg_count, :] = np.array([data.x, data.y, data.z])
+        if self.msg_count < 5*self.pred_params.shape[0]:
+            self.pos_buffer = np.roll(self.pos_buffer, 1, axis=0)
+            self.pos_buffer[-1, :] = np.array([data.x, data.y, data.z])
             self.write_to_file(GROUND_TRUTH, np.array([data.x, data.y, data.z]))
             self.msg_count += 1
         else:
             self.pos_buffer = np.roll(self.pos_buffer, 1, axis=0)
             self.pos_buffer[-1, :] = np.array([data.x, data.y, data.z])
             self.write_to_file(GROUND_TRUTH, np.array([data.x, data.y, data.z]))
-            self.next_predict()
-            self.n_step_predict()
+            #self.next_predict()
+            self.n_step_predict(N=self.N + 1, fname=PREDICTION_ONE_STEP) # One step with lag compensation
+            self.n_step_predict(N=self.N + self.Nplus, fname=PREDICTION_NTH_STEP)
 
 
     def next_predict(self):
         # print("Predicting one time step into the future")
         next_pred = np.zeros(self.pos_buffer.shape[1])
         for i in range(self.pos_buffer.shape[1]):
-            next_pred[i] = np.dot(np.flip(self.pos_buffer[:, i], 0), self.pred_params[:, i]) + np.random.normal(0, self.sigma[i])
+            next_pred[i] = np.dot(np.flip(self.pos_buffer[:, i], 0), self.pred_params[:, i]) #+ np.random.normal(0, self.sigma[i])
         self.next_prediciton_msg = Point(x=next_pred[0], y=next_pred[1], z=next_pred[2])
         self.pub_base_predict_next.publish(self.next_prediciton_msg)
         self.write_to_file(PREDICTION_ONE_STEP, next_pred)
 
-    def n_step_predict(self):
+    def n_step_predict(self, N, fname):
         #print("Predicting " + str(self.N) + " time steps into the future")
         curr_buffer = self.pos_buffer
         nth_pred = np.zeros(self.pos_buffer.shape[1])
-        for j in range(self.N):
+        for j in range(N):
             for i in range(self.pos_buffer.shape[1]):
-                nth_pred[i] = np.dot(np.flip(curr_buffer[:, i], 0), self.pred_params[:, i]) + np.random.normal(0, self.sigma[i])
+                nth_pred[i] = np.dot(np.flip(curr_buffer[:, i], 0), self.pred_params[:, i]) #+ np.random.normal(0, self.sigma[i])
             curr_buffer = np.roll(curr_buffer, 1, axis=0)
             curr_buffer[-1, :] = nth_pred
         self.nth_prediciton_msg = Point(x=nth_pred[0], y=nth_pred[1], z=nth_pred[2])
         self.pub_base_predict_nth.publish(self.nth_prediciton_msg)
-        self.write_to_file(PREDICTION_NTH_STEP, nth_pred)
+        self.write_to_file(fname, nth_pred)
 
     def write_to_file(self, fname, data):
         with open(fname, 'a') as f:
             np.savetxt(f, [np.append(data, time.time() - self.init_time)], fmt='%1.10f', delimiter=',')
 
+    def log_end_effector(self, data):
+        self.write_to_file(EE_POSE, np.array([data.x, data.y, data.z]))
+
     def run(self):
         self.base_pos = rospy.wait_for_message('/base_pose', Point)
+        #self.ee_pos = rospy.wait_for_message('/base_pose', Point)
         print("Base Position Message Detected")
         self.param_read()
         self.base_pos_sub = rospy.Subscriber('/base_pose', Point, self.update_buffer)
+        self.ee_pos_sub = rospy.Subscriber('/ee_pose', Point, self.log_end_effector)
         rospy.spin()
 
 
