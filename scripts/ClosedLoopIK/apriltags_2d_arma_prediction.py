@@ -29,7 +29,7 @@ from statsmodels.tsa.arima_model import ARMA
 from statsmodels.tsa.ar_model import AR
 
 CHOICE = 0  # 0 for AR model, 1 for ARMA model
-ARFILE = '/home/hriclass/catkin_ws/src/third_arm/scripts/ClosedLoopIK/data/ar_params.csv'
+ARFILE = '/home/hriclass/catkin_ws/src/third_arm/scripts/ClosedLoopIK/data/ar_params_2d.csv'
 AR_SIGMA_FILE = '/home/hriclass/catkin_ws/src/third_arm/scripts/ClosedLoopIK/data/ar_sigmas.csv'
 ARMAFILE = '/home/hriclass/catkin_ws/src/third_arm/scripts/ClosedLoopIK/data/arma_params.csv'
 GROUND_TRUTH = '/home/hriclass/catkin_ws/src/third_arm/scripts/ClosedLoopIK/data/base_pos.csv'
@@ -47,14 +47,14 @@ class apriltags_2d_predict:
         self.pub_base_predict_nth = rospy.Publisher('/base_pose_nth_prediction', Point,
                                                     queue_size=1)  # Predict N time steps into the future
         self.N = 0
-        self.Nplus = 10
+        self.Nplus = 1
         self.msg_count = 0
         self.init_time = time.time()
 
     def param_read(self):
         print("Read AR/ARMA parameters from file")
         if CHOICE == 0:
-            self.pred_params = np.genfromtxt(ARFILE, delimiter='')
+            self.pred_params = np.genfromtxt(ARFILE, delimiter=',')
             self.pos_buffer = np.zeros([self.pred_params.shape[0], 3])
             self.sigma = np.sqrt(np.genfromtxt(AR_SIGMA_FILE, delimiter=''))
             self.N = self.pred_params.shape[0]
@@ -71,16 +71,17 @@ class apriltags_2d_predict:
             self.pos_buffer = np.roll(self.pos_buffer, 1, axis=0)
             self.pos_buffer[-1, :] = np.array([data.x, data.y, data.z])
             self.write_to_file(GROUND_TRUTH, np.array([data.x, data.y, data.z]))
-            #self.next_predict()
-            self.n_step_predict(N=self.N + 1, fname=PREDICTION_ONE_STEP) # One step with lag compensation
-            self.n_step_predict(N=self.N + self.Nplus, fname=PREDICTION_NTH_STEP)
+            self.next_predict()
+            #self.n_step_predict(N=1, fname=PREDICTION_ONE_STEP) # One step with lag compensation
+            #self.n_step_predict(N=self.N + self.Nplus, fname=PREDICTION_NTH_STEP)
+            self.n_step_predict(N=1, fname=PREDICTION_NTH_STEP)
 
 
     def next_predict(self):
         # print("Predicting one time step into the future")
         next_pred = np.zeros(self.pos_buffer.shape[1])
         for i in range(self.pos_buffer.shape[1]):
-            next_pred[i] = np.dot(np.flip(self.pos_buffer[:, i], 0), self.pred_params[:, i]) #+ np.random.normal(0, self.sigma[i])
+            next_pred[i] = np.dot(np.flip(self.pos_buffer[:, i], 0), self.pred_params[:, i]) #+ np.random.normal(0, self.sigma[i]**2)
         self.next_prediciton_msg = Point(x=next_pred[0], y=next_pred[1], z=next_pred[2])
         self.pub_base_predict_next.publish(self.next_prediciton_msg)
         self.write_to_file(PREDICTION_ONE_STEP, next_pred)
@@ -91,7 +92,7 @@ class apriltags_2d_predict:
         nth_pred = np.zeros(self.pos_buffer.shape[1])
         for j in range(N):
             for i in range(self.pos_buffer.shape[1]):
-                nth_pred[i] = np.dot(np.flip(curr_buffer[:, i], 0), self.pred_params[:, i]) #+ np.random.normal(0, self.sigma[i])
+                nth_pred[i] = np.dot(np.flip(curr_buffer[:, i], 0), self.pred_params[:, i]) #+ np.random.normal(0, self.sigma[i]**2)
             curr_buffer = np.roll(curr_buffer, 1, axis=0)
             curr_buffer[-1, :] = nth_pred
         self.nth_prediciton_msg = Point(x=nth_pred[0], y=nth_pred[1], z=nth_pred[2])
@@ -99,8 +100,10 @@ class apriltags_2d_predict:
         self.write_to_file(fname, nth_pred)
 
     def write_to_file(self, fname, data):
-        with open(fname, 'a') as f:
-            np.savetxt(f, [np.append(data, time.time() - self.init_time)], fmt='%1.10f', delimiter=',')
+        a = 10
+        #print('')
+        #with open(fname, 'a') as f:
+        #    np.savetxt(f, [np.append(data, time.time() - self.init_time)], fmt='%1.10f', delimiter=',')
 
     def log_end_effector(self, data):
         self.write_to_file(EE_POSE, np.array([data.x, data.y, data.z]))
