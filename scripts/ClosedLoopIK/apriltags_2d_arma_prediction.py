@@ -101,9 +101,9 @@ class apriltags_2d_predict:
 
     def write_to_file(self, fname, data):
         a = 10
-        #print('')
-        #with open(fname, 'a') as f:
-        #    np.savetxt(f, [np.append(data, time.time() - self.init_time)], fmt='%1.10f', delimiter=',')
+
+        with open(fname, 'a') as f:
+            np.savetxt(f, [np.append(data, time.time() - self.init_time)], fmt='%1.10f', delimiter=',')
 
     def log_end_effector(self, data):
         self.write_to_file(EE_POSE, np.array([data.x, data.y, data.z]))

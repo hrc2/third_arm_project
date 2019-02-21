@@ -25,9 +25,9 @@ from apriltags_ros.msg import AprilTagDetectionArray
 import csv
 
 
-class apriltags_motor_control:
+class apriltags_motor_control_prediction:
     def __init__(self):
-        rospy.init_node('apriltags_motor_controller')
+        rospy.init_node('apriltags_motor_controller_prediction')
 
         self.currval = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         self.command = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
@@ -47,6 +47,9 @@ class apriltags_motor_control:
                              '/arm_extension_controller/set_speed', '/wrist_controller/set_speed',
                              '/wrist_tilt_controller/set_speed', '/gripper_controller/set_speed']
         self.motor_max_speeds = [1.0, 0.5, 3.0, 0.5, 0.5, 0.5]
+
+        check = rospy.wait_for_message('/base_pose_nth_prediction', Point)
+        print('Received Base prediction message')
 
         print('Setting motor max speeds')
         for i in range(len(self.motor_max_speeds)):
@@ -192,7 +195,8 @@ class apriltags_motor_control:
         rospy.Subscriber('/base_swivel_controller/state', dynamixel_msgs.msg.JointState, self.update_theta_state)
         rospy.Subscriber('/arm_extension_controller/state', dynamixel_msgs.msg.JointState, self.update_l_state)
 
-        rospy.Subscriber('/base_pose', Point, self.update_base_pose)
+        #rospy.Subscriber('/base_pose', Point, self.update_base_pose)
+        rospy.Subscriber('/base_pose_nth_prediction', Point, self.update_base_pose)
         rospy.Subscriber('/ee_pose', Point, self.update_ee_pose)
         rospy.spin()
 
@@ -201,5 +205,5 @@ class apriltags_motor_control:
 
 
 if __name__ == '__main__':
-    t1 = apriltags_motor_control()
+    t1 = apriltags_motor_control_prediction()
     t1.run()

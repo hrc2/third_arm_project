@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+
+	<node name = "apriltags_2d_poser" pkg="third_arm" type="apriltags_2d_ik.py" output ='screen'/>
+	<node name = "apriltags_arma_predictor" pkg="third_arm" type="apriltags_2d_arma_prediction.py" output ='screen'/>
+  	<node name = "apriltags_motor_controller_prediction" pkg="third_arm" type="apriltags_motor_control_prediction.py" output ='screen'/>
+
+</launch>
