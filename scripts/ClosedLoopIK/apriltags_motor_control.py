@@ -14,7 +14,7 @@ import sensor_msgs.msg
 from sensor_msgs.msg import Imu, JointState, Joy
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Point, Pose, Quaternion, Twist, TwistWithCovariance, Vector3
-from std_msgs.msg import ColorRGBA, Float32, Bool, Float64
+from std_msgs.msg import ColorRGBA, Float32, Bool, Float64, Int32
 
 import random
 import arbotix_msgs.srv
@@ -39,6 +39,8 @@ class apriltags_motor_control:
         self.pub_motor5 = rospy.Publisher('/wrist_tilt_controller/command', Float64, queue_size=1)
         self.pub_motor6 = rospy.Publisher('/gripper_controller/command', Float64, queue_size=1)
 
+        self.pub_within_range = rospy.Publisher('/within_range', Int32, queue_size=1)
+
         self.pubvec = [self.pub_motor1, self.pub_motor2, self.pub_motor3, self.pub_motor4, self.pub_motor5,
                        self.pub_motor6]
 
@@ -55,10 +57,18 @@ class apriltags_motor_control:
         #Assume extension starts from full in
         self.get_initial_motor_states()
         self.full_in = self.currval[2]
+        if self.full_in < 1.8:
+            print('Error: Re-calibrate length extension')
+            exit(0)
         self.full_out = self.full_in - 1.7
+        self.len_mid = 0.5*(self.full_out + self.full_in)
+        if self.len_mid < self.full_out and self.len_mid > self.full_in:
+            print('Error: Re-calibrate length extension')
+            exit(0)
+        self.within_range = 0
 
         #self.initial_angles = [0.0, -0.8, 0.5*(self.full_in + self.full_out), 0.0, -0.64, 0.0]
-        self.initial_angles = [0.0, -0.8, self.full_in, 0.0, -0.64, 0.0]
+        self.initial_angles = [0.0, 0.0, self.full_in, 0.0, -0.2, 0.0]
 
         print('Setting motor initial states')
         for i in range(len(self.initial_angles)):
@@ -87,6 +97,8 @@ class apriltags_motor_control:
         t = time.time()
         timeout = 2.0
         print("Setting initial pose values: " + str(timeout) + " seconds averaged")
+        self.pubvec[2].publish(self.len_mid)
+        time.sleep(1)
         self.base_x_avg = 0.0
         self.base_y_avg = 0.0
         self.ee_x_avg = 0.0
@@ -113,9 +125,12 @@ class apriltags_motor_control:
         print("Base- X: " + str(self.base_x_avg) + " Y: " + str(self.base_y_avg))
         print("Gripper- X: " + str(self.ee_x_avg) + " Y: " + str(self.ee_y_avg))
 
-        self.l0 = math.sqrt((self.base_x_avg - self.ee_x_avg) ** 2 + (self.base_y_avg - self.ee_y_avg) ** 2)
+
         self.thet0 = math.atan2((self.ee_y_avg - self.base_y_avg), (self.ee_x_avg - self.base_x_avg))
         self.length_calibrate()
+        self.pubvec[2].publish(self.len_mid)
+        time.sleep(1)
+
 
     def update_theta_state(self, data):
         self.theta = data
@@ -136,12 +151,13 @@ class apriltags_motor_control:
         self.closed_loop_control()
 
     def length_calibrate(self):
-        self.pubvec[2].publish(self.full_out)
-        time.sleep(1)
+
         t0 = time.time()
         t = time.time()
         timeout = 2.0
         print("Calibrating length: " + str(timeout) + " seconds averaged")
+        self.pubvec[2].publish(self.full_in)
+        time.sleep(1)
         ee_x_avg = 0.0
         ee_y_avg = 0.0
         count = 0
@@ -153,10 +169,25 @@ class apriltags_motor_control:
             t = time.time()
         ee_x_avg /= count
         ee_y_avg /= count
+        self.l0 = math.sqrt((self.base_x_avg - ee_x_avg) ** 2 + (self.base_y_avg - ee_y_avg) ** 2)
+
+        self.pubvec[2].publish(self.full_out)
+        time.sleep(1)
+        ee_x_avg = 0.0
+        ee_y_avg = 0.0
+        count = 0
+        t0 = time.time()
+        while (t < t0 + timeout):
+            ee_pose = rospy.wait_for_message('/ee_pose', Point)
+            ee_x_avg += ee_pose.x
+            ee_y_avg += ee_pose.y
+            count += 1
+            t = time.time()
+        ee_x_avg /= count
+        ee_y_avg /= count
 
         self.l_max = math.sqrt((self.base_x_avg - ee_x_avg) ** 2 + (self.base_y_avg - ee_y_avg) ** 2)
-        self.pubvec[2].publish(self.full_in)
-        time.sleep(1)
+
 
     def closed_loop_control(self):
         # print('Closed Loop Controller')
@@ -179,6 +210,11 @@ class apriltags_motor_control:
             if m3_command <= self.full_in and m3_command >= self.full_out:
                 #self.pubvec[0].publish(m1_command)
                 self.pubvec[2].publish(m3_command)
+                self.within_range = 1
+            else:
+                self.within_range = 0
+
+        self.pub_within_range.publish(self.within_range)
             # print("Del X : " + str(self.del_x))
             # print("Del Y : " + str(self.del_y))
 

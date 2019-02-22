@@ -31,15 +31,15 @@ arm_extension_controller:
         module: joint_position_controller
         type: JointPositionController
     joint_name: arm_extension
-    joint_speed: 4.0
+    joint_speed: 3.1
     motor:
         id: 3
         #init: 28672
         init: 0
-        #min: 0
-        #max: 57343
         min: 0
-        max: 4095
+        max: 57343
+        #min: 0
+        #max: 4095
 
         
 wrist_controller:
