@@ -14,7 +14,7 @@ import sensor_msgs.msg
 from sensor_msgs.msg import Imu, JointState, Joy
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Point, Pose, Quaternion, Twist, TwistWithCovariance, Vector3
-from std_msgs.msg import ColorRGBA, Float32, Bool, Float64
+from std_msgs.msg import ColorRGBA, Float32, Bool, Float64, Int32
 
 import random
 import arbotix_msgs.srv
@@ -25,7 +25,7 @@ from apriltags_ros.msg import AprilTagDetectionArray
 import csv
 
 
-class apriltags_motor_control_prediction:
+class apriltags_motor_control_pred:
     def __init__(self):
         rospy.init_node('apriltags_motor_controller_prediction')
 
@@ -39,6 +39,8 @@ class apriltags_motor_control_prediction:
         self.pub_motor5 = rospy.Publisher('/wrist_tilt_controller/command', Float64, queue_size=1)
         self.pub_motor6 = rospy.Publisher('/gripper_controller/command', Float64, queue_size=1)
 
+        self.pub_within_range = rospy.Publisher('/within_range', Int32, queue_size=1)
+
         self.pubvec = [self.pub_motor1, self.pub_motor2, self.pub_motor3, self.pub_motor4, self.pub_motor5,
                        self.pub_motor6]
 
@@ -48,25 +50,31 @@ class apriltags_motor_control_prediction:
                              '/wrist_tilt_controller/set_speed', '/gripper_controller/set_speed']
         self.motor_max_speeds = [1.0, 0.5, 3.0, 0.5, 0.5, 0.5]
 
-        check = rospy.wait_for_message('/base_pose_nth_prediction', Point)
-        print('Received Base prediction message')
-
         print('Setting motor max speeds')
         for i in range(len(self.motor_max_speeds)):
             self.set_motor_speeds(self.speed_topics[i], self.motor_max_speeds[i])
 
         #Assume extension starts from full in
         self.get_initial_motor_states()
-        self.full_in = self.currval[2]
-        self.full_out = self.full_in - 1.7
+        self.full_out = self.currval[2]
+        if self.full_out < 0.2:
+            print('Error: Re-calibrate length extension')
+            exit(0)
+        #self.full_out = self.full_in - 2.0
+        self.full_in = self.full_out + 2.0
+        self.len_mid = 0.5*(self.full_out + self.full_in)
+        if self.len_mid < self.full_out and self.len_mid > self.full_in:
+            print('Error: Re-calibrate length extension')
+            exit(0)
+        self.within_range = 0
 
         #self.initial_angles = [0.0, -0.8, 0.5*(self.full_in + self.full_out), 0.0, -0.64, 0.0]
-        self.initial_angles = [0.0, -0.8, self.full_in, 0.0, -0.64, 0.0]
+        self.initial_angles = [0.0, 0.0, self.full_in, 0.0, -0.2, 0.0]
 
         print('Setting motor initial states')
         for i in range(len(self.initial_angles)):
             self.pubvec[i].publish(self.initial_angles[i])
-            time.sleep(1)
+            time.sleep(2)
 
     def set_motor_speeds(self, speed_topic, speed):
         self.set_speed = rospy.ServiceProxy(speed_topic, dynamixel_controllers.srv.SetSpeed)
@@ -90,6 +98,8 @@ class apriltags_motor_control_prediction:
         t = time.time()
         timeout = 2.0
         print("Setting initial pose values: " + str(timeout) + " seconds averaged")
+        self.pubvec[2].publish(self.len_mid)
+        time.sleep(1)
         self.base_x_avg = 0.0
         self.base_y_avg = 0.0
         self.ee_x_avg = 0.0
@@ -116,9 +126,12 @@ class apriltags_motor_control_prediction:
         print("Base- X: " + str(self.base_x_avg) + " Y: " + str(self.base_y_avg))
         print("Gripper- X: " + str(self.ee_x_avg) + " Y: " + str(self.ee_y_avg))
 
-        self.l0 = math.sqrt((self.base_x_avg - self.ee_x_avg) ** 2 + (self.base_y_avg - self.ee_y_avg) ** 2)
+
         self.thet0 = math.atan2((self.ee_y_avg - self.base_y_avg), (self.ee_x_avg - self.base_x_avg))
         self.length_calibrate()
+        self.pubvec[2].publish(self.len_mid)
+        time.sleep(1)
+
 
     def update_theta_state(self, data):
         self.theta = data
@@ -139,12 +152,13 @@ class apriltags_motor_control_prediction:
         self.closed_loop_control()
 
     def length_calibrate(self):
-        self.pubvec[2].publish(self.full_out)
-        time.sleep(1)
+
         t0 = time.time()
         t = time.time()
         timeout = 2.0
         print("Calibrating length: " + str(timeout) + " seconds averaged")
+        self.pubvec[2].publish(self.full_in)
+        time.sleep(1)
         ee_x_avg = 0.0
         ee_y_avg = 0.0
         count = 0
@@ -156,10 +170,25 @@ class apriltags_motor_control_prediction:
             t = time.time()
         ee_x_avg /= count
         ee_y_avg /= count
+        self.l0 = math.sqrt((self.base_x_avg - ee_x_avg) ** 2 + (self.base_y_avg - ee_y_avg) ** 2)
+
+        self.pubvec[2].publish(self.full_out)
+        time.sleep(1)
+        ee_x_avg = 0.0
+        ee_y_avg = 0.0
+        count = 0
+        t0 = time.time()
+        while (t < t0 + timeout):
+            ee_pose = rospy.wait_for_message('/ee_pose', Point)
+            ee_x_avg += ee_pose.x
+            ee_y_avg += ee_pose.y
+            count += 1
+            t = time.time()
+        ee_x_avg /= count
+        ee_y_avg /= count
 
         self.l_max = math.sqrt((self.base_x_avg - ee_x_avg) ** 2 + (self.base_y_avg - ee_y_avg) ** 2)
-        self.pubvec[2].publish(self.full_in)
-        time.sleep(1)
+
 
     def closed_loop_control(self):
         # print('Closed Loop Controller')
@@ -182,6 +211,12 @@ class apriltags_motor_control_prediction:
             if m3_command <= self.full_in and m3_command >= self.full_out:
                 #self.pubvec[0].publish(m1_command)
                 self.pubvec[2].publish(m3_command)
+                self.within_range = 1
+            else:
+                self.within_range = 0
+
+        self.pub_within_range.publish(self.within_range)
+        self.pubvec[4].publish(self.initial_angles[4])
             # print("Del X : " + str(self.del_x))
             # print("Del Y : " + str(self.del_y))
 
@@ -195,7 +230,6 @@ class apriltags_motor_control_prediction:
         rospy.Subscriber('/base_swivel_controller/state', dynamixel_msgs.msg.JointState, self.update_theta_state)
         rospy.Subscriber('/arm_extension_controller/state', dynamixel_msgs.msg.JointState, self.update_l_state)
 
-        #rospy.Subscriber('/base_pose', Point, self.update_base_pose)
         rospy.Subscriber('/base_pose_nth_prediction', Point, self.update_base_pose)
         rospy.Subscriber('/ee_pose', Point, self.update_ee_pose)
         rospy.spin()
@@ -205,5 +239,5 @@ class apriltags_motor_control_prediction:
 
 
 if __name__ == '__main__':
-    t1 = apriltags_motor_control_prediction()
+    t1 = apriltags_motor_control_pred()
     t1.run()

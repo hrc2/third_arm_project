@@ -109,14 +109,14 @@ class apriltags_2d_predict:
     def write_to_file(self, fname, data):
         a = 10
 
-        #with open(fname, 'a') as f:
-        #    np.savetxt(f, [np.append(data, time.time() - self.init_time)], fmt='%1.10f', delimiter=',')
+        with open(fname, 'a') as f:
+            np.savetxt(f, [np.append(data, time.time() - self.init_time)], fmt='%1.10f', delimiter=',')
 
     def log_end_effector(self, data):
         self.write_to_file(EE_POSE, np.array([data.x, data.y, data.z]))
 
     def log_within_range(self, data):
-        self.write_to_file(WITHIN_RANGE_FLAG, data)
+        self.write_to_file(WITHIN_RANGE_FLAG, float(data.data))
 
     def run(self):
         self.base_pos = rospy.wait_for_message('/base_pose', Point)

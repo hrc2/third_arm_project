@@ -31,7 +31,7 @@ arm_extension_controller:
         module: joint_position_controller
         type: JointPositionController
     joint_name: arm_extension
-    joint_speed: 3.1
+    joint_speed: 3.0
     motor:
         id: 3
         #init: 28672
@@ -61,7 +61,7 @@ wrist_tilt_controller:
         module: joint_position_controller
         type: JointPositionController
     joint_name: wrist_tilt
-    joint_speed: 0.5
+    joint_speed: 0.4
     motor:
         id: 5
         init: 512
