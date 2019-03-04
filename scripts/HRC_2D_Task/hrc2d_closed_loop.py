@@ -39,7 +39,7 @@ class hrc2d_closed_loop:
         self.pub_motor5 = rospy.Publisher('/wrist_tilt_controller/command', Float64, queue_size=1)
         self.pub_motor6 = rospy.Publisher('/gripper_controller/command', Float64, queue_size=1)
 
-        self.pub_within_range = rospy.Publisher('/within_range', Int32, queue_size=1)
+        #self.pub_within_range = rospy.Publisher('/within_range', Int32, queue_size=1)
 
         self.pubvec = [self.pub_motor1, self.pub_motor2, self.pub_motor3, self.pub_motor4, self.pub_motor5,
                        self.pub_motor6]
@@ -79,6 +79,8 @@ class hrc2d_closed_loop:
             self.pubvec[i].publish(self.initial_angles[i])
             time.sleep(2)
 
+        self.calibrate()
+
 
     def set_motor_speeds(self, speed_topic, speed):
         self.set_speed = rospy.ServiceProxy(speed_topic, dynamixel_controllers.srv.SetSpeed)
@@ -109,6 +111,20 @@ class hrc2d_closed_loop:
         self.cup1_x = cup1_pose.x
         self.cup1_y = cup1_pose.y
 
+    def calibrate(self):
+        self.thet0 = math.atan2((self.ee_y - self.base_y), (self.ee_x - self.base_x))
+        self.l_mid = math.sqrt((self.base_x - self.ee_x) ** 2 + (self.base_y - self.ee_y) ** 2)
+
+        self.pubvec[2].publish(self.full_out)
+        time.sleep(2)
+        ee_pose = rospy.wait_for_message('/ee_pose', Point)
+        self.ee_x = ee_pose.x
+        self.ee_y = ee_pose.y
+        self.l_max = math.sqrt((self.base_x - self.ee_x) ** 2 + (self.base_y - self.ee_y) ** 2)
+
+        print('Calibration Done')
+
+
     def update_theta_state(self, data):
         self.theta = data.current_pos
 
@@ -126,6 +142,7 @@ class hrc2d_closed_loop:
     def update_ee_pose(self, data):
         self.ee_x = data.x
         self.ee_y = data.y
+        self.pubvec[4].publish(-0.2)
 
     def on_press(self, key):
         try:
@@ -133,22 +150,46 @@ class hrc2d_closed_loop:
         except:
             k = key.name
 
-        if key == keyboard.Key.sec:
+        if key == keyboard.Key.esc:
             print('Stopping Keyboard Listener')
             return False
 
         if k == 'g':
-            print('Key Pressed : ' + k)
+            print('Gripper Closing')
             self.pubvec[5].publish(self.grip_close)
-            time.sleep(1)
+            time.sleep(0.1)
         elif k == 'j':
-            print('Key Pressed : ' + k)
+            print('Gripper Opening')
             self.pubvec[5].publish(self.grip_open)
-            time.sleep(1)
+            time.sleep(0.1)
+        elif k == 'c':
+            self.go_to_cup()
+        elif k == 'n':
+            self.go_to_init()
+
+    def go_to_cup(self):
+        self.theta_command = math.atan2((self.cup1_y - self.base_y), (self.cup1_x - self.base_x))
+        self.l_command = math.sqrt((self.cup1_x - self.base_x) ** 2 + (self.cup1_y - self.base_y) ** 2)
+
+        m1_command = self.theta_command - self.thet0
+        m3_command = self.full_out + (self.l_command - self.l_max) * (
+        (self.len_mid - self.full_out) / (self.l_mid - self.l_max))
+
+        print ('Commands DoF1 : ' + str(m1_command) + ' DoF3 : ' + str(m3_command))
+
+        if (m1_command > -1.57) and (m1_command < 1.57):
+            print('Moving DoF1')
+            self.pubvec[0].publish(m1_command)
+
+    def go_to_init(self):
+        print('Setting motors to initial states')
+        for i in range(len(self.initial_angles)):
+            self.pubvec[i].publish(self.initial_angles[i])
+            time.sleep(0.5)
 
     def run(self):
 
-        self.get_initial_states()
+        #self.get_initial_states()
 
         rospy.Subscriber('/base_swivel_controller/state', dynamixel_msgs.msg.JointState, self.update_theta_state)
         rospy.Subscriber('/arm_extension_controller/state', dynamixel_msgs.msg.JointState, self.update_l_state)
