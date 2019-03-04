@@ -65,14 +65,16 @@ Visualization Manager:
         camera_link:
           Value: false
         camera_rgb_frame:
-          Value: true
+          Value: false
         camera_rgb_optical_frame:
           Value: false
+        cup1_frame:
+          Value: true
         ee_frame:
           Value: true
       Marker Scale: 1
       Name: TF
-      Show Arrows: true
+      Show Arrows: false
       Show Axes: true
       Show Names: true
       Tree:
@@ -83,6 +85,8 @@ Visualization Manager:
           camera_rgb_frame:
             camera_rgb_optical_frame:
               base_frame:
+                {}
+              cup1_frame:
                 {}
               ee_frame:
                 {}
@@ -103,7 +107,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: camera_rgb_frame
+    Fixed Frame: base_frame
     Frame Rate: 30
   Name: root
   Tools:
@@ -124,22 +128,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 4.00654
+      Distance: 2.94679
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.975938
-        Y: 0.127057
-        Z: -0.000982996
+        X: -0.0106146
+        Y: -0.718626
+        Z: 0.446894
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 1.5448
+      Pitch: 1.5648
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 6.22861
+      Yaw: 4.72677
     Saved: ~
 Window Geometry:
   Displays:

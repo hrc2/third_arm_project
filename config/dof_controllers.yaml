@@ -4,7 +4,7 @@ base_swivel_controller:
         module: joint_position_controller
         type: JointPositionController
     joint_name: base_swivel
-    joint_speed: 1.1
+    joint_speed: 0.5
     motor:
         id: 1
         init: 2048
@@ -31,7 +31,7 @@ arm_extension_controller:
         module: joint_position_controller
         type: JointPositionController
     joint_name: arm_extension
-    joint_speed: 3.0
+    joint_speed: 2.0
     motor:
         id: 3
         #init: 28672
