@@ -1,0 +1,8 @@
+bring me the cup
+put away the cup
+close hand
+open hand
+stop
+reset
+hello
+

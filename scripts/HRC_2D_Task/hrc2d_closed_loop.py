@@ -65,7 +65,7 @@ class hrc2d_closed_loop:
             print('Error: Re-calibrate length extension')
             exit(0)
         #self.full_out = self.full_in - 2.0
-        self.full_in = self.full_out + 2.0
+        self.full_in = self.full_out + 2.3
         self.len_mid = 0.5*(self.full_out + self.full_in)
         if self.len_mid < self.full_out and self.len_mid > self.full_in:
             print('Error: Re-calibrate length extension')
@@ -112,9 +112,13 @@ class hrc2d_closed_loop:
         self.cup1_y = cup1_pose.y
 
     def calibrate(self):
+        #time.sleep(2)
+        ee_pose = rospy.wait_for_message('/ee_pose', Point)
+        self.ee_x = ee_pose.x
+        self.ee_y = ee_pose.y
         self.thet0 = math.atan2((self.ee_y - self.base_y), (self.ee_x - self.base_x))
         self.l_mid = math.sqrt((self.base_x - self.ee_x) ** 2 + (self.base_y - self.ee_y) ** 2)
-
+        #time.sleep(2)
         self.pubvec[2].publish(self.full_out)
         time.sleep(2)
         ee_pose = rospy.wait_for_message('/ee_pose', Point)
@@ -172,14 +176,19 @@ class hrc2d_closed_loop:
         self.l_command = math.sqrt((self.cup1_x - self.base_x) ** 2 + (self.cup1_y - self.base_y) ** 2)
 
         m1_command = self.theta_command - self.thet0
-        m3_command = self.full_out + (self.l_command - self.l_max) * (
-        (self.len_mid - self.full_out) / (self.l_mid - self.l_max))
+        m3_command = self.full_out + (self.l_command - self.l_max) * \
+                                     ((self.len_mid - self.full_out) / (self.l_mid - self.l_max))
 
-        print ('Commands DoF1 : ' + str(m1_command) + ' DoF3 : ' + str(m3_command))
+        print('Commands DoF1 : ' + str(m1_command) + ' DoF3 : ' + str(m3_command))
+        print('DoF 3 params. [l_cmd, l_max, l_mid, f_out, f_in, len_mid] '
+              + str([self.l_command, self.l_max, self.l_mid, self.full_out, self.full_in, self.len_mid]))
 
         if (m1_command > -1.57) and (m1_command < 1.57):
             print('Moving DoF1')
             self.pubvec[0].publish(m1_command)
+        if (m3_command > self.full_out) and (m3_command < self.full_in):
+            print('Moving DoF3')
+            self.pubvec[2].publish(m3_command)
 
     def go_to_init(self):
         print('Setting motors to initial states')
