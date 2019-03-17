@@ -102,6 +102,7 @@ class hrc2d_closed_loop:
         base_pose = rospy.wait_for_message('/base_pose', Point)
         ee_pose = rospy.wait_for_message('/ee_pose', Point)
         cup1_pose = rospy.wait_for_message('/cup1_pose', Point)
+        print('Detected Tags')
         self.theta = self.currval[0]
         self.l = self.currval[2]
         self.base_x = base_pose.x

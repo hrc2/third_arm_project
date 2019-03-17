@@ -103,7 +103,8 @@ class apriltags_2d_predict:
         #nth_filt[1] = 0.999 * self.next_pred[1] + 0.0005 * self.nth_pred[1]
         nth_filt[1] = self.pos_buffer[-1, 1]
         nth_filt[2] = self.next_pred[2]
-        self.pub_base_predict_nth.publish(Point(x=nth_filt[0], y=nth_filt[1], z=nth_filt[2]))
+        #self.pub_base_predict_nth.publish(Point(x=nth_filt[0], y=nth_filt[1], z=nth_filt[2]))
+        self.pub_base_predict_nth.publish(self.nth_prediction_msg)
         self.write_to_file(fname, self.nth_pred)
 
     def write_to_file(self, fname, data):
