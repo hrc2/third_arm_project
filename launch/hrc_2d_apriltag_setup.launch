@@ -2,6 +2,7 @@
 <launch>
 
   <include file="$(find third_arm)/launch/third_arm.launch"/>
+
   <!--include file="$(find openni_launch)/launch/openni.launch"/-->
   <include file="$(find astra_launch)/launch/astra.launch"/>
   
@@ -26,7 +27,8 @@
     <rosparam param="tag_descriptions">[      
       {id: 1, size: 0.07, frame_id: base_frame},
       {id: 2, size: 0.07, frame_id: ee_frame},
-      {id: 5, size: 0.10, frame_id: cup1_frame}]
+      {id: 5, size: 0.10, frame_id: cup1_frame}
+      {id: 8, size: 0.10, frame_id: box1_frame}]
     </rosparam>
   </node>
 

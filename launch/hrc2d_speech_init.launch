@@ -1,5 +1,5 @@
  <launch>
-     <node name="recognizer" pkg="pocketsphinx" type="recognizer.py" output="screen">
+<node name="recognizer" pkg="pocketsphinx" type="recognizer.py" output="screen">
        <param name="lm" value="$(find third_arm)/config/speech_files/hrc2d_commands.lm"/>
        <param name="dict" value="$(find third_arm)/config/speech_files/hrc2d_commands.dic"/>
      </node>

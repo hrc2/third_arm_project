@@ -2,10 +2,10 @@
 <launch>
 
   
-  <!--include file="$(find openni_launch)/launch/openni.launch"/-->
+  <include file="$(find openni_launch)/launch/openni.launch"/>
   <include file="$(find skeleton_markers)/launch/markers_from_tf.launch"/>
   
-  <arg name="rvizconfig" default="$(find .rviz)/depthcam.rviz"/>
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="false"/>
+  <!--arg name="rvizconfig" default="$(find .rviz)/depthcam.rviz"/>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="false"/-->
 
 </launch>
