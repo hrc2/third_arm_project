@@ -36,8 +36,10 @@ class ik_2d_apriltags:
         self.pub_ee_pose = rospy.Publisher('/ee_pose', Point, queue_size=1)
         self.pub_cup1_pose = rospy.Publisher('/cup1_pose', Point, queue_size=1)
         self.pub_box1_pose = rospy.Publisher('/box1_pose', Point, queue_size=1)
-        self.pubvec = [self.pub_base_pose, self.pub_ee_pose, self.pub_cup1_pose]
-        self.tag_ids = [1, 2, 5, 8]
+        self.pub_cup2_pose = rospy.Publisher('/cup2_pose', Point, queue_size=1)
+        self.pub_box2_pose = rospy.Publisher('/box2_pose', Point, queue_size=1)
+        self.pubvec = [self.pub_base_pose, self.pub_ee_pose, self.pub_cup1_pose, self.pub_box1_pose, self.pub_cup2_pose, self.pub_box2_pose]
+        self.tag_ids = [1, 2, 5, 8, 9, 10]
 
 
     def positions_update(self, data):

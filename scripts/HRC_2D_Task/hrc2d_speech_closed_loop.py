@@ -48,7 +48,7 @@ class hrc2d_speech_closed_loop:
         self.speed_topics = ['base_swivel_controller/set_speed', '/vertical_tilt_controller/set_speed',
                              '/arm_extension_controller/set_speed', '/wrist_controller/set_speed',
                              '/wrist_tilt_controller/set_speed', '/gripper_controller/set_speed']
-        self.motor_max_speeds = [0.5, 0.5, 2.0, 0.5, 0.5, 0.5]
+        self.motor_max_speeds = [0.5, 0.5, 2.0, 0.5, 0.5, 1.0]
 
         print('Setting motor max speeds')
         for i in range(len(self.motor_max_speeds)):
@@ -102,6 +102,7 @@ class hrc2d_speech_closed_loop:
         base_pose = rospy.wait_for_message('/base_pose', Point)
         ee_pose = rospy.wait_for_message('/ee_pose', Point)
         cup1_pose = rospy.wait_for_message('/cup1_pose', Point)
+        cup2_pose = rospy.wait_for_message('/cup2_pose', Point)
         print('Detected Tags')
         self.theta = self.currval[0]
         self.l = self.currval[2]
@@ -111,6 +112,8 @@ class hrc2d_speech_closed_loop:
         self.ee_y = ee_pose.y
         self.cup1_x = cup1_pose.x
         self.cup1_y = cup1_pose.y
+        self.cup2_x = cup2_pose.x
+        self.cup2_y = cup2_pose.y
 
     def calibrate(self):
         #time.sleep(2)
@@ -148,6 +151,14 @@ class hrc2d_speech_closed_loop:
         self.box1_x = data.x
         self.box1_y = data.y
 
+    def update_cup2_pose(self, data):
+        self.cup2_x = data.x
+        self.cup2_y = data.y
+
+    def update_box2_pose(self, data):
+        self.box2_x = data.x
+        self.box2_y = data.y
+
     def update_ee_pose(self, data):
         self.ee_x = data.x
         self.ee_y = data.y
@@ -163,17 +174,39 @@ class hrc2d_speech_closed_loop:
             print('Gripper Opening')
             self.pubvec[5].publish(self.grip_open)
             time.sleep(0.1)
-        elif data == 'bring me the cup':
-            self.go_to_cup()
-        elif data == 'put away the cup':
-            self.cup_to_box()
+        elif data == 'go to cup one':
+            self.go_to_cup(self.cup1_x, self.cup1_y)
+        elif data == 'put away cup one':
+            self.cup_to_box(self.box1_x, self.box1_y)
+        elif data == 'go to cup two':
+            self.go_to_cup(self.cup2_x, self.cup2_y)
+        elif data == 'put away cup two':
+            self.cup_to_box(self.box2_x, self.box2_y)
         elif data == 'reset':
             self.go_to_init()
+        elif data == 'stop':
+            self.stop_motors()
 
-    def go_to_cup(self):
-        self.delta_l = 0.05
-        self.theta_command = math.atan2((self.cup1_y - self.base_y), (self.cup1_x - self.base_x))
-        self.l_command = math.sqrt((self.cup1_x - self.base_x) ** 2 + (self.cup1_y - self.base_y) ** 2) - self.delta_l
+    def stop_motors(self):
+        topic_list = ['/base_swivel_controller/state', '/vertical_tilt_controller/state',
+                      '/arm_extension_controller/state', '/wrist_controller/state', '/wrist_tilt_controller/state',
+                      '/gripper_controller/state']
+        #print("Waiting for joint states")
+        count = 0
+        motor_angs = [0, 0, 0, 0, 0, 0]
+        for topic in topic_list:
+            # print("Topic name : " + topic)
+            data = rospy.wait_for_message(topic, dynamixel_msgs.msg.JointState)
+            motor_angs[count] = data.current_pos
+            #print("Topic name : " + topic + " Angle : " + str(data.current_pos))
+            count += 1
+        for i in range(len(self.initial_angles)):
+            self.pubvec[i].publish(motor_angs[i])
+
+    def go_to_cup(self, cup_x, cup_y):
+        self.delta_l = 0.08
+        self.theta_command = math.atan2((cup_y - self.base_y), (cup_x - self.base_x))
+        self.l_command = math.sqrt((cup_x - self.base_x) ** 2 + (cup_y - self.base_y) ** 2) - self.delta_l
 
         m1_command = self.theta_command - self.thet0
         m3_command = self.full_out + (self.l_command - self.l_max) * \
@@ -190,11 +223,11 @@ class hrc2d_speech_closed_loop:
             print('Moving DoF3')
             self.pubvec[2].publish(m3_command)
 
-    def cup_to_box(self):
-        self.delta_bx = 0.15
-        self.delta_by = 0.20
-        self.theta_command = math.atan2((self.box1_y - self.base_y - self.delta_by), (self.box1_x - self.base_x - self.delta_bx))
-        self.l_command = math.sqrt((self.box1_x - self.base_x - self.delta_bx) ** 2 + (self.box1_y - self.base_y - self.delta_by) ** 2)
+    def cup_to_box(self, box_x, box_y):
+        self.delta_bx = 0.00
+        self.delta_by = 0.00
+        self.theta_command = math.atan2((box_y - self.base_y - self.delta_by), (box_x - self.base_x - self.delta_bx))
+        self.l_command = math.sqrt((box_x - self.base_x - self.delta_bx) ** 2 + (box_y - self.base_y - self.delta_by) ** 2)
 
         m1_command = self.theta_command - self.thet0
         m3_command = self.full_out + (self.l_command - self.l_max) * \
@@ -216,25 +249,21 @@ class hrc2d_speech_closed_loop:
         for i in range(len(self.initial_angles)):
             self.pubvec[i].publish(self.initial_angles[i])
             time.sleep(0.5)
+        self.pubvec[2].publish(self.full_out)
 
     def run(self):
 
         #self.get_initial_states()
-
         rospy.Subscriber('/base_swivel_controller/state', dynamixel_msgs.msg.JointState, self.update_theta_state)
         rospy.Subscriber('/arm_extension_controller/state', dynamixel_msgs.msg.JointState, self.update_l_state)
         rospy.Subscriber('/base_pose', Point, self.update_base_pose)
         rospy.Subscriber('/ee_pose', Point, self.update_ee_pose)
         rospy.Subscriber('/cup1_pose', Point, self.update_cup1_pose)
         rospy.Subscriber('/box1_pose', Point, self.update_box1_pose)
+        rospy.Subscriber('/cup2_pose', Point, self.update_cup2_pose)
+        rospy.Subscriber('/box2_pose', Point, self.update_box2_pose)
         rospy.Subscriber('/recognizer/output', String, self.update_speech_input)
-
-
-
         rospy.spin()
-
-
-
     # self.get_initial_motor_states()
     # self.get_frame_poses()
 

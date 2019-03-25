@@ -1,5 +1,7 @@
-bring me the cup
-put away the cup
+go to cup one
+put away cup one
+go to cup two
+put away cup two
 close hand
 open hand
 stop

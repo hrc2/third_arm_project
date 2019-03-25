@@ -27,8 +27,10 @@
     <rosparam param="tag_descriptions">[      
       {id: 1, size: 0.07, frame_id: base_frame},
       {id: 2, size: 0.07, frame_id: ee_frame},
-      {id: 5, size: 0.10, frame_id: cup1_frame}
-      {id: 8, size: 0.10, frame_id: box1_frame}]
+      {id: 5, size: 0.10, frame_id: cup1_frame},
+      {id: 8, size: 0.10, frame_id: box1_frame}, 
+      {id: 9, size: 0.10, frame_id: cup2_frame},
+      {id: 10, size: 0.10, frame_id: box2_frame}]
     </rosparam>
   </node>
 
