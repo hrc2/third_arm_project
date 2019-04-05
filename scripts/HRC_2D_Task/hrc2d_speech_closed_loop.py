@@ -39,6 +39,8 @@ class hrc2d_speech_closed_loop:
         self.pub_motor5 = rospy.Publisher('/wrist_tilt_controller/command', Float64, queue_size=1)
         self.pub_motor6 = rospy.Publisher('/gripper_controller/command', Float64, queue_size=1)
 
+        self.pub_arm_command = rospy.Publisher('/arm_command_state', String, queue_size=1)
+
         #self.pub_within_range = rospy.Publisher('/within_range', Int32, queue_size=1)
 
         self.pubvec = [self.pub_motor1, self.pub_motor2, self.pub_motor3, self.pub_motor4, self.pub_motor5,
@@ -186,6 +188,7 @@ class hrc2d_speech_closed_loop:
             self.go_to_init()
         elif data == 'stop':
             self.stop_motors()
+        self.pub_arm_command.publish(data)
 
     def stop_motors(self):
         topic_list = ['/base_swivel_controller/state', '/vertical_tilt_controller/state',

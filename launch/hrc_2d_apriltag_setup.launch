@@ -3,7 +3,10 @@
 
   <include file="$(find third_arm)/launch/third_arm.launch"/>
 
-  <!--include file="$(find openni_launch)/launch/openni.launch"/-->
+  <!--include file="$(find openni_launch)/launch/openni.launch">
+    <arg name="camera" value="kinect"/>
+  </include -->
+
   <include file="$(find astra_launch)/launch/astra.launch"/>
   
   <arg name="rvizconfig" default="$(find third_arm)/urdf/apriltag_config.rviz"/>
@@ -30,9 +33,13 @@
       {id: 5, size: 0.10, frame_id: cup1_frame},
       {id: 8, size: 0.10, frame_id: box1_frame}, 
       {id: 9, size: 0.10, frame_id: cup2_frame},
-      {id: 10, size: 0.10, frame_id: box2_frame}]
+      {id: 10, size: 0.10, frame_id: box2_frame},
+      {id: 3, size: 0.07, frame_id: left_hand},
+      {id: 4, size: 0.07, frame_id: right_hand}]      
     </rosparam>
   </node>
+
+  <include file="$(find skeleton_markers)/launch/markers_from_tf.launch"/>
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="false"/>
 

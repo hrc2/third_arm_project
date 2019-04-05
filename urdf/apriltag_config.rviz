@@ -7,8 +7,9 @@ Panels:
         - /Global Options1
         - /Status1
         - /TF1
-        - /TF1/Frames1
         - /Image1
+        - /Marker1
+        - /Marker1/Status1
       Splitter Ratio: 0.5
     Tree Height: 333
   - Class: rviz/Selection
@@ -55,28 +56,90 @@ Visualization Manager:
       Enabled: true
       Frame Timeout: 15
       Frames:
-        All Enabled: false
+        All Enabled: true
         base_frame:
           Value: true
-        box1_frame:
-          Value: true
-        box2_frame:
-          Value: true
         camera_depth_frame:
-          Value: false
+          Value: true
         camera_depth_optical_frame:
-          Value: false
+          Value: true
         camera_link:
-          Value: false
+          Value: true
         camera_rgb_frame:
-          Value: false
+          Value: true
         camera_rgb_optical_frame:
-          Value: false
-        cup1_frame:
           Value: true
-        cup2_frame:
+        head_1:
           Value: true
-        ee_frame:
+        head_2:
+          Value: true
+        kinect_depth_frame:
+          Value: true
+        kinect_depth_optical_frame:
+          Value: true
+        kinect_link:
+          Value: true
+        kinect_rgb_frame:
+          Value: true
+        kinect_rgb_optical_frame:
+          Value: true
+        left_elbow_1:
+          Value: true
+        left_elbow_2:
+          Value: true
+        left_foot_1:
+          Value: true
+        left_foot_2:
+          Value: true
+        left_hand_1:
+          Value: true
+        left_hand_2:
+          Value: true
+        left_hip_1:
+          Value: true
+        left_hip_2:
+          Value: true
+        left_knee_1:
+          Value: true
+        left_knee_2:
+          Value: true
+        left_shoulder_1:
+          Value: true
+        left_shoulder_2:
+          Value: true
+        neck_1:
+          Value: true
+        neck_2:
+          Value: true
+        openni_depth_frame:
+          Value: true
+        right_elbow_1:
+          Value: true
+        right_elbow_2:
+          Value: true
+        right_foot_1:
+          Value: true
+        right_foot_2:
+          Value: true
+        right_hand_1:
+          Value: true
+        right_hand_2:
+          Value: true
+        right_hip_1:
+          Value: true
+        right_hip_2:
+          Value: true
+        right_knee_1:
+          Value: true
+        right_knee_2:
+          Value: true
+        right_shoulder_1:
+          Value: true
+        right_shoulder_2:
+          Value: true
+        torso_1:
+          Value: true
+        torso_2:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -92,16 +155,67 @@ Visualization Manager:
             camera_rgb_optical_frame:
               base_frame:
                 {}
-              box1_frame:
-                {}
-              box2_frame:
-                {}
-              cup1_frame:
-                {}
-              cup2_frame:
-                {}
-              ee_frame:
-                {}
+        openni_depth_frame:
+          head_1:
+            {}
+          head_2:
+            {}
+          left_elbow_1:
+            {}
+          left_elbow_2:
+            {}
+          left_foot_1:
+            {}
+          left_foot_2:
+            {}
+          left_hand_1:
+            {}
+          left_hand_2:
+            {}
+          left_hip_1:
+            {}
+          left_hip_2:
+            {}
+          left_knee_1:
+            {}
+          left_knee_2:
+            {}
+          left_shoulder_1:
+            {}
+          left_shoulder_2:
+            {}
+          neck_1:
+            {}
+          neck_2:
+            {}
+          right_elbow_1:
+            {}
+          right_elbow_2:
+            {}
+          right_foot_1:
+            {}
+          right_foot_2:
+            {}
+          right_hand_1:
+            {}
+          right_hand_2:
+            {}
+          right_hip_1:
+            {}
+          right_hip_2:
+            {}
+          right_knee_1:
+            {}
+          right_knee_2:
+            {}
+          right_shoulder_1:
+            {}
+          right_shoulder_2:
+            {}
+          torso_1:
+            {}
+          torso_2:
+            {}
       Update Interval: 0
       Value: true
     - Class: rviz/Image
@@ -115,6 +229,14 @@ Visualization Manager:
       Queue Size: 2
       Transport Hint: raw
       Unreliable: false
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /skeleton_markers
+      Name: Marker
+      Namespaces:
+        {}
+      Queue Size: 100
       Value: true
   Enabled: true
   Global Options:
@@ -140,7 +262,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 4.06148
+      Distance: 7.29798
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
@@ -152,10 +274,10 @@ Visualization Manager:
         Z: 0.446378
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 1.5148
+      Pitch: 0.614801
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.0135829
+      Yaw: 6.04676
     Saved: ~
 Window Geometry:
   Displays:
