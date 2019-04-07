@@ -1,4 +1,4 @@
  <launch>
-    <node name = "hrc_2d_poser" pkg="third_arm" type="hrc2d_apriltags_2d_ik.py" output ='screen'/>
+    <!--node name = "hrc_2d_poser" pkg="third_arm" type="hrc2d_apriltags_2d_ik.py" output ='screen'/ -->
     <node name = "hrc_motor_speech_controller" pkg="third_arm" type="hrc2d_speech_closed_loop.py" output ='screen'/>     
 </launch>

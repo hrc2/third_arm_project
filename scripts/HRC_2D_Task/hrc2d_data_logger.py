@@ -36,21 +36,49 @@ class hrc2d_data_logger:
         rospy.init_node('hrc2d_data_logger')
         self.apriltag_topic_list = ['/base_pose', '/ee_pose', '/cup1_pose', '/box1_pose', '/cup2_pose', '/box2_pose',
                                     '/left_hand_pose', '/right_hand_pose']
-        self.speech_command_topic = '/arm_command_state'
+        #self.speech_command_topic = '/arm_command_state'
         self.tag_ids = [1, 2, 5, 8, 9, 10, 3, 4]
-        self.tag_log = np.zeros(2*len(tag_ids))
+        self.tag_log = np.zeros(2*len(self.tag_ids))
         self.speech_log = ''
+        self.header = []
+
+        print('Looking for tag topics')
+
+        for topic in self.apriltag_topic_list:
+            dat = rospy.wait_for_message('/base_pose', Point)
+            #print(dat)
+            self.header.append(str(topic + '_x'))
+            self.header.append(str(topic + '_y'))
+        print('Found tag topics')
+
+        self.header.append('time')
+
+        speech_header = ['Command', 'Time']
+        with open(SPEECH_FILE, 'a') as sf:
+            writer = csv.writer(sf)
+            writer.writerow(speech_header)
+
+        with open(TAGS_FILE, 'a') as f:
+            writer = csv.writer(f)
+            writer.writerow(self.header)
 
     def update_poses(self, data):
-        for i in range(len(self.tag_ids)):
-            ind = np.flatnonzero(np.array(self.tag_ids) == data.detections[i].id)
-            if not np.isnan(ind):
-                self.tag_log[2 * ind[0]] = data.detections[i].pose.pose.position.x
-                self.tag_log[2 * ind[0] + 1] = data.detections[i].pose.pose.position.y
+        try:
+            for i in range(len(self.tag_ids)):
+                ind = np.flatnonzero(np.array(self.tag_ids) == data.detections[i].id)
+                if not np.isnan(ind):
+                    self.tag_log[2 * ind[0]] = data.detections[i].pose.pose.position.x
+                    self.tag_log[2 * ind[0] + 1] = data.detections[i].pose.pose.position.y
+                    #print(self.tag_log)
+            self.print_to_file()
+
+        except (NameError, IndexError):
+            return
+
 
     def update_speech(self, data):
         self.speech_log = data.data
-        self.print_to_file()
+
 
     def print_to_file(self):
         curr_time = time.time()
@@ -58,7 +86,8 @@ class hrc2d_data_logger:
         speech_data = [self.speech_log, curr_time]
 
         with open(TAGS_FILE, 'a') as f:
-            np.savetxt(f, tag_data, fmt='%1.10f', delimiter=',')
+            writer = csv.writer(f)
+            writer.writerow(tag_data.tolist())
 
         with open(SPEECH_FILE, 'a') as sf:
             writer = csv.writer(sf)
@@ -70,7 +99,7 @@ class hrc2d_data_logger:
         #self.get_initial_states()
 
         rospy.Subscriber('/tag_detections', AprilTagDetectionArray, self.update_poses)
-        rospy.Subscriber('/recognizer/output', String, self.update_speech_input)
+        rospy.Subscriber('/recognizer/output', String, self.update_speech)
         rospy.spin()
 
 if __name__ == '__main__':
