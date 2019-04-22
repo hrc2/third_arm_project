@@ -41,7 +41,7 @@
 
   <!--include file="$(find skeleton_markers)/launch/markers_from_tf.launch"/-->
   <!-- node name = "hrc_2d_poser" pkg="third_arm" type="hrc2d_apriltags_2d_ik.py" output ='screen'/-->
-  <node name="hrc2d_data_logger" pkg="third_arm" type="hrc2d_data_logger.py"/>
+  <node name="hrc2d_data_logger" pkg="third_arm" type="reg_hrc2d_data_logger.py"/>
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="false"/>
 

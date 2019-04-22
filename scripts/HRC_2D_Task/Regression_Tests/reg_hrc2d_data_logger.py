@@ -26,18 +26,18 @@ import csv
 from pynput import keyboard
 from datetime import date
 
-DATA_PATH = '/home/hriclass/catkin_ws/src/third_arm/scripts/HRC_2D_Task/Data/'
+DATA_PATH = '/home/hriclass/catkin_ws/src/third_arm/scripts/HRC_2D_Task/Regression_Tests/'
 today = str(date.today())
 TAGS_FILE = str(DATA_PATH + 'TagData' + today + '.csv')
 SPEECH_FILE = str(DATA_PATH + 'SpeechData' + today + '.csv')
 
 class hrc2d_data_logger:
     def __init__(self):
-        rospy.init_node('hrc2d_data_logger')
-        self.apriltag_topic_list = ['/base_pose', '/ee_pose', '/cup1_pose', '/box1_pose', '/cup2_pose', '/box2_pose',
-                                    '/left_hand_pose', '/right_hand_pose']
+        rospy.init_node('reg_hrc2d_data_logger')
+        self.apriltag_topic_list = ['/base_pose', '/ee_pose', '/left_hand_pose', '/right_hand_pose']
         #self.speech_command_topic = '/arm_command_state'
-        self.tag_ids = [1, 2, 5, 8, 9, 10, 3, 4]
+        self.tag_ids = [1, 2, 3, 4]
+        self.task_number = 0
         self.tag_log = np.zeros(2*len(self.tag_ids))
         self.speech_log = ''
         self.header = []
@@ -45,10 +45,8 @@ class hrc2d_data_logger:
         self.speech_dict = {
             'close hand': 'ch',
             'open hand': 'oh',
-            'go to cup one': 'gc1',
-            'put away cup one': 'pc1',
-            'go to cup two': 'gc2',
-            'put away cup two': 'pc2',
+            'go to cup': 'gc1',
+            'put away cup': 'pc1',
             'reset': 'reset',
             'stop': 'stop'
         }
@@ -63,6 +61,7 @@ class hrc2d_data_logger:
         print('Found tag topics')
 
         self.header.append('time')
+        self.header.append('TaskNumber')
 
         speech_header = ['Command', 'Time']
         with open(SPEECH_FILE, 'a') as sf:
@@ -88,24 +87,30 @@ class hrc2d_data_logger:
 
 
     def update_speech(self, data):
+        curr_time = time.time()
         if data.data in self.speech_dict:
             self.speech_log = self.speech_dict.get(data.data)
+
+            speech_data = [self.speech_log, curr_time]
+            with open(SPEECH_FILE, 'a') as sf:
+                writer = csv.writer(sf)
+                writer.writerow(speech_data)
+
         else:
             self.speech_log = ''
 
+    def update_task_number(self, task_number):
+        self.task_number = task_number
 
     def print_to_file(self):
         curr_time = time.time()
-        tag_data = np.append(self.tag_log, curr_time)
-        speech_data = [self.speech_log, curr_time]
+        tag_data = np.append(self.tag_log, curr_time, self.task_number)
+
 
         with open(TAGS_FILE, 'a') as f:
             writer = csv.writer(f)
             writer.writerow(tag_data.tolist())
 
-        with open(SPEECH_FILE, 'a') as sf:
-            writer = csv.writer(sf)
-            writer.writerow(speech_data)
 
 
     def run(self):
@@ -114,6 +119,7 @@ class hrc2d_data_logger:
 
         rospy.Subscriber('/tag_detections', AprilTagDetectionArray, self.update_poses)
         rospy.Subscriber('/recognizer/output', String, self.update_speech)
+        rospy.Subscriber('/hrc2d_task_number', Int32, self.update_task_number)
         rospy.spin()
 
 if __name__ == '__main__':
