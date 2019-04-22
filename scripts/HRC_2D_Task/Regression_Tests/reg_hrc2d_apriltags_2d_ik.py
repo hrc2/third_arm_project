@@ -65,16 +65,21 @@ class ik_2d_apriltags:
         flag1 = 0
         #flag2 = 0
         while (1 - flag1):
+            #print("Checking")
             self.tags = rospy.wait_for_message('/tag_detections', AprilTagDetectionArray)
             check_list = [1, 2, 3, 4]
             check_ctr = 0
             try:
                 for i in range(len(self.tag_ids)):
                     if (self.tags.detections[i].id in check_list):
+                        #print (self.tags.detections[i].id)
                         check_ctr += 1
                         check_list.remove(self.tags.detections[i].id)
-                if check_ctr == 4:
-                    flag1 = 1
+                        #print(check_list)
+                        #print(check_ctr)
+                    if check_ctr == 4:
+                        flag1 = 1
+                        break
             except (NameError, IndexError):
                 continue
 
