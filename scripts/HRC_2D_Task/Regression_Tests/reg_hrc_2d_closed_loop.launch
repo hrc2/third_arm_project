@@ -3,5 +3,7 @@
 
 	<node name = "hrc_2d_poser" pkg="third_arm" type="reg_hrc2d_apriltags_2d_ik.py" output ='screen'/>
   	<node name = "hrc_motor_controller" pkg="third_arm" type="reg_hrc2d_speech_closed_loop.py" output ='screen'/>
-
+  	<node name="proabilities plot"
+        pkg="rqt_plot"
+        type="rqt_plot" />
 </launch>

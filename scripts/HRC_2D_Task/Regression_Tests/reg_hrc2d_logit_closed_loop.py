@@ -24,13 +24,14 @@ from diagnostic_msgs.msg import DiagnosticArray
 from apriltags_ros.msg import AprilTagDetectionArray
 import csv
 from pynput import keyboard
+from prediction import thirdarm_logit
 
 # Handover state: DoF 1 =  ?, DoF3 = Full_in
 # Dropoff state: DoF 1 =  ?, DoF3 = Full_out
 
 class hrc2d_speech_closed_loop:
     def __init__(self):
-        rospy.init_node('reg_hrc2d_speech_motor_controller')
+        rospy.init_node('reg_hrc2d_logit_motor_controller')
 
         self.currval = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         self.command = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
@@ -41,21 +42,18 @@ class hrc2d_speech_closed_loop:
         self.pub_motor4 = rospy.Publisher('/wrist_controller/command', Float64, queue_size=1)
         self.pub_motor5 = rospy.Publisher('/wrist_tilt_controller/command', Float64, queue_size=1)
         self.pub_motor6 = rospy.Publisher('/gripper_controller/command', Float64, queue_size=1)
-
-        self.pub_speech_command = rospy.Publisher('/arm_command_state', String, queue_size=1)
-
-        self.pub_trial_number = rospy.Publisher('/hrc2d_task_number', Float64, queue_size=1)
-        self.trial_number = 0.0
-        #self.pub_within_range = rospy.Publisher('/within_range', Int32, queue_size=1)
-
         self.pubvec = [self.pub_motor1, self.pub_motor2, self.pub_motor3, self.pub_motor4, self.pub_motor5,
                        self.pub_motor6]
 
+        self.pub_speech_command = rospy.Publisher('/arm_command_state', String, queue_size=1)
+        self.pub_trial_number = rospy.Publisher('/hrc2d_task_number', Float64, queue_size=1)
 
+        self.trial_number = 0.0
         self.speed_topics = ['base_swivel_controller/set_speed', '/vertical_tilt_controller/set_speed',
                              '/arm_extension_controller/set_speed', '/wrist_controller/set_speed',
                              '/wrist_tilt_controller/set_speed', '/gripper_controller/set_speed']
         self.motor_max_speeds = [0.5, 0.5, 2.0, 0.5, 0.5, 1.0]
+
 
         print('Setting motor max speeds')
         for i in range(len(self.motor_max_speeds)):
@@ -87,9 +85,26 @@ class hrc2d_speech_closed_loop:
         print('Setting motor initial states')
         for i in range(len(self.initial_angles)):
             self.pubvec[i].publish(self.initial_angles[i])
-            time.sleep(2)
+            time.sleep(1)
 
         self.calibrate()
+
+        self.data_log_flag = 0
+
+
+        self.Xkt = np.array([])
+        self.Xnt = np.array([])
+        self.Ykt = np.array([])
+        self.Ynt = np.array([])
+        self.Tnt = np.array([])
+        self.target1_positions = np.array([])
+        self.target2_positions = np.array([])
+        self.mean_target1 = np.array([])
+        self.mean_target2 = np.array([])
+        self.target_probs = [0.0, 0.0]
+        self.set_target = 0
+        # Later replace with  a structure depending on target clustering
+        self.logit = thirdarm_logit()
 
 
     def set_motor_speeds(self, speed_topic, speed):
@@ -111,8 +126,9 @@ class hrc2d_speech_closed_loop:
 
         base_pose = rospy.wait_for_message('/base_pose', Point)
         ee_pose = rospy.wait_for_message('/ee_pose', Point)
-        #cup1_pose = rospy.wait_for_message('/cup1_pose', Point)
-        #cup2_pose = rospy.wait_for_message('/cup2_pose', Point)
+        lh_pose = rospy.wait_for_message('/left_hand_pose', Point)
+        rh_pose = rospy.wait_for_message('/right_hand_pose', Point)
+
         print('Detected Tags')
         self.theta = self.currval[0]
         self.l = self.currval[2]
@@ -120,13 +136,13 @@ class hrc2d_speech_closed_loop:
         self.base_y = base_pose.y
         self.ee_x = ee_pose.x
         self.ee_y = ee_pose.y
-        #self.cup1_x = cup1_pose.x
-        #self.cup1_y = cup1_pose.y
-        #self.cup2_x = cup2_pose.x
-        #self.cup2_y = cup2_pose.y
+        self.lh_x = lh_pose.x
+        self.lh_y = lh_pose.y
+        self.rh_x = rh_pose.x
+        self.rh_y = rh_pose.y
 
     def calibrate(self):
-        #time.sleep(2)
+        print('Calibrating length: 2 seconds')
         ee_pose = rospy.wait_for_message('/ee_pose', Point)
         self.ee_x = ee_pose.x
         self.ee_y = ee_pose.y
@@ -142,6 +158,13 @@ class hrc2d_speech_closed_loop:
 
         print('Calibration Done')
 
+    def update_lh_pose(self, data):
+        self.lh_x = data.x
+        self.lh_y = data.y
+
+    def update_rh_pose(self, data):
+        self.rh_x = data.x
+        self.rh_y = data.y
 
     def update_theta_state(self, data):
         self.theta = data.current_pos
@@ -152,6 +175,7 @@ class hrc2d_speech_closed_loop:
     def update_base_pose(self, data):
         self.base_x = data.x
         self.base_y = data.y
+        self.data_prepare()
 
     def update_cup1_pose(self, data):
         self.cup1_x = data.x
@@ -161,18 +185,89 @@ class hrc2d_speech_closed_loop:
         self.box1_x = data.x
         self.box1_y = data.y
 
-    def update_cup2_pose(self, data):
-        self.cup2_x = data.x
-        self.cup2_y = data.y
-
-    def update_box2_pose(self, data):
-        self.box2_x = data.x
-        self.box2_y = data.y
-
     def update_ee_pose(self, data):
         self.ee_x = data.x
         self.ee_y = data.y
         self.pubvec[4].publish(-0.2)
+        if self.set_target == 1 or self.set_target == 2:
+            if self.data_log_flag == 1:
+                self.move_to_target()
+
+    def move_to_target(self):
+        if self.set_target == 1:
+            ee_target_x = self.mean_target1[0]
+            ee_target_y = self.mean_target1[1]
+        elif self.set_target == 2:
+                ee_target_x = self.mean_target2[0]
+                ee_target_y = self.mean_target2[1]
+
+        self.delta_l = 0.00
+        self.theta_command = math.atan2((ee_target_y - self.base_y), (ee_target_x - self.base_x))
+        self.l_command = math.sqrt((ee_target_x - self.base_x) ** 2 + (ee_target_y - self.base_y) ** 2) - self.delta_l
+
+        m1_command = self.theta_command - self.thet0
+        m3_command = self.full_out + (self.l_command - self.l_max) * \
+                                     ((self.len_mid - self.full_out) / (self.l_mid - self.l_max))
+
+        print('Commands DoF1 : ' + str(m1_command) + ' DoF3 : ' + str(m3_command))
+
+        if (m1_command > -1.57) and (m1_command < 1.57):
+            print('Moving DoF1')
+            self.pubvec[0].publish(m1_command)
+        if (m3_command > self.full_out) and (m3_command < self.full_in):
+            print('Moving DoF3')
+            self.pubvec[2].publish(m3_command)
+
+    def data_prepare(self):
+        tk = time.time()
+        if self.data_log_flag == 1:
+            X_current = [self.base_x, self.base_y, self.lh_x, self.lh_y, self.rh_x, self.rh_y]
+            Y_current = 2 - (self.trial_number % 2) # Update with target clustering part later on
+            if(self.Xkt.size == 0):
+                self.Xkt = np.array(X_current, ndmin=2)
+                self.Ykt = np.array(Y_current, ndmin=2)
+                self.Tnt = np.array(tk, ndmin=2)
+            else:
+                self.Xkt = np.append(self.Xkt, np.array(X_current, ndmin=2), axis=0)
+                self.Ykt = np.append(self.Ykt, np.array(Y_current, ndmin=2), axis=0)
+                self.Tnt = np.append(self.Tnt, np.array(tk, ndmin=2), axis=0)
+            if self.trial_number > 2 and self.set_target == 0:
+                self.target_probs = self.logit.predict_probabilites(np.array(X_current, ndmin=2))
+                if self.target_probs[0] > 0.8:
+                    self.set_target = 1
+                elif self.target_probs[1] > 0.8:
+                    self.set_target = 2
+
+        elif self.data_log_flag == 0 and self.trial_number >= 1:
+            if(self.Xnt.size==0):
+                self.Xnt = self.Xkt
+                self.Ynt = self.Ykt
+            else:
+                self.Xnt = np.append(self.Xnt, self.Xkt, axis=0)
+                self.Ynt = np.append(self.Ynt, self.Ykt, axis=0)
+            self.Tnt = np.append(self.Tnt, np.array(tk, ndmin=2), axis=0)
+
+            if self.trial_number % 2 == 1:
+                if (self.target1_positions.size == 0):
+                    self.target1_positions = np.array([self.ee_x, self.ee_y], ndmin=2)
+                else:
+                    self.target1_positions = np.append(self.target1_positions, np.array([self.ee_x, self.ee_y], ndmin=2),
+                                                       axis=0)
+                self.mean_target1 = np.mean(self.target1_positions, axis=0)
+
+            elif self.trial_number % 2 == 0:
+                if (self.target2_positions.size == 0):
+                    self.target2_positions = np.array([self.ee_x, self.ee_y], ndmin=2)
+                else:
+                    self.target2_positions = np.append(self.target2_positions,
+                                                       np.array([self.ee_x, self.ee_y], ndmin=2),
+                                                       axis=0)
+                self.mean_target2 = np.mean(self.target2_positions, axis=0)
+
+            self.logit.assign_data(self.Xnt, self.Ynt)
+            self.logit.train()
+
+
 
     def update_speech_input(self, dat):
         data = dat.data
@@ -180,22 +275,21 @@ class hrc2d_speech_closed_loop:
             print('Gripper Closing')
             self.pubvec[5].publish(self.grip_close)
             time.sleep(0.1)
-            self.trial_number += 1
-            self.pub_trial_number.publish(self.trial_number)
         elif data == 'open hand':
             print('Gripper Opening')
             self.pubvec[5].publish(self.grip_open)
+            self.data_log_flag = 0
+            self.set_target = 0
             time.sleep(0.1)
         elif data == 'go to cup':
+            self.pubvec[5].publish(self.grip_open)
             self.go_to_handover_location()
             #self.go_to_cup(self.cup1_x, self.cup1_y)
         elif data == 'put away cup':
+            self.trial_number += 1
+            self.data_log_flag = 1
+            self.pub_trial_number.publish(self.trial_number)
             self.go_to_dropoff()
-            #self.cup_to_box(self.box1_x, self.box1_y)
-        # elif data == 'go to cup two':
-        #     self.go_to_cup(self.cup2_x, self.cup2_y)
-        # elif data == 'put away cup two':
-        #     self.cup_to_box(self.box2_x, self.box2_y)
         elif data == 'reset':
             self.go_to_init()
         elif data == 'stop':
@@ -225,6 +319,7 @@ class hrc2d_speech_closed_loop:
     def go_to_dropoff(self):
         self.pubvec[2].publish(self.full_out)
         self.pubvec[0].publish(self.d1_dropoff)
+
 
     def go_to_cup(self, cup_x, cup_y):
         self.delta_l = 0.08
@@ -275,21 +370,14 @@ class hrc2d_speech_closed_loop:
         self.pubvec[2].publish(self.full_out)
 
     def run(self):
-
-        #self.get_initial_states()
         rospy.Subscriber('/base_swivel_controller/state', dynamixel_msgs.msg.JointState, self.update_theta_state)
         rospy.Subscriber('/arm_extension_controller/state', dynamixel_msgs.msg.JointState, self.update_l_state)
         rospy.Subscriber('/base_pose', Point, self.update_base_pose)
         rospy.Subscriber('/ee_pose', Point, self.update_ee_pose)
-        #rospy.Subscriber('/cup1_pose', Point, self.update_cup1_pose)
-        #rospy.Subscriber('/box1_pose', Point, self.update_box1_pose)
-        #rospy.Subscriber('/cup2_pose', Point, self.update_cup2_pose)
-        #rospy.Subscriber('/box2_pose', Point, self.update_box2_pose)
+        rospy.Subscriber('/left_hand_pose', Point, self.update_lh_pose)
+        rospy.Subscriber('/right_hand_pose', Point, self.update_rh_pose)
         rospy.Subscriber('/recognizer/output', String, self.update_speech_input)
         rospy.spin()
-    # self.get_initial_motor_states()
-    # self.get_frame_poses()
-
 
 if __name__ == '__main__':
     t1 = hrc2d_speech_closed_loop()

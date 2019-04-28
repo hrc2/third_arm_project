@@ -117,7 +117,7 @@ class hrc2d_data_logger:
             self.speech_log = ''
 
     def update_task_number(self, task_number):
-        self.task_number = task_number
+        self.task_number = int(task_number.data)
 
     def print_to_file(self):
         curr_time = time.time()
@@ -147,8 +147,9 @@ class hrc2d_data_logger:
         rospy.Subscriber('/left_hand_pose', Point, self.update_lh_pose)
         rospy.Subscriber('/right_hand_pose', Point, self.update_rh_pose)
 
-        rospy.Subscriber('/recognizer/output', String, self.update_speech)
-        rospy.Subscriber('/hrc2d_task_number', Int32, self.update_task_number)
+        #rospy.Subscriber('/recognizer/output', String, self.update_speech)
+        rospy.Subscriber('/arm_command_state', String, self.update_speech)
+        rospy.Subscriber('/hrc2d_task_number', Float64, self.update_task_number)
         rospy.spin()
 
 if __name__ == '__main__':
