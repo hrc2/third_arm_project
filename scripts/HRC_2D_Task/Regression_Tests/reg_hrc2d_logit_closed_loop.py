@@ -47,7 +47,7 @@ class hrc2d_speech_closed_loop:
 
         self.pub_speech_command = rospy.Publisher('/arm_command_state', String, queue_size=1)
         self.pub_trial_number = rospy.Publisher('/hrc2d_task_number', Float64, queue_size=1)
-        self.pub_target_probs = rospy.Publisher('/target_probs', String, queue_size=1)
+        self.pub_target_probs = rospy.Publisher('/target_probs', Float32MultiArray, queue_size=1)
 
         self.trial_number = 0.0
         self.speed_topics = ['base_swivel_controller/set_speed', '/vertical_tilt_controller/set_speed',
@@ -74,7 +74,7 @@ class hrc2d_speech_closed_loop:
             print('Error: Re-calibrate length extension')
             exit(0)
         #self.full_out = self.full_in - 2.0
-        self.full_in = self.full_out + 2.0
+        self.full_in = self.full_out + 1.6
         self.len_mid = 0.5*(self.full_out + self.full_in)
         if self.len_mid < self.full_out and self.len_mid > self.full_in:
             print('Error: Re-calibrate length extension')
@@ -212,9 +212,9 @@ class hrc2d_speech_closed_loop:
         m3_command = self.full_out + (self.l_command - self.l_max) * \
                                      ((self.len_mid - self.full_out) / (self.l_mid - self.l_max))
 
-        print('Commands DoF1 : ' + str(m1_command) + ' DoF3 : ' + str(m3_command))
+        #print('Commands DoF1 : ' + str(m1_command) + ' DoF3 : ' + str(m3_command))
 
-        if math.fabs(math.sqrt((ee_target_x - self.ee_x) ** 2 + (ee_target_y - self.ee_y) ** 2)) <= 0.01:
+        if math.sqrt((ee_target_x - self.ee_x) ** 2 + (ee_target_y - self.ee_y) ** 2) <= 0.09:
             print('Found target. Opening gripper')
             self.pubvec[5].publish(self.grip_open)
             self.data_log_flag = 0
@@ -224,10 +224,10 @@ class hrc2d_speech_closed_loop:
             return
 
         if (m1_command > -1.57) and (m1_command < 1.57):
-            print('Moving DoF1')
+            #print('Moving DoF1')
             self.pubvec[0].publish(m1_command)
         if (m3_command > self.full_out) and (m3_command < self.full_in):
-            print('Moving DoF3')
+            #print('Moving DoF3')
             self.pubvec[2].publish(m3_command)
 
     def data_prepare(self):
@@ -245,15 +245,13 @@ class hrc2d_speech_closed_loop:
                 self.Ykt = np.append(self.Ykt, np.array(Y_current, ndmin=2), axis=0)
                 self.Tnt = np.append(self.Tnt, np.array(tk, ndmin=2), axis=0)
             if self.trial_number > 2: #and self.set_target == 0:
-                self.target_probs = list(self.logit.predict_probabilites(np.array(X_current, ndmin=2)))
-                probs = str(list(self.target_probs))
-                # for i in range(len(self.target_probs)):
-                #     probs.data[i] = self.target_probs[i]
-                self.pub_target_probs.publish(probs)
-                # if self.target_probs[0] > 0.8:
-                #     self.set_target = 1
-                # elif self.target_probs[1] > 0.8:
-                #     self.set_target = 2
+                self.target_probs = self.logit.predict_probabilites(np.array(X_current, ndmin=2))
+                probs = self.target_probs.ravel().tolist()
+                self.pub_target_probs.publish(Float32MultiArray(data=probs))
+                if probs[0] > 0.8:
+                    self.set_target = 1
+                elif probs[1] > 0.8:
+                    self.set_target = 2
 
         elif self.data_log_flag == 0 and self.trial_number >= 1 and self.train_flag == 1:
 

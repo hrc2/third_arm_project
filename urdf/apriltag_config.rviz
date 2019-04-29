@@ -9,7 +9,6 @@ Panels:
         - /TF1
         - /Image1
         - /Marker1
-        - /Marker1/Status1
       Splitter Ratio: 0.5
     Tree Height: 333
   - Class: rviz/Selection
@@ -69,77 +68,11 @@ Visualization Manager:
           Value: true
         camera_rgb_optical_frame:
           Value: true
-        head_1:
+        ee_frame:
           Value: true
-        head_2:
+        left_hand:
           Value: true
-        kinect_depth_frame:
-          Value: true
-        kinect_depth_optical_frame:
-          Value: true
-        kinect_link:
-          Value: true
-        kinect_rgb_frame:
-          Value: true
-        kinect_rgb_optical_frame:
-          Value: true
-        left_elbow_1:
-          Value: true
-        left_elbow_2:
-          Value: true
-        left_foot_1:
-          Value: true
-        left_foot_2:
-          Value: true
-        left_hand_1:
-          Value: true
-        left_hand_2:
-          Value: true
-        left_hip_1:
-          Value: true
-        left_hip_2:
-          Value: true
-        left_knee_1:
-          Value: true
-        left_knee_2:
-          Value: true
-        left_shoulder_1:
-          Value: true
-        left_shoulder_2:
-          Value: true
-        neck_1:
-          Value: true
-        neck_2:
-          Value: true
-        openni_depth_frame:
-          Value: true
-        right_elbow_1:
-          Value: true
-        right_elbow_2:
-          Value: true
-        right_foot_1:
-          Value: true
-        right_foot_2:
-          Value: true
-        right_hand_1:
-          Value: true
-        right_hand_2:
-          Value: true
-        right_hip_1:
-          Value: true
-        right_hip_2:
-          Value: true
-        right_knee_1:
-          Value: true
-        right_knee_2:
-          Value: true
-        right_shoulder_1:
-          Value: true
-        right_shoulder_2:
-          Value: true
-        torso_1:
-          Value: true
-        torso_2:
+        right_hand:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -155,67 +88,12 @@ Visualization Manager:
             camera_rgb_optical_frame:
               base_frame:
                 {}
-        openni_depth_frame:
-          head_1:
-            {}
-          head_2:
-            {}
-          left_elbow_1:
-            {}
-          left_elbow_2:
-            {}
-          left_foot_1:
-            {}
-          left_foot_2:
-            {}
-          left_hand_1:
-            {}
-          left_hand_2:
-            {}
-          left_hip_1:
-            {}
-          left_hip_2:
-            {}
-          left_knee_1:
-            {}
-          left_knee_2:
-            {}
-          left_shoulder_1:
-            {}
-          left_shoulder_2:
-            {}
-          neck_1:
-            {}
-          neck_2:
-            {}
-          right_elbow_1:
-            {}
-          right_elbow_2:
-            {}
-          right_foot_1:
-            {}
-          right_foot_2:
-            {}
-          right_hand_1:
-            {}
-          right_hand_2:
-            {}
-          right_hip_1:
-            {}
-          right_hip_2:
-            {}
-          right_knee_1:
-            {}
-          right_knee_2:
-            {}
-          right_shoulder_1:
-            {}
-          right_shoulder_2:
-            {}
-          torso_1:
-            {}
-          torso_2:
-            {}
+              ee_frame:
+                {}
+              left_hand:
+                {}
+              right_hand:
+                {}
       Update Interval: 0
       Value: true
     - Class: rviz/Image
@@ -241,7 +119,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: base_frame
+    Fixed Frame: camera_depth_frame
     Frame Rate: 30
   Name: root
   Tools:
@@ -274,10 +152,10 @@ Visualization Manager:
         Z: 0.446378
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.614801
+      Pitch: -0.399797
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 6.04676
+      Yaw: 3.56175
     Saved: ~
 Window Geometry:
   Displays:
