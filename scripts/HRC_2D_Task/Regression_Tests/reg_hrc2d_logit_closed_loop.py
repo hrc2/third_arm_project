@@ -14,7 +14,7 @@ import sensor_msgs.msg
 from sensor_msgs.msg import Imu, JointState, Joy
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Point, Pose, Quaternion, Twist, TwistWithCovariance, Vector3
-from std_msgs.msg import ColorRGBA, Float32, Bool, Float64, Int32, String
+from std_msgs.msg import ColorRGBA, Float32, Bool, Float64, Int32, String, Float32MultiArray
 
 import random
 import arbotix_msgs.srv
@@ -47,6 +47,7 @@ class hrc2d_speech_closed_loop:
 
         self.pub_speech_command = rospy.Publisher('/arm_command_state', String, queue_size=1)
         self.pub_trial_number = rospy.Publisher('/hrc2d_task_number', Float64, queue_size=1)
+        self.pub_target_probs = rospy.Publisher('/target_probs', String, queue_size=1)
 
         self.trial_number = 0.0
         self.speed_topics = ['base_swivel_controller/set_speed', '/vertical_tilt_controller/set_speed',
@@ -66,7 +67,7 @@ class hrc2d_speech_closed_loop:
         self.grip_close = 1.2
 
         self.d1_handover = 0.4
-        self.d1_dropoff = -1.1
+        self.d1_dropoff = -0.8
 
         self.full_out = self.currval[2]
         if self.full_out < 0.2:
@@ -90,7 +91,7 @@ class hrc2d_speech_closed_loop:
         self.calibrate()
 
         self.data_log_flag = 0
-
+        self.train_flag = 0
 
         self.Xkt = np.array([])
         self.Xnt = np.array([])
@@ -198,8 +199,10 @@ class hrc2d_speech_closed_loop:
             ee_target_x = self.mean_target1[0]
             ee_target_y = self.mean_target1[1]
         elif self.set_target == 2:
-                ee_target_x = self.mean_target2[0]
-                ee_target_y = self.mean_target2[1]
+            ee_target_x = self.mean_target2[0]
+            ee_target_y = self.mean_target2[1]
+        else:
+            return
 
         self.delta_l = 0.00
         self.theta_command = math.atan2((ee_target_y - self.base_y), (ee_target_x - self.base_x))
@@ -211,6 +214,15 @@ class hrc2d_speech_closed_loop:
 
         print('Commands DoF1 : ' + str(m1_command) + ' DoF3 : ' + str(m3_command))
 
+        if math.fabs(math.sqrt((ee_target_x - self.ee_x) ** 2 + (ee_target_y - self.ee_y) ** 2)) <= 0.01:
+            print('Found target. Opening gripper')
+            self.pubvec[5].publish(self.grip_open)
+            self.data_log_flag = 0
+            self.set_target = 0
+            self.pub_speech_command.publish('open hand')
+            time.sleep(0.1)
+            return
+
         if (m1_command > -1.57) and (m1_command < 1.57):
             print('Moving DoF1')
             self.pubvec[0].publish(m1_command)
@@ -221,8 +233,9 @@ class hrc2d_speech_closed_loop:
     def data_prepare(self):
         tk = time.time()
         if self.data_log_flag == 1:
+            #print('Updating current data')
             X_current = [self.base_x, self.base_y, self.lh_x, self.lh_y, self.rh_x, self.rh_y]
-            Y_current = 2 - (self.trial_number % 2) # Update with target clustering part later on
+            Y_current = [2 - (self.trial_number % 2)] # Update with target clustering part later on
             if(self.Xkt.size == 0):
                 self.Xkt = np.array(X_current, ndmin=2)
                 self.Ykt = np.array(Y_current, ndmin=2)
@@ -231,14 +244,19 @@ class hrc2d_speech_closed_loop:
                 self.Xkt = np.append(self.Xkt, np.array(X_current, ndmin=2), axis=0)
                 self.Ykt = np.append(self.Ykt, np.array(Y_current, ndmin=2), axis=0)
                 self.Tnt = np.append(self.Tnt, np.array(tk, ndmin=2), axis=0)
-            if self.trial_number > 2 and self.set_target == 0:
-                self.target_probs = self.logit.predict_probabilites(np.array(X_current, ndmin=2))
-                if self.target_probs[0] > 0.8:
-                    self.set_target = 1
-                elif self.target_probs[1] > 0.8:
-                    self.set_target = 2
+            if self.trial_number > 2: #and self.set_target == 0:
+                self.target_probs = list(self.logit.predict_probabilites(np.array(X_current, ndmin=2)))
+                probs = str(list(self.target_probs))
+                # for i in range(len(self.target_probs)):
+                #     probs.data[i] = self.target_probs[i]
+                self.pub_target_probs.publish(probs)
+                # if self.target_probs[0] > 0.8:
+                #     self.set_target = 1
+                # elif self.target_probs[1] > 0.8:
+                #     self.set_target = 2
 
-        elif self.data_log_flag == 0 and self.trial_number >= 1:
+        elif self.data_log_flag == 0 and self.trial_number >= 1 and self.train_flag == 1:
+
             if(self.Xnt.size==0):
                 self.Xnt = self.Xkt
                 self.Ynt = self.Ykt
@@ -264,8 +282,11 @@ class hrc2d_speech_closed_loop:
                                                        axis=0)
                 self.mean_target2 = np.mean(self.target2_positions, axis=0)
 
-            self.logit.assign_data(self.Xnt, self.Ynt)
-            self.logit.train()
+            if self.trial_number >= 2:
+                print('Training Logit model')
+                self.logit.assign_data(self.Xnt, self.Ynt)
+                self.logit.train()
+            self.train_flag = 0
 
 
 
@@ -280,6 +301,7 @@ class hrc2d_speech_closed_loop:
             self.pubvec[5].publish(self.grip_open)
             self.data_log_flag = 0
             self.set_target = 0
+            self.train_flag = 1
             time.sleep(0.1)
         elif data == 'go to cup':
             self.pubvec[5].publish(self.grip_open)

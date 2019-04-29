@@ -19,7 +19,7 @@ class thirdarm_logit:
 
     def assign_data(self, training_data, target_labels):
         self.Xtrain = training_data
-        y = target_labels.tolist()
+        y = np.ravel(target_labels).tolist()
         y = np.array([int(num) for num in y], dtype=int)
         self.Ytrain = y
 

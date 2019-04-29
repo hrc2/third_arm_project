@@ -55,7 +55,7 @@ class hrc2d_data_logger:
 
         for topic in self.apriltag_topic_list:
             dat = rospy.wait_for_message(topic, Point)
-            print(dat)
+            #print(dat)
             self.header.append(str(topic + '_x'))
             self.header.append(str(topic + '_y'))
         print('Found tag topics')
@@ -130,7 +130,7 @@ class hrc2d_data_logger:
                 label = 2
 
         tag_data = np.append(self.tag_log, np.array([curr_time, self.task_number, label]))
-        print(tag_data)
+        #print(tag_data)
         with open(TAGS_FILE, 'a') as f:
             writer = csv.writer(f)
             writer.writerow(tag_data.tolist())
