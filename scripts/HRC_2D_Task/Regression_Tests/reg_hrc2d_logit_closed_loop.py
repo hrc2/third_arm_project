@@ -290,22 +290,22 @@ class hrc2d_speech_closed_loop:
 
     def update_speech_input(self, dat):
         data = dat.data
-        if data == 'close hand':
+        if data == 'close':
             print('Gripper Closing')
             self.pubvec[5].publish(self.grip_close)
             time.sleep(0.1)
-        elif data == 'open hand':
+        elif data == 'open':
             print('Gripper Opening')
             self.pubvec[5].publish(self.grip_open)
             self.data_log_flag = 0
             self.set_target = 0
             self.train_flag = 1
             time.sleep(0.1)
-        elif data == 'go to cup':
+        elif data == 'go':
             self.pubvec[5].publish(self.grip_open)
             self.go_to_handover_location()
             #self.go_to_cup(self.cup1_x, self.cup1_y)
-        elif data == 'put away cup':
+        elif data == 'put':
             self.trial_number += 1
             self.data_log_flag = 1
             self.pub_trial_number.publish(self.trial_number)

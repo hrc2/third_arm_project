@@ -43,10 +43,10 @@ class hrc2d_data_logger:
         self.header = []
 
         self.speech_dict = {
-            'close hand': 'cl',
-            'open hand': 'op',
-            'go to cup': 'go',
-            'put away cup': 'put',
+            'close': 'cl',
+            'open': 'op',
+            'go': 'go',
+            'put': 'put',
             'reset': 'rst',
             'stop': 'stp'
         }
