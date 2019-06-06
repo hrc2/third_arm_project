@@ -50,10 +50,10 @@ class hrc2d_speech_closed_loop:
         self.pub_target_probs = rospy.Publisher('/target_probs', Float32MultiArray, queue_size=1)
 
         self.trial_number = 0.0
-        self.speed_topics = ['base_swivel_controller/set_speed', '/vertical_tilt_controller/set_speed',
+        self.speed_topics = ['/base_swivel_controller/set_speed', '/vertical_tilt_controller/set_speed',
                              '/arm_extension_controller/set_speed', '/wrist_controller/set_speed',
                              '/wrist_tilt_controller/set_speed', '/gripper_controller/set_speed']
-        self.motor_max_speeds = [0.5, 0.5, 2.0, 0.5, 0.5, 1.0]
+        self.motor_max_speeds = [0.5, 0.5, 1.6, 0.5, 0.5, 1.0]
 
 
         print('Setting motor max speeds')
