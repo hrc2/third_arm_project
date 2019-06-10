@@ -31,12 +31,13 @@ class hrc2d_gui_main(QtGui.QMainWindow, hrc2d_gui_reconfigurable.Ui_MainWindow):
         # #########################Fields#####################################
         self.TargetProbabilityTopic = '/target'
         self.TaskStateTopic = '/task'
-        self.NumberTargets = 2
+        self.NumberTargets = 3
+        self.NumTasks = 5
 
         self.DummyValue = np.random.uniform(0, 100)
-        self.TargetProbabilities = Float32MultiArray(data=[self.DummyValue, 100 - self.DummyValue])
-        self.TaskProbabilities = Float32MultiArray(data=np.repeat(self.DummyValue, 5).tolist())
-
+        self.TargetProbabilities = Float32MultiArray(data=np.repeat(self.DummyValue, self.NumberTargets).tolist())
+        self.TaskProbabilities = Float32MultiArray(data=np.repeat(self.DummyValue, self.NumTasks).tolist())        
+        
         # ################### Publishers ####################################
         self.TargetProbabilityPublisher = rospy.Publisher('/target', Float32MultiArray, queue_size=1)
         self.TaskProbabilityPublisher = rospy.Publisher('/task', Float32MultiArray, queue_size=1)
@@ -52,9 +53,7 @@ class hrc2d_gui_main(QtGui.QMainWindow, hrc2d_gui_reconfigurable.Ui_MainWindow):
                          Float32MultiArray,
                          self.TaskStateCallback)        
 
-        time.sleep(1)
-        #self.TargetProbabilityPublisher.publish(self.TargetProbabilities)
-        #self.TaskProbabilityPublisher.publish(self.TaskProbabilities)
+        
         
         # ################### Actions ######################################
 
@@ -66,6 +65,9 @@ class hrc2d_gui_main(QtGui.QMainWindow, hrc2d_gui_reconfigurable.Ui_MainWindow):
         self.TargetProbabilityTrigger.connect(self.UpdateTargetProbability)
         self.TaskStateTrigger.connect(self.UpdateTaskState)
 
+        time.sleep(1)
+        self.TargetProbabilityPublisher.publish(self.TargetProbabilities)
+        self.TaskProbabilityPublisher.publish(self.TaskProbabilities)
     # ################### Action Clients ###################################
     #def actionClient():
 
@@ -81,18 +83,22 @@ class hrc2d_gui_main(QtGui.QMainWindow, hrc2d_gui_reconfigurable.Ui_MainWindow):
 
     # ################### Methods ###########################################
     def UpdateTargetProbability(self,value):
+        self.NumberTargets = np.random.randint(2,5)
+        self.TargetProbabilities = Float32MultiArray(data=np.repeat(self.DummyValue, self.NumberTargets).tolist())        
+        self.setupUi(self, self.NumberTargets)
+        time.sleep(1)
+        print(len(self.ProgressBarTarget))
         for i in range(0, self.NumberTargets):
-            self.progressBar[i].setProperty("value", value[i])
-
+            self.ProgressBarTarget[i].setProperty("value", value[i])
+        self.TargetProbabilityPublisher.publish(self.TargetProbabilities)
 
     def UpdateTaskState(self,value):        
-        self.DummyValue = np.random.uniform(0,100)
-        self.TargetProbabilities = Float32MultiArray(data=[self.DummyValue, 100-self.DummyValue])
-        self.TaskProbabilities = Float32MultiArray(data=np.repeat(self.DummyValue, 5).tolist())        
-        self.TargetProbabilityPublisher.publish(self.TargetProbabilities)
-        self.TaskProbabilityPublisher.publish(self.TaskProbabilities)
-
-        self.progressBar_3.setProperty("value", value[0])
+        self.DummyValue = np.random.uniform(0,100)        
+        self.TaskProbabilities = Float32MultiArray(data=np.repeat(self.DummyValue, self.NumTasks).tolist())                
+        self.TaskProbabilityPublisher.publish(self.TaskProbabilities)   
+        
+        for i in range(0, self.NumTasks):
+            self.ProgressBarTask[i].setProperty("value", value[i])
 
 if __name__ == '__main__':
     # Initialize node
