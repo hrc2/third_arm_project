@@ -22,10 +22,12 @@ except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
 
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow, numbertargets):
         # Create Window
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
+
         self.MainWindowHeight = 800
         self.MainWindowWidth = 800
         self.HistogramBarWidth = 50
@@ -35,7 +37,6 @@ class Ui_MainWindow(object):
         # Create Widget
         self.CentralWidget = QtGui.QWidget(MainWindow)
         self.CentralWidget.setObjectName(_fromUtf8("CentralWidget"))
-
 
         # Create Frames
         self.TopFrame = QtGui.QFrame(self.CentralWidget)
@@ -116,10 +117,14 @@ class Ui_MainWindow(object):
             self.ProgressBarTask[i].setGeometry(QtCore.QRect(ProgressBarLeft + i*self.BottomFrameWidth/5, ProgressBarTop, self.HistogramBarWidth, self.BottomFrameHeight))
             self.ProgressBarTask[i].setProperty("value", 20)
             self.ProgressBarTask[i].setObjectName(_fromUtf8("ProgressBarTask+str(i)"))
+            palette = QtGui.QPalette(self.ProgressBarTask[i].palette())
+            palette.setColor(QtGui.QPalette.Highlight, QtGui.QColor(QtCore.Qt.green))
+            self.ProgressBarTask[i].setPalette(palette)
             self.LabelsTask.append(QtGui.QLabel(self.CentralWidget))
             self.LabelsTask[i].setGeometry(QtCore.QRect((self.MainWindowWidth-self.BottomFrameWidth)/2+ProgressBarLeft+i*self.BottomFrameWidth/5, self.MainWindowHeight - self.HistogramBarWidth, self.HistogramBarWidth, self.MainWindowHeight / 40))
             self.LabelsTask[i].setObjectName(_fromUtf8("TaskLabel" + str(i)))
             self.LabelsTask[i].setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+
 
         # Task State Labels
         self.LabelProbabilityBottom = QtGui.QLabel(self.CentralWidget)
