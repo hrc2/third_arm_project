@@ -30,7 +30,7 @@ class HRC2dGuiMain(QtGui.QMainWindow, hrc2d_gui_reconfigurable.Ui_MainWindow):
 
         # #########################Fields#####################################
         self.TargetProbabilityTopic = '/target'
-        self.NumTargets = 3
+        self.NumTargets = 2
         self.TaskStateTopic = '/task'
         self.NumTasks = 5
 
@@ -78,8 +78,8 @@ class HRC2dGuiMain(QtGui.QMainWindow, hrc2d_gui_reconfigurable.Ui_MainWindow):
     def update_target_probability(self, value):
         if len(value) is not self.NumTargets:
             self.NumTargets = len(value)
-            self.reconstruct_ui(self.NumTargets)
-            rospy.sleep(1.0)
+            #self.reconstruct_ui(self.NumTargets)
+            #rospy.sleep(1.0)
 
         for i in range(0, self.NumTargets):
             self.ProgressBarTarget[i].setProperty("value", value[i])

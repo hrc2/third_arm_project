@@ -24,7 +24,8 @@ from diagnostic_msgs.msg import DiagnosticArray
 from apriltags_ros.msg import AprilTagDetectionArray
 import csv
 from pynput import keyboard
-from prediction import thirdarm_logit
+from target_prediction import thirdarm_logit
+from task_prediction import thirdarm_task_prediction
 
 # Handover state: DoF 1 =  ?, DoF3 = Full_in
 # Dropoff state: DoF 1 =  ?, DoF3 = Full_out
@@ -106,6 +107,7 @@ class hrc2d_speech_closed_loop:
         self.set_target = 0
         # Later replace with  a structure depending on target clustering
         self.logit = thirdarm_logit()
+        self.task_predict = thirdarm_task_prediction()
 
 
     def set_motor_speeds(self, speed_topic, speed):
