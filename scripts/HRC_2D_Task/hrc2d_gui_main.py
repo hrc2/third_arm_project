@@ -29,9 +29,9 @@ class HRC2dGuiMain(QtGui.QMainWindow, hrc2d_gui_reconfigurable.Ui_MainWindow):
         super(self.__class__, self).__init__()
 
         # #########################Fields#####################################
-        self.TargetProbabilityTopic = '/target'
+        self.TargetProbabilityTopic = '/target_probs'
         self.NumTargets = 2
-        self.TaskStateTopic = '/task'
+        self.TaskStateTopic = '/task_probs'
         self.NumTasks = 5
 
         self.DummyValue = np.random.uniform(0, 100)

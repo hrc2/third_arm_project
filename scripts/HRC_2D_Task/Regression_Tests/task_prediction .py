@@ -41,10 +41,13 @@ class thirdarm_task_prediction:
     def set_relevant_commands(self, command_labels, dn_label):
         self.relevant_commands = command_labels
         self.do_nothing_label = dn_label
+        self.label_encoder.fit_transform(self.relevant_commands)
 
     def process_data(self):
         T_y = self.command_buffer[:, -1]
         T_x = self.data_buffer[:, -1]
+        self.x_train = np.array([])
+        self.y_train = np.array([])
         ind_set = np.array([])
 
         for i in range(len(T_y)):

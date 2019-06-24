@@ -45,5 +45,6 @@
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="false"/>
 
+  <node name="hrc2d_gui" pkg="third_arm" type="hrc2d_gui_main.py" output='screen' />
 
 </launch>

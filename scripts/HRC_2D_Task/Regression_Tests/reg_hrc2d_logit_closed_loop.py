@@ -49,6 +49,7 @@ class hrc2d_speech_closed_loop:
         self.pub_speech_command = rospy.Publisher('/arm_command_state', String, queue_size=1)
         self.pub_trial_number = rospy.Publisher('/hrc2d_task_number', Float64, queue_size=1)
         self.pub_target_probs = rospy.Publisher('/target_probs', Float32MultiArray, queue_size=1)
+        self.pub_task_probs = rospy.Publisher('/task_probs', Float32MultiArray, queue_size=1)
 
         self.trial_number = 0.0
         self.speed_topics = ['/base_swivel_controller/set_speed', '/vertical_tilt_controller/set_speed',
@@ -107,7 +108,14 @@ class hrc2d_speech_closed_loop:
         self.set_target = 0
         # Later replace with  a structure depending on target clustering
         self.logit = thirdarm_logit()
+        
         self.task_predict = thirdarm_task_prediction()
+        self.task_prediction_threshold = 3
+        self.relevant_commands = ['close', 'go', 'put', 'stop']
+        self.dn_command = ['stop']
+        self.task_predict.set_relevant_commands(self.relevant_commands, self.dn_command)
+        self.task_pred_probs = [0.0, 0.0, 0.0, 0.0, 0.0]
+        self.grip_open_prob = 0.0
 
 
     def set_motor_speeds(self, speed_topic, speed):
@@ -216,12 +224,18 @@ class hrc2d_speech_closed_loop:
 
         #print('Commands DoF1 : ' + str(m1_command) + ' DoF3 : ' + str(m3_command))
 
-        if math.sqrt((ee_target_x - self.ee_x) ** 2 + (ee_target_y - self.ee_y) ** 2) <= 0.09:
+        dist = math.sqrt((ee_target_x - self.ee_x) ** 2 + (ee_target_y - self.ee_y) ** 2)
+        lam = 1.6252
+        self.grip_open_prob = math.exp(-lam*dist)
+
+        if dist <= 0.09:
             print('Found target. Opening gripper')
             self.pubvec[5].publish(self.grip_open)
             self.data_log_flag = 0
             self.set_target = 0
             self.pub_speech_command.publish('open hand')
+            if self.trial_number <= self.task_prediction_threshold:
+                self.task_predict.add_to_command_buffer(['open', time.time()])
             time.sleep(0.1)
             return
 
@@ -237,7 +251,7 @@ class hrc2d_speech_closed_loop:
         if self.data_log_flag == 1:
             #print('Updating current data')
             X_current = [self.base_x, self.base_y, self.lh_x, self.lh_y, self.rh_x, self.rh_y]
-            Y_current = [2 - (self.trial_number % 2)] # Update with target clustering part later on
+            Y_current = [2 - (self.trial_number % 2)]  #Update with target clustering part later on
             if(self.Xkt.size == 0):
                 self.Xkt = np.array(X_current, ndmin=2)
                 self.Ykt = np.array(Y_current, ndmin=2)
@@ -256,7 +270,10 @@ class hrc2d_speech_closed_loop:
                     self.set_target = 2
 
         elif self.data_log_flag == 0 and self.trial_number >= 1 and self.train_flag == 1:
-
+            
+            self.task_predict.process_data()
+            self.task_predict.train()
+            
             if(self.Xnt.size==0):
                 self.Xnt = self.Xkt
                 self.Ynt = self.Ykt
@@ -317,6 +334,9 @@ class hrc2d_speech_closed_loop:
         elif data == 'stop':
             self.stop_motors()
         self.pub_speech_command.publish(data)
+        
+        if self.trial_number <= self.task_prediction_threshold:
+            self.task_predict.add_to_command_buffer([data, time.time()])
 
     def stop_motors(self):
         topic_list = ['/base_swivel_controller/state', '/vertical_tilt_controller/state',
@@ -390,7 +410,24 @@ class hrc2d_speech_closed_loop:
             self.pubvec[i].publish(self.initial_angles[i])
             time.sleep(0.5)
         self.pubvec[2].publish(self.full_out)
+    
+    def task_prediction_method(self):
+        print('Task Prediction Method')
+        tk = time.time()
+        if self.trial_number <= self.task_prediction_threshold:
+            x_data = [self.base_x, self.base_y, self.ee_x, self.ee_y, self.lh_x, self.lh_y, self.rh_x, self.rh_y, tk]
+            self.task_predict.add_to_data_buffer(x_data)
+            probs = self.task_pred_probs
+            probs[3] = self.grip_open_prob
+            self.pub_task_probs.publish(Float32MultiArray(data=probs))
+        else:
+            x_test = [self.base_x, self.base_y, self.ee_x, self.ee_y, self.lh_x, self.lh_y, self.rh_x, self.rh_y]
+            pred_probs = self.task_predict.predict_probabilites(x_test)
+            probs = [pred_probs[1], pred_probs[2], pred_probs[0], self.grip_open_prob, pred_probs[3]]
+            self.pub_task_probs.publish(Float32MultiArray(data=probs))
 
+        
+    
     def run(self):
         rospy.Subscriber('/base_swivel_controller/state', dynamixel_msgs.msg.JointState, self.update_theta_state)
         rospy.Subscriber('/arm_extension_controller/state', dynamixel_msgs.msg.JointState, self.update_l_state)
@@ -399,6 +436,7 @@ class hrc2d_speech_closed_loop:
         rospy.Subscriber('/left_hand_pose', Point, self.update_lh_pose)
         rospy.Subscriber('/right_hand_pose', Point, self.update_rh_pose)
         rospy.Subscriber('/recognizer/output', String, self.update_speech_input)
+        self.task_prediction_method()
         rospy.spin()
 
 if __name__ == '__main__':
