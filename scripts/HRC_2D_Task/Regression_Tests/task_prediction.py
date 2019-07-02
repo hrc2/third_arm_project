@@ -14,12 +14,12 @@ import math
 class thirdarm_task_prediction:
 
     def __init__(self):
-        self.time_threshold = 2.0
-        self.data_buffer = np.array([])
-        self.command_buffer = np.array([])
+        self.time_threshold = 1.0
+        self.data_buffer = np.array([], ndmin=2)
+        self.command_buffer = np.array([], ndmin=2)
         self.N = 20
-        self.x_train = np.array([])
-        self.y_train = np.array([])
+        self.x_train = np.array([], ndmin=2)
+        self.y_train = np.array([], ndmin=2)
         self.relevant_commands = []
         self.do_nothing_label = []
 
@@ -44,9 +44,9 @@ class thirdarm_task_prediction:
         self.label_encoder.fit_transform(self.relevant_commands)
 
     def process_data(self):
-        T_y = self.command_buffer[:, -1]
+        T_y = self.command_buffer[:, -1].astype(float)
         T_x = self.data_buffer[:, -1]
-        self.x_train = np.array([])
+        self.x_train = np.array([], ndmin=2)
         self.y_train = np.array([])
         ind_set = np.array([])
 
