@@ -110,7 +110,7 @@ class hrc2d_speech_closed_loop:
         self.logit = thirdarm_logit()
         
         self.task_predict = thirdarm_task_prediction()
-        self.task_prediction_threshold = 2
+        self.task_prediction_threshold = 3
         self.relevant_commands = ['close', 'go', 'put', 'stop']
         self.dn_command = ['stop']
         self.task_predict.set_relevant_commands(self.relevant_commands, self.dn_command)
@@ -244,15 +244,16 @@ class hrc2d_speech_closed_loop:
             #print('Moving DoF3')
             self.pubvec[2].publish(m3_command)
 
-        if dist <= 0.09:
+        #if dist <= 0.09:
+        if self.grip_open_prob > 0.9:
             print('Found target. Opening gripper')
             self.pubvec[5].publish(self.grip_open)
             self.data_log_flag = 0
             self.set_target = 0
             self.pub_speech_command.publish('open hand')
+            self.grip_open_prob = 0.0
             if self.trial_number <= self.task_prediction_threshold:
                 self.task_predict.add_to_command_buffer(np.array(['open', time.time()], ndmin=2))
-                self.grip_open_prob = 0.0
             #time.sleep(0.1)
 
     def data_prepare(self):
