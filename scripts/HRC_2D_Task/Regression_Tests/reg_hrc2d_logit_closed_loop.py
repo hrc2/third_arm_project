@@ -108,7 +108,7 @@ class hrc2d_speech_closed_loop:
         self.mean_target2 = np.array([])
         self.target_probs = [0.00, 0.0]
         self.set_target = 0
-        self.target_prediction_threshold = 5
+        self.target_prediction_threshold = 10
         # Later replace with  a structure depending on target clustering
         self.logit = thirdarm_logit()
         self.num_targets = 0
@@ -118,7 +118,7 @@ class hrc2d_speech_closed_loop:
         self.target_means = np.array([])
         
         self.task_predict = thirdarm_task_prediction()
-        self.task_prediction_threshold = 5
+        self.task_prediction_threshold = 10
         self.relevant_commands = ['close', 'go', 'put', 'stop']
         self.dn_command = ['stop']
         self.task_predict.set_relevant_commands(self.relevant_commands, self.dn_command)
@@ -295,9 +295,10 @@ class hrc2d_speech_closed_loop:
 
 
         elif self.data_log_flag == 0 and self.trial_number >= 1 and self.train_flag == 1:
-            
-            self.task_predict.process_data()
-            self.task_predict.train()
+
+            if self.trial_number <= self.task_prediction_threshold:
+                self.task_predict.process_data()
+                self.task_predict.train()
             
             if(self.Xnt.size==0):
                 self.Xnt = self.Xkt
@@ -331,16 +332,18 @@ class hrc2d_speech_closed_loop:
                                                    np.array([self.ee_x, self.ee_y], ndmin=2),
                                                    axis=0)
             
-            if self.trial_number > self.jump_init_number:
+            if self.trial_number >= self.jump_init_number and self.trial_number < self.target_prediction_threshold:
                 jm = JumpsMethod(self.target_positions)
                 jm.Distortions(cluster_range=range(1, self.target_positions.shape[0]), random_state=0)
-                jm.Jumps(Y=0.2)
+                jm.Jumps(Y=0.15)
 
                 print('Optimal Number of clusters for N = ' + str(self.target_positions.shape[0]) + ' data points: '
                       + str(jm.recommended_cluster_number))
-                print('Target Positions: ' + str(self.target_positions))
+                #print('Target Positions: ' + str(self.target_positions))
 
                 self.num_targets = jm.recommended_cluster_number
+                if self.num_targets <= 1:
+                    self.num_targets = 2
                 km = KMeans(n_clusters=self.num_targets)
                 self.target_labels = km.fit_predict(self.target_positions) + 1
                 self.reprocess_Yn()
@@ -380,10 +383,12 @@ class hrc2d_speech_closed_loop:
             self.train_flag = 1
             time.sleep(0.1)
         elif data == 'go':
+            print('Going to handover')
             self.pubvec[5].publish(self.grip_open)
             self.go_to_handover_location()
             #self.go_to_cup(self.cup1_x, self.cup1_y)
         elif data == 'put':
+            print('Putting away cup')
             self.trial_number += 1
             self.data_log_flag = 1
             self.pub_trial_number.publish(self.trial_number)
@@ -476,23 +481,26 @@ class hrc2d_speech_closed_loop:
         thresh = 0.85
         if probs[0] > thresh:
             data = 'close'
-            #print('Gripper Closing')
+            print('Prediction: Gripper closing')
             self.pubvec[5].publish(self.grip_close)
             self.pub_speech_command.publish(data)
             time.sleep(0.1)
         elif probs[1] > thresh:
             data = 'go'
-            #print('Going to Handover')
+            print('Prediction: Going to handover')
             self.pubvec[5].publish(self.grip_open)
             self.pub_speech_command.publish(data)
             self.go_to_handover_location()
+            time.sleep(0.3)
         elif probs[2] > thresh:
             data = 'put'
+            print('Prediction: Putting away cup')
             self.trial_number += 1
             self.data_log_flag = 1
             #self.pub_trial_number.publish(self.trial_number)
             self.go_to_dropoff()
             self.pub_speech_command.publish(data)
+            #time.sleep(0.3)
 
 
 
@@ -516,7 +524,7 @@ class hrc2d_speech_closed_loop:
             x_test = np.array([self.base_x, self.base_y, self.ee_x, self.ee_y, self.lh_x, self.lh_y, self.rh_x, self.rh_y], ndmin=2)
             pred_probs = self.task_predict.predict_probabilites(x_test).ravel()
             probs = [pred_probs[1], pred_probs[2], pred_probs[0], self.grip_open_prob, pred_probs[3]]
-            self.move_after_prediction(pred_probs)
+            #self.move_after_prediction(pred_probs)
             pub_probs = [x * 100 for x in probs]
             self.pub_task_probs.publish(Float32MultiArray(data=pub_probs))
 
