@@ -27,7 +27,7 @@ from pynput import keyboard
 from datetime import date
 
 DATA_PATH = '/home/hriclass/catkin_ws/src/third_arm/scripts/HRC_2D_Task/Regression_Tests/Data/'
-today = str(date.today())
+today = str(date.today()) + '-' + str(int(time.time()))
 TAGS_FILE = str(DATA_PATH + 'TagData' + today + '.csv')
 SPEECH_FILE = str(DATA_PATH + 'SpeechData' + today + '.csv')
 

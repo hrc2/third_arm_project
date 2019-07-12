@@ -14,7 +14,7 @@ import math
 class thirdarm_task_prediction:
 
     def __init__(self):
-        self.time_threshold = 1.0
+        self.time_threshold = 1.5
         self.data_buffer = np.array([], ndmin=2)
         self.command_buffer = np.array([], ndmin=2)
         self.N = 20

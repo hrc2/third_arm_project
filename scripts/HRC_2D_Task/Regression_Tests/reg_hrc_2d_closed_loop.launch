@@ -3,6 +3,7 @@
 
 	<node name = "hrc_2d_poser" pkg="third_arm" type="reg_hrc2d_apriltags_2d_ik.py" output ='screen'/>
 	<node name = "hrc_motor_controller" pkg="third_arm" type="reg_hrc2d_logit_closed_loop.py" output ='screen'/>
+	<node name="hrc2d_data_logger" pkg="third_arm" type="reg_hrc2d_data_logger.py" output='screen' />
   	<!--node name = "hrc_motor_controller" pkg="third_arm" type="reg_hrc2d_speech_closed_loop.py" output ='screen'/-->
   	<!--node name="prob_plot_data_prep"  pkg="third_arm"  type="reg_hrc2d_prob_plotter.py" /-->
 </launch>
