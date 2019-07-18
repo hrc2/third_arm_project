@@ -53,11 +53,11 @@ class hrc2d_speech_closed_loop:
         self.pub_target_probs = rospy.Publisher('/target_probs', Float32MultiArray, queue_size=1)
         self.pub_task_probs = rospy.Publisher('/task_probs', Float32MultiArray, queue_size=1)
 
-        self.trial_number = 0.0
+        self.trial_number = 1.0
         self.speed_topics = ['/base_swivel_controller/set_speed', '/vertical_tilt_controller/set_speed',
                              '/arm_extension_controller/set_speed', '/wrist_controller/set_speed',
                              '/wrist_tilt_controller/set_speed', '/gripper_controller/set_speed']
-        self.motor_max_speeds = [0.5, 0.5, 1.6, 0.5, 0.5, 1.0]
+        self.motor_max_speeds = [0.5, 0.5, 1.6, 1.0, 1.0, 1.6]
 
 
         print('Setting motor max speeds')
@@ -94,6 +94,8 @@ class hrc2d_speech_closed_loop:
 
         self.calibrate()
 
+        thresh = 10
+
         self.data_log_flag = 0
         self.train_flag = 0
 
@@ -108,7 +110,7 @@ class hrc2d_speech_closed_loop:
         self.mean_target2 = np.array([])
         self.target_probs = [0.00, 0.0]
         self.set_target = 0
-        self.target_prediction_threshold = 10
+        self.target_prediction_threshold = thresh
         # Later replace with  a structure depending on target clustering
         self.logit = thirdarm_logit()
         self.num_targets = 0
@@ -118,12 +120,15 @@ class hrc2d_speech_closed_loop:
         self.target_means = np.array([])
         
         self.task_predict = thirdarm_task_prediction()
-        self.task_prediction_threshold = 10
+        self.task_prediction_threshold = thresh
         self.relevant_commands = ['close', 'go', 'put', 'stop']
         self.dn_command = ['stop']
         self.task_predict.set_relevant_commands(self.relevant_commands, self.dn_command)
         self.task_pred_probs = [0.00, 0.0, 0.0, 0.0, 0.0]
         self.grip_open_prob = 0.0
+
+        self.pred_state_prev = ''
+        self.speech_current = ''
 
         self.pub_task_probs.publish(Float32MultiArray(data=self.task_pred_probs))
         self.pub_target_probs.publish(Float32MultiArray(data=self.target_probs))
@@ -134,13 +139,15 @@ class hrc2d_speech_closed_loop:
         rospy.Subscriber('/ee_pose', Point, self.update_ee_pose)
         rospy.Subscriber('/left_hand_pose', Point, self.update_lh_pose)
         rospy.Subscriber('/right_hand_pose', Point, self.update_rh_pose)
+        rospy.Subscriber('/cup_pose', Point, self.update_cup_pose)
         if self.trial_number <= self.task_prediction_threshold:
             rospy.Subscriber('/recognizer/output', String, self.update_speech_input)
 
 
     def set_motor_speeds(self, speed_topic, speed):
-        self.set_speed = rospy.ServiceProxy(speed_topic, dynamixel_controllers.srv.SetSpeed)
-        self.set_speed(speed)
+        rospy.wait_for_service(speed_topic)
+        set_speed = rospy.ServiceProxy(speed_topic, dynamixel_controllers.srv.SetSpeed, persistent=True)
+        set_speed(speed)
 
     def get_initial_states(self):
         topic_list = ['/base_swivel_controller/state', '/vertical_tilt_controller/state',
@@ -165,6 +172,8 @@ class hrc2d_speech_closed_loop:
         self.l = self.currval[2]
         self.base_x = base_pose.x
         self.base_y = base_pose.y
+        self.init_base_x = base_pose.x
+        self.init_base_y = base_pose.y
         self.ee_x = ee_pose.x
         self.ee_y = ee_pose.y
         self.lh_x = lh_pose.x
@@ -208,13 +217,9 @@ class hrc2d_speech_closed_loop:
         self.base_y = data.y
 
 
-    def update_cup1_pose(self, data):
-        self.cup1_x = data.x
-        self.cup1_y = data.y
-
-    def update_box1_pose(self, data):
-        self.box1_x = data.x
-        self.box1_y = data.y
+    def update_cup_pose(self, data):
+        self.cup_x = data.x
+        self.cup_y = data.y
 
     def update_ee_pose(self, data):
         self.ee_x = data.x
@@ -232,8 +237,8 @@ class hrc2d_speech_closed_loop:
         # else:
         #     return
         if self.set_target != 0:
-            ee_target_x = self.target_means[self.set_target - 1, 0]
-            ee_target_y = self.target_means[self.set_target - 1, 1]
+            ee_target_x = self.target_means[self.set_target - 1, 0] + self.init_base_x
+            ee_target_y = self.target_means[self.set_target - 1, 1] + self.init_base_y
         else:
             return
 
@@ -262,10 +267,15 @@ class hrc2d_speech_closed_loop:
         if self.grip_open_prob > 0.9 and self.trial_number > self.task_prediction_threshold:
             print('Found target. Opening gripper')
             self.pubvec[5].publish(self.grip_open)
+            self.trial_number += 1
+            self.pub_trial_number.publish(self.trial_number)
             self.data_log_flag = 0
+            self.train_flag = 0
             self.set_target = 0
             self.pub_speech_command.publish('open')
             self.grip_open_prob = 0.0
+            self.pred_state_prev = 'open'
+            self.speech_current = ''
             #if self.trial_number <= self.task_prediction_threshold:
             #    self.task_predict.add_to_command_buffer(np.array(['open', time.time()], ndmin=2))
             #time.sleep(0.1)
@@ -299,6 +309,7 @@ class hrc2d_speech_closed_loop:
             if self.trial_number <= self.task_prediction_threshold:
                 self.task_predict.process_data()
                 self.task_predict.train()
+                print('Training Task KNN model')
             
             if(self.Xnt.size==0):
                 self.Xnt = self.Xkt
@@ -326,13 +337,13 @@ class hrc2d_speech_closed_loop:
                 self.mean_target2 = np.mean(self.target2_positions, axis=0)
             
             if (self.target_positions.size == 0):
-                self.target_positions = np.array([self.ee_x, self.ee_y], ndmin=2)
+                self.target_positions = np.array([self.ee_x - self.init_base_x, self.ee_y - self.init_base_y], ndmin=2)
             else:
                 self.target_positions = np.append(self.target_positions,
-                                                   np.array([self.ee_x, self.ee_y], ndmin=2),
+                                                   np.array([self.ee_x - self.init_base_x, self.ee_y - self.init_base_y], ndmin=2),
                                                    axis=0)
             
-            if self.trial_number >= self.jump_init_number and self.trial_number < self.target_prediction_threshold:
+            if self.trial_number >= self.jump_init_number and self.trial_number <= self.target_prediction_threshold:
                 jm = JumpsMethod(self.target_positions)
                 jm.Distortions(cluster_range=range(1, self.target_positions.shape[0]), random_state=0)
                 jm.Jumps(Y=0.15)
@@ -352,6 +363,11 @@ class hrc2d_speech_closed_loop:
                 print('Training Logit model')
                 self.logit.assign_data(self.Xnt, self.Ynt[:, 0])
                 self.logit.train()
+
+            if self.speech_current == 'open':
+                self.trial_number += 1
+                self.pub_trial_number.publish(self.trial_number)
+
             self.train_flag = 0
 
 
@@ -371,6 +387,7 @@ class hrc2d_speech_closed_loop:
 
     def update_speech_input(self, dat):
         data = dat.data
+        self.speech_current = data
         if data == 'close':
             print('Gripper Closing')
             self.pubvec[5].publish(self.grip_close)
@@ -389,9 +406,7 @@ class hrc2d_speech_closed_loop:
             #self.go_to_cup(self.cup1_x, self.cup1_y)
         elif data == 'put':
             print('Putting away cup')
-            self.trial_number += 1
             self.data_log_flag = 1
-            self.pub_trial_number.publish(self.trial_number)
             self.go_to_dropoff()
         elif data == 'reset':
             self.go_to_init()
@@ -477,28 +492,32 @@ class hrc2d_speech_closed_loop:
         self.pubvec[2].publish(self.full_out)
 
     def move_after_prediction(self, probs):
-        # order: [close, go , put]
-        thresh = 0.85
-        if probs[0] > thresh:
+        # probs order: [close, go , put]
+        thresh = 0.90
+        if probs[0] > thresh and self.pred_state_prev == 'go':
             data = 'close'
+            msg = rospy.wait_for_message('/cup_pose', Point)
             print('Prediction: Gripper closing')
             self.pubvec[5].publish(self.grip_close)
             self.pub_speech_command.publish(data)
+            self.pred_state_prev = 'close'
             time.sleep(0.1)
-        elif probs[1] > thresh:
+        elif probs[1] > thresh and self.pred_state_prev =='open':
             data = 'go'
             print('Prediction: Going to handover')
             self.pubvec[5].publish(self.grip_open)
             self.pub_speech_command.publish(data)
             self.go_to_handover_location()
+            self.pred_state_prev = 'go'
             time.sleep(0.3)
-        elif probs[2] > thresh:
+        elif probs[2] > thresh and self.pred_state_prev =='close':
             data = 'put'
             print('Prediction: Putting away cup')
-            self.trial_number += 1
+            #self.trial_number += 1
             self.data_log_flag = 1
             #self.pub_trial_number.publish(self.trial_number)
             self.go_to_dropoff()
+            self.pred_state_prev = 'put'
             self.pub_speech_command.publish(data)
             #time.sleep(0.3)
 
@@ -529,16 +548,9 @@ class hrc2d_speech_closed_loop:
             self.pub_task_probs.publish(Float32MultiArray(data=pub_probs))
 
     def run(self):
-        # rospy.Subscriber('/base_swivel_controller/state', dynamixel_msgs.msg.JointState, self.update_theta_state)
-        # rospy.Subscriber('/arm_extension_controller/state', dynamixel_msgs.msg.JointState, self.update_l_state)
-        # rospy.Subscriber('/base_pose', Point, self.update_base_pose)
-        # rospy.Subscriber('/ee_pose', Point, self.update_ee_pose)
-        # rospy.Subscriber('/left_hand_pose', Point, self.update_lh_pose)
-        # rospy.Subscriber('/right_hand_pose', Point, self.update_rh_pose)
-        # rospy.Subscriber('/recognizer/output', String, self.update_speech_input)
         while not rospy.is_shutdown():
             self.prediction_method()
-        #rospy.spin()
+
 
 if __name__ == '__main__':
     t1 = hrc2d_speech_closed_loop()
