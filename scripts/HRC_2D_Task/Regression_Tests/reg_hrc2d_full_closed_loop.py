@@ -250,7 +250,7 @@ class hrc2d_closed_loop:
             #print('Moving DoF3')
             self.pubvec[2].publish(m3_command)
 
-        if self.grip_open_prob > 0.85 and self.pred_state_prev != 'open':
+        if self.grip_open_prob > 0.80 and self.pred_state_prev == 'put':
             print('Found target. Opening gripper')
             self.pred_state_prev = 'open'
             self.pubvec[5].publish(self.grip_open)
@@ -337,28 +337,29 @@ class hrc2d_closed_loop:
 
     def update_speech_input(self, dat):
         data = dat.data
-        self.speech_current = data
-        self.pub_speech_command.publish(data)
 
-        if data == 'close':
-            print('Gripper Closing')
-            self.pubvec[5].publish(self.grip_close)
-            time.sleep(0.1)
-        elif data == 'open':
-            print('Gripper Opening')
-            self.pubvec[5].publish(self.grip_open)
-            time.sleep(0.1)
-        elif data == 'go':
-            print('Going to handover')
-            self.pubvec[5].publish(self.grip_open)
-            self.go_to_handover_location()
-        elif data == 'put':
-            print('Putting away cup')
-            self.go_to_dropoff()
-        elif data == 'reset':
-            self.go_to_init()
-        elif data == 'stop':
-            self.stop_motors()
+        if self.mode == 'train' or self.mode == 'auto' or self.mode == 'speech' or self.mode == 'init':
+            self.speech_current = data
+            self.pub_speech_command.publish(data)
+            if data == 'close':
+                print('Gripper Closing')
+                self.pubvec[5].publish(self.grip_close)
+                time.sleep(0.1)
+            elif data == 'open':
+                print('Gripper Opening')
+                self.pubvec[5].publish(self.grip_open)
+                time.sleep(0.1)
+            elif data == 'go':
+                print('Going to handover')
+                self.pubvec[5].publish(self.grip_open)
+                self.go_to_handover_location()
+            elif data == 'put':
+                print('Putting away cup')
+                self.go_to_dropoff()
+            elif data == 'reset':
+                self.go_to_init()
+            elif data == 'stop':
+                self.stop_motors()
 
         if self.mode == 'train':
             if data in self.relevant_commands:
@@ -413,11 +414,13 @@ class hrc2d_closed_loop:
         if probs[0] > thresh and self.pred_state_prev == 'go':
             data = 'close'
             msg = rospy.wait_for_message('/cup_pose', Point)
-            print('Prediction: Gripper closing')
-            self.pubvec[5].publish(self.grip_close)
-            self.pub_speech_command.publish(data)
-            self.pred_state_prev = 'close'
-            time.sleep(0.1)
+            dist = math.sqrt((msg.x - self.ee_x) ** 2 + (msg.y - self.ee_y) ** 2)
+            if dist < 0.1:
+                print('Prediction: Gripper closing')
+                self.pubvec[5].publish(self.grip_close)
+                self.pub_speech_command.publish(data)
+                self.pred_state_prev = 'close'
+                time.sleep(0.1)
         elif probs[1] > thresh and self.pred_state_prev == 'open':
             data = 'go'
             print('Prediction: Going to handover')
@@ -483,6 +486,9 @@ class hrc2d_closed_loop:
         init_user_input = ''
         order = ''  # After training, ab = autonomous first; ba = speech first
 
+        print('Familiarize user with speech commands before starting study')
+        self.mode = 'init'
+
         while init_user_input != 'Y' and init_user_input != 'y' and init_user_input != 'set':
             init_user_input = raw_input('Begin Training Sequence? (Y/N): ')
             if init_user_input == 'Y' or init_user_input == 'y':
@@ -531,14 +537,18 @@ class hrc2d_closed_loop:
                     end_cutoff = 3 * self.trials_per_condition
                     next_mode = ''
                 if self.trial_number == start_cutoff and auto_user_input != 'set':
-                    print('Initiating Autonomous Trial')
+                    self.mode = ''
+                    raw_input('Press any key to initiate Autonomous Trial')
                     self.pred_state_prev = 'open'
                     auto_user_input = 'set'
+                    self.mode = 'auto'
+
+                self.autonomous_method()
+
                 if self.trial_number > end_cutoff:
                     self.mode = next_mode
                     if self.mode == '':
-                        print('End of Trials')
-                self.autonomous_method()
+                        print('End of Study')
 
             elif self.mode == 'speech':
                 if order == 'ba':
@@ -550,13 +560,17 @@ class hrc2d_closed_loop:
                     end_cutoff = 3 * self.trials_per_condition
                     next_mode = ''
                 if self.trial_number == start_cutoff and speech_user_input != 'set':
-                    print('Initiating Speech Trial')
+                    self.mode = ''
+                    raw_input('Press any key to initiate Speech Trial')
                     speech_user_input = 'set'
+                    self.mode = 'speech'
+
+                self.speech_method()
+
                 if self.trial_number > end_cutoff:
                     self.mode = next_mode
                     if self.mode == '':
-                        print('End of Trials')
-                self.speech_method()
+                        print('End of Study')
 
 
 if __name__ == '__main__':
