@@ -365,11 +365,16 @@ class hrc2d_closed_loop:
             if data in self.relevant_commands:
                 self.task_predict.add_to_command_buffer(np.array([data, time.time()], ndmin=2))
 
-        elif self.mode == 'auto' and data == 'open':
-            self.trial_number += 1
-            self.pub_trial_number.publish(self.trial_number)
-            self.pred_state_prev = 'open'
-            self.speech_current = ''
+        elif self.mode == 'auto':
+            if data == 'open':
+                self.trial_number += 1
+                self.pub_trial_number.publish(self.trial_number)
+                self.pred_state_prev = 'open'
+                self.speech_current = ''
+            elif data == 'close':
+                self.pred_state_prev = 'close'
+            elif data == 'go':
+                self.pred_state_prev = 'go'
 
         elif self.mode == 'speech' and data == 'open':
             self.trial_number += 1
@@ -415,7 +420,7 @@ class hrc2d_closed_loop:
             data = 'close'
             msg = rospy.wait_for_message('/cup_pose', Point)
             dist = math.sqrt((msg.x - self.ee_x) ** 2 + (msg.y - self.ee_y) ** 2)
-            if dist < 0.1:
+            if dist < 0.25:
                 print('Prediction: Gripper closing')
                 self.pubvec[5].publish(self.grip_close)
                 self.pub_speech_command.publish(data)
@@ -425,8 +430,8 @@ class hrc2d_closed_loop:
             data = 'go'
             print('Prediction: Going to handover')
             self.pubvec[5].publish(self.grip_open)
-            self.pub_speech_command.publish(data)
             self.go_to_handover_location()
+            self.pub_speech_command.publish(data)
             self.pred_state_prev = 'go'
             time.sleep(0.3)
         elif probs[2] > thresh and self.pred_state_prev == 'close':
@@ -480,7 +485,7 @@ class hrc2d_closed_loop:
         pass
 
     def run(self):
-        self.trials_per_condition = 5
+        self.trials_per_condition = 20
         auto_user_input = ''
         speech_user_input = ''
         init_user_input = ''
