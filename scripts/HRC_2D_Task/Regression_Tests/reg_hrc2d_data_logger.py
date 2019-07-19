@@ -9,6 +9,7 @@ import tf
 import PyKDL
 import dynamic_reconfigure.server
 import argparse
+import os
 
 import sensor_msgs.msg
 from sensor_msgs.msg import Imu, JointState, Joy
@@ -26,7 +27,8 @@ import csv
 from pynput import keyboard
 from datetime import date
 
-DATA_PATH = '/home/hriclass/catkin_ws/src/third_arm/scripts/HRC_2D_Task/Regression_Tests/Data/'
+DATA_PATH = str(os.path.dirname(__file__) + '/Data/')
+#DATA_PATH = '/home/hriclass/catkin_ws/src/third_arm/scripts/HRC_2D_Task/Regression_Tests/Data/'
 today = str(date.today()) + '-' + str(int(time.time()))
 TAGS_FILE = str(DATA_PATH + 'TagData' + today + '.csv')
 SPEECH_FILE = str(DATA_PATH + 'SpeechData' + today + '.csv')
@@ -123,11 +125,11 @@ class hrc2d_data_logger:
         curr_time = time.time()
         # Box target labels, assuming alternating dropoffs in initial data:
         label = 0
-        if self.task_number > 0:
-            if self.task_number % 2 == 1:
-                label = 1
-            else:
-                label = 2
+        # if self.task_number > 0:
+        #     if self.task_number % 2 == 1:
+        #         label = 1
+        #     else:
+        #         label = 2
 
         tag_data = np.append(self.tag_log, np.array([curr_time, self.task_number, label]))
         #print(tag_data)
