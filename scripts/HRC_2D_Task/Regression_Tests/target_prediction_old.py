@@ -16,8 +16,6 @@ class thirdarm_logit:
 
     def __init__(self):
         self.logreg = LogisticRegression()
-        self.data_buffer = np.array([], ndmin=2)
-        self.label_buffer = np.array([], ndmin=2)
 
     def assign_data(self, training_data, target_labels):
         self.Xtrain = training_data
