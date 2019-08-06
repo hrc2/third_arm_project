@@ -128,6 +128,7 @@ class hrc2d_closed_loop:
         self.pred_state_prev = ''
         self.speech_current = ''
         self.mode = ''
+        self.prev_cmd = ''
 
         self.pub_task_probs.publish(Float32MultiArray(data=self.task_pred_probs))
         self.pub_target_probs.publish(Float32MultiArray(data=self.target_probs))
@@ -250,9 +251,10 @@ class hrc2d_closed_loop:
             #print('Moving DoF3')
             self.pubvec[2].publish(m3_command)
 
-        if self.grip_open_prob > 0.80 and self.pred_state_prev == 'put':
+        if self.grip_open_prob > 0.80 and (self.pred_state_prev == 'put' or self.prev_cmd == 'put'):
             print('Found target. Opening gripper')
             self.pred_state_prev = 'open'
+            self.prev_cmd = 'open'
             self.pubvec[5].publish(self.grip_open)
             self.trial_number += 1
             self.pub_trial_number.publish(self.trial_number)
@@ -344,10 +346,12 @@ class hrc2d_closed_loop:
             if data == 'close':
                 print('Gripper Closing')
                 self.pubvec[5].publish(self.grip_close)
+                self.prev_cmd = 'close'
                 time.sleep(0.1)
-            elif data == 'open':
+            elif data == 'open' and self.prev_cmd == 'put':
                 print('Gripper Opening')
                 self.pubvec[5].publish(self.grip_open)
+                self.prev_cmd = 'open'
                 time.sleep(0.1)
             elif data == 'go':
                 print('Going to handover')
@@ -355,18 +359,21 @@ class hrc2d_closed_loop:
                 self.go_to_handover_location()
             elif data == 'put':
                 print('Putting away cup')
+                self.prev_cmd = 'put'
                 self.go_to_dropoff()
             elif data == 'reset':
                 self.go_to_init()
+                self.prev_cmd = 'reset'
             elif data == 'stop':
                 self.stop_motors()
+                self.prev_cmd = 'stop'
 
         if self.mode == 'train':
             if data in self.relevant_commands:
                 self.task_predict.add_to_command_buffer(np.array([data, time.time()], ndmin=2))
 
         elif self.mode == 'auto':
-            if data == 'open':
+            if data == 'open' and self.prev_cmd == 'put':
                 self.trial_number += 1
                 self.pub_trial_number.publish(self.trial_number)
                 self.pred_state_prev = 'open'
@@ -376,7 +383,7 @@ class hrc2d_closed_loop:
             elif data == 'go':
                 self.pred_state_prev = 'go'
 
-        elif self.mode == 'speech' and data == 'open':
+        elif self.mode == 'speech' and data == 'open' and self.prev_cmd == 'put':
             self.trial_number += 1
             self.pub_trial_number.publish(self.trial_number)
             self.speech_current = ''
@@ -425,6 +432,7 @@ class hrc2d_closed_loop:
                 self.pubvec[5].publish(self.grip_close)
                 self.pub_speech_command.publish(data)
                 self.pred_state_prev = 'close'
+                self.prev_cmd = 'close'
                 time.sleep(0.1)
         elif probs[1] > thresh and self.pred_state_prev == 'open':
             data = 'go'
@@ -433,6 +441,7 @@ class hrc2d_closed_loop:
             self.go_to_handover_location()
             self.pub_speech_command.publish(data)
             self.pred_state_prev = 'go'
+            self.prev_cmd = 'go'
             time.sleep(0.3)
         elif probs[2] > thresh and self.pred_state_prev == 'close':
             data = 'put'
@@ -440,6 +449,7 @@ class hrc2d_closed_loop:
             print('Prediction: Putting away cup')
             self.go_to_dropoff()
             self.pred_state_prev = 'put'
+            self.prev_cmd = 'put'
             self.pub_speech_command.publish(data)
             #time.sleep(0.3)
 
