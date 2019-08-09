@@ -114,7 +114,7 @@ class hrc2d_closed_loop:
         self.target_logit = thirdarm_logit()
         self.num_targets = 0
         self.target_positions = np.array([])
-        self.jump_init_number = 4
+        self.jump_init_number = 10
         self.target_labels = np.array([])
         self.target_means = np.array([])
         
@@ -281,7 +281,7 @@ class hrc2d_closed_loop:
                 self.Ykt = np.append(self.Ykt, np.array(Y_current, ndmin=2), axis=0)
                 self.Tnt = np.append(self.Tnt, np.array(tk, ndmin=2), axis=0)
 
-        elif self.speech_current == 'open':
+        elif self.speech_current == 'open' and self.tflag == 1:
             print('Training Task KNN model')
             self.task_predict.process_data()
             self.task_predict.train()
@@ -304,13 +304,13 @@ class hrc2d_closed_loop:
             if self.trial_number >= self.jump_init_number:
                 jm = JumpsMethod(self.target_positions)
                 jm.Distortions(cluster_range=range(1, self.target_positions.shape[0]), random_state=0)
-                jm.Jumps(Y=0.15)
+                jm.Jumps(Y=0.1)
 
-                print('Optimal Number of clusters for N = ' + str(self.target_positions.shape[0]) + ' data points: '
-                      + str(jm.recommended_cluster_number))
+                #print('Optimal Number of clusters for N = ' + str(self.target_positions.shape[0]) + ' data points: '
+                #      + str(jm.recommended_cluster_number))
 
                 self.num_targets = jm.recommended_cluster_number
-                if self.num_targets <= 1:
+                if self.num_targets != 2:
                     self.num_targets = 2
                 km = KMeans(n_clusters=self.num_targets)
                 self.target_labels = km.fit_predict(self.target_positions) + 1
@@ -324,6 +324,7 @@ class hrc2d_closed_loop:
             self.trial_number += 1
             self.pub_trial_number.publish(self.trial_number)
             self.speech_current = ''
+            self.tflag = 0
 
     def compute_target_means(self):
         labels = np.unique(self.target_labels)
@@ -347,15 +348,31 @@ class hrc2d_closed_loop:
                 print('Gripper Closing')
                 self.pubvec[5].publish(self.grip_close)
                 self.prev_cmd = 'close'
+                if self.mode == 'auto':
+                    self.pred_state_prev = 'close'
                 time.sleep(0.1)
             elif data == 'open' and self.prev_cmd == 'put':
                 print('Gripper Opening')
+                self.tflag = 1
                 self.pubvec[5].publish(self.grip_open)
+                if self.mode == 'speech': #and data == 'open' and self.prev_cmd == 'put':
+                    self.trial_number += 1
+                    self.pub_trial_number.publish(self.trial_number)
+                    self.speech_current = ''
+                elif self.mode == 'auto':
+                    if data == 'open' and self.prev_cmd == 'put':
+                        self.trial_number += 1
+                        self.pub_trial_number.publish(self.trial_number)
+                        self.pred_state_prev = 'open'
+                        self.speech_current = ''
                 self.prev_cmd = 'open'
                 time.sleep(0.1)
             elif data == 'go':
                 print('Going to handover')
+                self.prev_cmd = 'go'
                 self.pubvec[5].publish(self.grip_open)
+                if self.mode == 'auto':
+                    self.pred_state_prev = 'go'
                 self.go_to_handover_location()
             elif data == 'put':
                 print('Putting away cup')
@@ -372,21 +389,18 @@ class hrc2d_closed_loop:
             if data in self.relevant_commands:
                 self.task_predict.add_to_command_buffer(np.array([data, time.time()], ndmin=2))
 
-        elif self.mode == 'auto':
-            if data == 'open' and self.prev_cmd == 'put':
-                self.trial_number += 1
-                self.pub_trial_number.publish(self.trial_number)
-                self.pred_state_prev = 'open'
-                self.speech_current = ''
-            elif data == 'close':
-                self.pred_state_prev = 'close'
-            elif data == 'go':
-                self.pred_state_prev = 'go'
+        # elif self.mode == 'auto':
+        #     if data == 'open' and self.prev_cmd == 'put':
+        #         self.trial_number += 1
+        #         self.pub_trial_number.publish(self.trial_number)
+        #         self.pred_state_prev = 'open'
+        #         self.speech_current = ''
+        #     elif data == 'close':
+        #         self.pred_state_prev = 'close'
+        #     elif data == 'go':
+        #         self.pred_state_prev = 'go'
 
-        elif self.mode == 'speech' and data == 'open' and self.prev_cmd == 'put':
-            self.trial_number += 1
-            self.pub_trial_number.publish(self.trial_number)
-            self.speech_current = ''
+
 
 
     def stop_motors(self):
