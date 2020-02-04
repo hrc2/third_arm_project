@@ -34,7 +34,8 @@ from sklearn.externals import joblib
 
 # Handover state: DoF 1 =  ?, DoF3 = Full_in
 # Dropoff state: DoF 1 =  ?, DoF3 = Full_out
-path = os.path.dirname(__file__)
+#path = os.path.dirname(__file__)
+path = '/home/hriclass/catkin_ws/src/third_arm/scripts/HRC_2D_Task/Regression_Tests'
 today = str(date.today()) + '-' + str(int(time.time()))
 logit_save_file = str(path + '/Data/Trained_Models/Logit_Target_Model' + today + '.sav')
 knn_save_file = str(path + '/Data/Trained_Models/KNN_Task_Model' + today + '.sav')
@@ -66,7 +67,7 @@ class hrc2d_closed_loop:
         self.speed_topics = ['/base_swivel_controller/set_speed', '/vertical_tilt_controller/set_speed',
                              '/arm_extension_controller/set_speed', '/wrist_controller/set_speed',
                              '/wrist_tilt_controller/set_speed', '/gripper_controller/set_speed']
-        self.motor_max_speeds = [0.4, 0.5, 1.0, 1.0, 1.0, 1.6]
+        self.motor_max_speeds = [0.8, 0.5, 1.0, 1.0, 1.0, 1.6]
 
 
         print('Setting motor max speeds')
@@ -80,7 +81,7 @@ class hrc2d_closed_loop:
         self.grip_close = 1.2
 
         self.d1_handover = 0.4
-        self.d1_dropoff = -2.2
+        self.d1_dropoff = -1.8
 
         self.full_out = self.currval[2]
         if self.full_out < 0.2:
@@ -244,7 +245,7 @@ class hrc2d_closed_loop:
         lam = 16.252
         self.grip_open_prob = math.exp(-lam*dist*dist)
 
-        if (m1_command > -1.57) and (m1_command < 1.57):
+        if (m1_command > -3.1) and (m1_command < 3.1):
             #print('Moving DoF1')
             self.pubvec[0].publish(m1_command)
         if (m3_command > self.full_out) and (m3_command < self.full_in):
@@ -341,7 +342,8 @@ class hrc2d_closed_loop:
     def update_speech_input(self, dat):
         data = dat.data
 
-        if self.mode == 'train' or self.mode == 'auto' or self.mode == 'speech' or self.mode == 'init':
+        #if self.mode == 'train' or self.mode == 'auto' or self.mode == 'speech' or self.mode == 'init':
+        if self.mode == 'train' or self.mode == 'speech' or self.mode == 'init':
             self.speech_current = data
             self.pub_speech_command.publish(data)
             if data == 'close':
@@ -436,7 +438,7 @@ class hrc2d_closed_loop:
 
     def move_after_prediction(self, probs):
         # probs order: [close, go , put]
-        thresh = 0.80
+        thresh = 0.70
         if probs[0] > thresh and self.pred_state_prev == 'go':
             data = 'close'
             msg = rospy.wait_for_message('/cup_pose', Point)
@@ -508,7 +510,7 @@ class hrc2d_closed_loop:
         pass
 
     def run(self):
-        self.trials_per_condition = 20
+        self.trials_per_condition = 10
         auto_user_input = ''
         speech_user_input = ''
         init_user_input = ''

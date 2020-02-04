@@ -24,7 +24,7 @@ import dynamixel_controllers.srv
 from diagnostic_msgs.msg import DiagnosticArray
 from apriltags_ros.msg import AprilTagDetectionArray
 import csv
-from pynput import keyboard
+#from pynput import keyboard
 from datetime import date
 
 DATA_PATH = str(os.path.dirname(__file__) + '/Data/')

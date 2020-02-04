@@ -87,7 +87,7 @@ class hrc2d_closed_loop:
             print('Error: Re-calibrate length extension')
             exit(0)
         #self.full_out = self.full_in - 2.0
-        self.full_in = self.full_out + 1.6
+        self.full_in = self.full_out + 1.2
         self.len_mid = 0.5*(self.full_out + self.full_in)
         if self.len_mid < self.full_out and self.len_mid > self.full_in:
             print('Error: Re-calibrate length extension')
@@ -114,7 +114,7 @@ class hrc2d_closed_loop:
         self.target_logit = thirdarm_logit()
         self.num_targets = 0
         self.target_positions = np.array([])
-        self.jump_init_number = 10
+        self.jump_init_number = 5
         self.target_labels = np.array([])
         self.target_means = np.array([])
         
