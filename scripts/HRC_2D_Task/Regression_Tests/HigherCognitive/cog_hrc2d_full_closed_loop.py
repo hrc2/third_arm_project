@@ -67,7 +67,7 @@ class hrc2d_closed_loop:
         self.speed_topics = ['/base_swivel_controller/set_speed', '/vertical_tilt_controller/set_speed',
                              '/arm_extension_controller/set_speed', '/wrist_controller/set_speed',
                              '/wrist_tilt_controller/set_speed', '/gripper_controller/set_speed']
-        self.motor_max_speeds = [0.8, 0.5, 1.0, 1.0, 1.0, 1.6]
+        self.motor_max_speeds = [0.5, 0.5, 1.0, 1.0, 1.0, 1.6]
 
 
         print('Setting motor max speeds')
@@ -130,6 +130,7 @@ class hrc2d_closed_loop:
         self.speech_current = ''
         self.mode = ''
         self.prev_cmd = ''
+        self.tflag = 0
 
         self.pub_task_probs.publish(Float32MultiArray(data=self.task_pred_probs))
         self.pub_target_probs.publish(Float32MultiArray(data=self.target_probs))
@@ -342,8 +343,8 @@ class hrc2d_closed_loop:
     def update_speech_input(self, dat):
         data = dat.data
 
-        #if self.mode == 'train' or self.mode == 'auto' or self.mode == 'speech' or self.mode == 'init':
-        if self.mode == 'train' or self.mode == 'speech' or self.mode == 'init':
+        if self.mode == 'train' or self.mode == 'auto' or self.mode == 'speech' or self.mode == 'init':
+        #if self.mode == 'train' or self.mode == 'speech' or self.mode == 'init':
             self.speech_current = data
             self.pub_speech_command.publish(data)
             if data == 'close':
@@ -438,7 +439,7 @@ class hrc2d_closed_loop:
 
     def move_after_prediction(self, probs):
         # probs order: [close, go , put]
-        thresh = 0.70
+        thresh = 0.80
         if probs[0] > thresh and self.pred_state_prev == 'go':
             data = 'close'
             msg = rospy.wait_for_message('/cup_pose', Point)
@@ -510,7 +511,7 @@ class hrc2d_closed_loop:
         pass
 
     def run(self):
-        self.trials_per_condition = 10
+        self.trials_per_condition = 6
         auto_user_input = ''
         speech_user_input = ''
         init_user_input = ''
@@ -568,6 +569,7 @@ class hrc2d_closed_loop:
                     next_mode = ''
                 if self.trial_number == start_cutoff and auto_user_input != 'set':
                     self.mode = ''
+                    self.go_to_init()
                     raw_input('Press any key to initiate Autonomous Trial')
                     self.pred_state_prev = 'open'
                     auto_user_input = 'set'
@@ -591,6 +593,7 @@ class hrc2d_closed_loop:
                     next_mode = ''
                 if self.trial_number == start_cutoff and speech_user_input != 'set':
                     self.mode = ''
+                    self.go_to_init()
                     raw_input('Press any key to initiate Speech Trial')
                     speech_user_input = 'set'
                     self.mode = 'speech'
