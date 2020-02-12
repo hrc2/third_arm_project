@@ -392,19 +392,6 @@ class hrc2d_closed_loop:
             if data in self.relevant_commands:
                 self.task_predict.add_to_command_buffer(np.array([data, time.time()], ndmin=2))
 
-        # elif self.mode == 'auto':
-        #     if data == 'open' and self.prev_cmd == 'put':
-        #         self.trial_number += 1
-        #         self.pub_trial_number.publish(self.trial_number)
-        #         self.pred_state_prev = 'open'
-        #         self.speech_current = ''
-        #     elif data == 'close':
-        #         self.pred_state_prev = 'close'
-        #     elif data == 'go':
-        #         self.pred_state_prev = 'go'
-
-
-
 
     def stop_motors(self):
         topic_list = ['/base_swivel_controller/state', '/vertical_tilt_controller/state',
@@ -429,6 +416,7 @@ class hrc2d_closed_loop:
     def go_to_dropoff(self):
         self.pubvec[2].publish(self.full_out)
         self.pubvec[0].publish(self.d1_dropoff)
+        self.pubvec[5].publish(self.grip_close)
 
     def go_to_init(self):
         print('Setting motors to initial states')
@@ -439,12 +427,12 @@ class hrc2d_closed_loop:
 
     def move_after_prediction(self, probs):
         # probs order: [close, go , put]
-        thresh = 0.80
+        thresh = 0.70
         if probs[0] > thresh and self.pred_state_prev == 'go':
             data = 'close'
             msg = rospy.wait_for_message('/cup_pose', Point)
             dist = math.sqrt((msg.x - self.ee_x) ** 2 + (msg.y - self.ee_y) ** 2)
-            if dist < 0.25:
+            if dist < 0.15:
                 print('Prediction: Gripper closing')
                 self.pubvec[5].publish(self.grip_close)
                 self.pub_speech_command.publish(data)
@@ -511,7 +499,7 @@ class hrc2d_closed_loop:
         pass
 
     def run(self):
-        self.trials_per_condition = 6
+        self.trials_per_condition = 10
         auto_user_input = ''
         speech_user_input = ''
         init_user_input = ''
@@ -580,6 +568,7 @@ class hrc2d_closed_loop:
                 if self.trial_number > end_cutoff:
                     self.mode = next_mode
                     if self.mode == '':
+                        self.go_to_init()
                         print('End of Study')
 
             elif self.mode == 'speech':
@@ -603,6 +592,7 @@ class hrc2d_closed_loop:
                 if self.trial_number > end_cutoff:
                     self.mode = next_mode
                     if self.mode == '':
+                        self.go_to_init()
                         print('End of Study')
 
 

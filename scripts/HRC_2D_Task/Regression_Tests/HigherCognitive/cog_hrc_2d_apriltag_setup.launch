@@ -28,11 +28,11 @@
 
     <!-- Describe the tags -->
     <rosparam param="tag_descriptions">[      
-      {id: 1, size: 0.07, frame_id: base_frame},
-      {id: 2, size: 0.07, frame_id: ee_frame},
+      {id: 1, size: 0.09, frame_id: base_frame},
+      {id: 2, size: 0.09, frame_id: ee_frame},
       {id: 12, size: 0.07, frame_id: cup_frame},      
-      {id: 3, size: 0.07, frame_id: left_hand},
-      {id: 4, size: 0.07, frame_id: right_hand}]      
+      {id: 3, size: 0.09, frame_id: left_hand},
+      {id: 4, size: 0.09, frame_id: right_hand}]      
     </rosparam>
   </node>
 
