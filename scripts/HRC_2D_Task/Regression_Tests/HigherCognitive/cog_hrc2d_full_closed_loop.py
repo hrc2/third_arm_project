@@ -9,6 +9,7 @@ import tf
 import PyKDL
 import dynamic_reconfigure.server
 import argparse
+from playsound import playsound
 import os
 from datetime import date
 
@@ -255,6 +256,7 @@ class hrc2d_closed_loop:
 
         if self.grip_open_prob > 0.80 and (self.pred_state_prev == 'put' or self.prev_cmd == 'put'):
             print('Found target. Opening gripper')
+            playsound('opening.wav')
             self.pred_state_prev = 'open'
             self.prev_cmd = 'open'
             self.pubvec[5].publish(self.grip_open)
@@ -263,6 +265,7 @@ class hrc2d_closed_loop:
             self.set_target = 0
             self.pub_speech_command.publish('open')
             self.grip_open_prob = 0.0
+            self.go_to_init()
             self.speech_current = ''
             #if self.trial_number <= self.task_prediction_threshold:
             #    self.task_predict.add_to_command_buffer(np.array(['open', time.time()], ndmin=2))
@@ -370,6 +373,7 @@ class hrc2d_closed_loop:
                         self.speech_current = ''
                 self.prev_cmd = 'open'
                 time.sleep(0.1)
+                self.go_to_init()
             elif data == 'go':
                 print('Going to handover')
                 self.prev_cmd = 'go'
@@ -414,6 +418,7 @@ class hrc2d_closed_loop:
         self.pubvec[0].publish(self.d1_handover)
 
     def go_to_dropoff(self):
+        self.pubvec[5].publish(self.grip_close)
         self.pubvec[2].publish(self.full_out)
         self.pubvec[0].publish(self.d1_dropoff)
         self.pubvec[5].publish(self.grip_close)
@@ -421,9 +426,11 @@ class hrc2d_closed_loop:
     def go_to_init(self):
         print('Setting motors to initial states')
         for i in range(len(self.initial_angles)):
-            self.pubvec[i].publish(self.initial_angles[i])
-            time.sleep(0.5)
-        self.pubvec[2].publish(self.full_out)
+            if i!=2:
+                self.pubvec[i].publish(self.initial_angles[i])
+            elif i==2:
+                self.pubvec[2].publish(self.full_out)
+            time.sleep(0.1)
 
     def move_after_prediction(self, probs):
         # probs order: [close, go , put]
@@ -434,6 +441,7 @@ class hrc2d_closed_loop:
             dist = math.sqrt((msg.x - self.ee_x) ** 2 + (msg.y - self.ee_y) ** 2)
             if dist < 0.15:
                 print('Prediction: Gripper closing')
+                playsound('closing.wav')
                 self.pubvec[5].publish(self.grip_close)
                 self.pub_speech_command.publish(data)
                 self.pred_state_prev = 'close'
@@ -442,6 +450,7 @@ class hrc2d_closed_loop:
         elif probs[1] > thresh and self.pred_state_prev == 'open':
             data = 'go'
             print('Prediction: Going to handover')
+            playsound('going.wav')
             self.pubvec[5].publish(self.grip_open)
             self.go_to_handover_location()
             self.pub_speech_command.publish(data)
@@ -452,6 +461,7 @@ class hrc2d_closed_loop:
             data = 'put'
             self.speech_current = 'put'
             print('Prediction: Putting away cup')
+            playsound('putting.wav')
             self.go_to_dropoff()
             self.pred_state_prev = 'put'
             self.prev_cmd = 'put'
