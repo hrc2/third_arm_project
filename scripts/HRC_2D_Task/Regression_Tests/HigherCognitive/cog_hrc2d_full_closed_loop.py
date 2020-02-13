@@ -40,8 +40,14 @@ path = '/home/hriclass/catkin_ws/src/third_arm/scripts/HRC_2D_Task/Regression_Te
 today = str(date.today()) + '-' + str(int(time.time()))
 logit_save_file = str(path + '/Data/Trained_Models/Logit_Target_Model' + today + '.sav')
 knn_save_file = str(path + '/Data/Trained_Models/KNN_Task_Model' + today + '.sav')
-logit_load_file = str(path + '/Data/Trained_Models/Logit_Target_Model2019-07-19-1563521135')
-knn_load_file = str(path + '/Data/Trained_Models/KNN_Task_Model2019-07-19-1563521135')
+logit_load_file = str(path + '/Data/Trained_Models/Logit_Target_Model2020-02-13-1581624602.sav')
+knn_load_file = str(path + '/Data/Trained_Models/KNN_Task_Model2020-02-13-1581624602.sav')
+spath = os.path.dirname(__file__)
+going_sound = str(spath + '/going.wav')
+putting_sound = str(spath + '/putting.wav')
+closing_sound = str(spath + '/closing.wav')
+opening_sound = str(spath + '/opening.wav')
+
 
 class hrc2d_closed_loop:
     def __init__(self):
@@ -256,7 +262,7 @@ class hrc2d_closed_loop:
 
         if self.grip_open_prob > 0.80 and (self.pred_state_prev == 'put' or self.prev_cmd == 'put'):
             print('Found target. Opening gripper')
-            playsound('opening.wav')
+            playsound(opening_sound)
             self.pred_state_prev = 'open'
             self.prev_cmd = 'open'
             self.pubvec[5].publish(self.grip_open)
@@ -439,9 +445,9 @@ class hrc2d_closed_loop:
             data = 'close'
             msg = rospy.wait_for_message('/cup_pose', Point)
             dist = math.sqrt((msg.x - self.ee_x) ** 2 + (msg.y - self.ee_y) ** 2)
-            if dist < 0.15:
+            if dist < 0.25:
                 print('Prediction: Gripper closing')
-                playsound('closing.wav')
+                playsound(closing_sound)
                 self.pubvec[5].publish(self.grip_close)
                 self.pub_speech_command.publish(data)
                 self.pred_state_prev = 'close'
@@ -450,7 +456,7 @@ class hrc2d_closed_loop:
         elif probs[1] > thresh and self.pred_state_prev == 'open':
             data = 'go'
             print('Prediction: Going to handover')
-            playsound('going.wav')
+            playsound(going_sound)
             self.pubvec[5].publish(self.grip_open)
             self.go_to_handover_location()
             self.pub_speech_command.publish(data)
@@ -461,7 +467,7 @@ class hrc2d_closed_loop:
             data = 'put'
             self.speech_current = 'put'
             print('Prediction: Putting away cup')
-            playsound('putting.wav')
+            playsound(putting_sound)
             self.go_to_dropoff()
             self.pred_state_prev = 'put'
             self.prev_cmd = 'put'
