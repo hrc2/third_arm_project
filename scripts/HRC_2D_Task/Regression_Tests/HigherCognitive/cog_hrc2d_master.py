@@ -33,8 +33,6 @@ from sklearn.cluster import KMeans
 from jumpsmethod import JumpsMethod
 from sklearn.externals import joblib
 
-# Handover state: DoF 1 =  ?, DoF3 = Full_in
-# Dropoff state: DoF 1 =  ?, DoF3 = Full_out
 #path = os.path.dirname(__file__)
 path = '/home/hriclass/catkin_ws/src/third_arm/scripts/HRC_2D_Task/Regression_Tests'
 today = str(date.today()) + '-' + str(int(time.time()))
@@ -51,7 +49,7 @@ opening_sound = str(sound_path + '/opening.wav')
 
 class hrc2d_closed_loop:
     def __init__(self):
-        rospy.init_node('hrc2d_motor_controller')
+        rospy.init_node('hrc2d_closed_loop')
 
         self.currval = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         self.command = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
@@ -119,18 +117,18 @@ class hrc2d_closed_loop:
         self.target_probs = [0.0, 0.0]
         self.set_target = 0
 
-        self.target_logit = thirdarm_logit()
         self.num_targets = 0
         self.target_positions = np.array([])
         self.jump_init_number = 5
         self.target_labels = np.array([])
         self.target_means = np.array([])
+        self.target_logit = thirdarm_logit(self.jump_init_number)
         
         self.task_predict = thirdarm_task_prediction()
         self.relevant_commands = ['close', 'go', 'put', 'stop']
         self.dn_command = ['stop']
         self.task_predict.set_relevant_commands(self.relevant_commands, self.dn_command)
-        self.task_pred_probs = [0.00, 0.0, 0.0, 0.0, 0.0]
+        self.task_pred_probs = [0.0, 0.0, 0.0, 0.0, 0.0]
         self.grip_open_prob = 0.0
 
         self.pred_state_prev = ''
@@ -282,71 +280,77 @@ class hrc2d_closed_loop:
             #print('Updating current data')
             X_current = [self.base_x, self.base_y, self.lh_x, self.lh_y, self.rh_x, self.rh_y]
             Y_current = [2 - (self.trial_number % 2), self.trial_number]  # For first two targets
-            if(self.Xkt.size == 0):
-                self.Xkt = np.array(X_current, ndmin=2)
-                self.Ykt = np.array(Y_current, ndmin=2)
-                self.Tnt = np.array(tk, ndmin=2)
-            else:
-                self.Xkt = np.append(self.Xkt, np.array(X_current, ndmin=2), axis=0)
-                self.Ykt = np.append(self.Ykt, np.array(Y_current, ndmin=2), axis=0)
-                self.Tnt = np.append(self.Tnt, np.array(tk, ndmin=2), axis=0)
+            self.target_logit.add_to_data_buffer(X_current, Y_current)
+            # if(self.Xkt.size == 0):
+            #     self.Xkt = np.array(X_current, ndmin=2)
+            #     self.Ykt = np.array(Y_current, ndmin=2)
+            #     self.Tnt = np.array(tk, ndmin=2)
+            # else:
+            #     self.Xkt = np.append(self.Xkt, np.array(X_current, ndmin=2), axis=0)
+            #     self.Ykt = np.append(self.Ykt, np.array(Y_current, ndmin=2), axis=0)
+            #     self.Tnt = np.append(self.Tnt, np.array(tk, ndmin=2), axis=0)
 
         elif self.speech_current == 'open' and self.tflag == 1:
             print('Training Task KNN model')
             self.task_predict.process_data()
             self.task_predict.train()
 
-            if(self.Xnt.size==0):
-                self.Xnt = self.Xkt
-                self.Ynt = self.Ykt
-            else:
-                self.Xnt = np.append(self.Xnt, self.Xkt, axis=0)
-                self.Ynt = np.append(self.Ynt, self.Ykt, axis=0)
-            self.Tnt = np.append(self.Tnt, np.array(tk, ndmin=2), axis=0)
-            
-            if (self.target_positions.size == 0):
-                self.target_positions = np.array([self.ee_x - self.init_base_x, self.ee_y - self.init_base_y], ndmin=2)
-            else:
-                self.target_positions = np.append(self.target_positions,
-                                                   np.array([self.ee_x - self.init_base_x, self.ee_y - self.init_base_y], ndmin=2),
-                                                   axis=0)
+            self.target_logit.update_train_buffer()
+            # if(self.Xnt.size==0):
+            #     self.Xnt = self.Xkt
+            #     self.Ynt = self.Ykt
+            # else:
+            #     self.Xnt = np.append(self.Xnt, self.Xkt, axis=0)
+            #     self.Ynt = np.append(self.Ynt, self.Ykt, axis=0)
+            #self.Tnt = np.append(self.Tnt, np.array(tk, ndmin=2), axis=0)
+
+            self.target_logit.update_target_data(np.array([self.ee_x - self.init_base_x, self.ee_y - self.init_base_y], ndmin=2))
+
+            # if (self.target_positions.size == 0):
+            #     self.target_positions = np.array([self.ee_x - self.init_base_x, self.ee_y - self.init_base_y], ndmin=2)
+            # else:
+            #     self.target_positions = np.append(self.target_positions,
+            #                                        np.array([self.ee_x - self.init_base_x, self.ee_y - self.init_base_y], ndmin=2),
+            #                                        axis=0)
             
             if self.trial_number >= self.jump_init_number:
-                jm = JumpsMethod(self.target_positions)
-                jm.Distortions(cluster_range=range(1, self.target_positions.shape[0]), random_state=0)
-                jm.Jumps(Y=0.1)
-
-                #print('Optimal Number of clusters for N = ' + str(self.target_positions.shape[0]) + ' data points: '
-                #      + str(jm.recommended_cluster_number))
-
-                self.num_targets = jm.recommended_cluster_number
-                if self.num_targets != 2:
-                    self.num_targets = 2
-                km = KMeans(n_clusters=self.num_targets)
-                self.target_labels = km.fit_predict(self.target_positions) + 1
-                self.reprocess_Yn()
-                self.compute_target_means()
+                self.target_logit.process_data(self.trial_number)
+                # jm = JumpsMethod(self.target_positions)
+                # jm.Distortions(cluster_range=range(1, self.target_positions.shape[0]), random_state=0)
+                # jm.Jumps(Y=0.1)
+                #
+                # #print('Optimal Number of clusters for N = ' + str(self.target_positions.shape[0]) + ' data points: '
+                # #      + str(jm.recommended_cluster_number))
+                #
+                # self.num_targets = jm.recommended_cluster_number
+                # if self.num_targets != 2:
+                #     self.num_targets = 2
+                # km = KMeans(n_clusters=self.num_targets)
+                # self.target_labels = km.fit_predict(self.target_positions) + 1
+                # self.reprocess_Yn()
+                # self.compute_target_means()
 
                 print('Training Logit model')
-                self.target_logit.assign_data(self.Xnt, self.Ynt[:, 0])
+                #self.target_logit.assign_data(self.Xnt, self.Ynt[:, 0])
                 self.target_logit.train()
+                self.target_means = self.target_logit.get_target_means()
 
             self.trial_number += 1
             self.pub_trial_number.publish(self.trial_number)
             self.speech_current = ''
             self.tflag = 0
 
-    def compute_target_means(self):
-        labels = np.unique(self.target_labels)
-        self.target_means = np.zeros([len(labels), 2])
-        for i in range(len(labels)):
-            ind = np.where(self.target_labels == labels[i])[0]
-            self.target_means[i, :] = np.mean(self.target_positions[ind, :], axis=0)
-
-    def reprocess_Yn(self):
-        for i in range(0, int(self.trial_number)):
-            ind = np.where(self.Ynt[:, 1].astype(int) == i+1)[0]
-            self.Ynt[ind, 0] = self.target_labels[i]
+    # def compute_target_means(self):
+    #     labels = np.unique(self.target_labels)
+    #     self.target_means = np.zeros([len(labels), 2])
+    #     for i in range(len(labels)):
+    #         ind = np.where(self.target_labels == labels[i])[0]
+    #         self.target_means[i, :] = np.mean(self.target_positions[ind, :], axis=0)
+    #
+    # def reprocess_Yn(self):
+    #     for i in range(0, int(self.trial_number)):
+    #         ind = np.where(self.Ynt[:, 1].astype(int) == i+1)[0]
+    #         self.Ynt[ind, 0] = self.target_labels[i]
 
     def update_speech_input(self, dat):
         data = dat.data
@@ -491,6 +495,13 @@ class hrc2d_closed_loop:
         self.task_predict.add_to_data_buffer(x_data)
 
     def autonomous_method(self):
+        x_test = np.array([self.base_x, self.base_y, self.ee_x, self.ee_y, self.lh_x, self.lh_y, self.rh_x, self.rh_y], ndmin=2)
+        pred_probs = self.task_predict.predict_probabilites(x_test).ravel()
+        probs = [pred_probs[1], pred_probs[2], pred_probs[0], self.grip_open_prob, pred_probs[3]]
+        self.move_after_prediction(pred_probs)
+        pub_probs = [x * 100 for x in probs]
+        self.pub_task_probs.publish(Float32MultiArray(data=pub_probs))
+
         X_current = [self.base_x, self.base_y, self.lh_x, self.lh_y, self.rh_x, self.rh_y]
         if self.speech_current == 'put':
             self.target_probs = self.target_logit.predict_probabilites(np.array(X_current, ndmin=2))
@@ -502,18 +513,13 @@ class hrc2d_closed_loop:
             if self.set_target != 0:
                 self.move_to_target()
 
-        x_test = np.array([self.base_x, self.base_y, self.ee_x, self.ee_y, self.lh_x, self.lh_y, self.rh_x, self.rh_y], ndmin=2)
-        pred_probs = self.task_predict.predict_probabilites(x_test).ravel()
-        probs = [pred_probs[1], pred_probs[2], pred_probs[0], self.grip_open_prob, pred_probs[3]]
-        self.move_after_prediction(pred_probs)
-        pub_probs = [x * 100 for x in probs]
-        self.pub_task_probs.publish(Float32MultiArray(data=pub_probs))
+
 
     def speech_method(self):
         pass
 
     def run(self):
-        self.trials_per_condition = 10
+        self.trials_per_condition = 8
         auto_user_input = ''
         speech_user_input = ''
         init_user_input = ''
