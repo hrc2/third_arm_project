@@ -14,6 +14,10 @@
                       /arm_command_state /base_pose /ee_pose /left_hand_pose /right_hand_pose /cup_pose 
                       /recognizer/output
                       /tag_detections
+                      /hrc2d_task_number
+                      /target_probs
+                      /task_probs
+                      /task_timeouts
                       "  
                       />
 

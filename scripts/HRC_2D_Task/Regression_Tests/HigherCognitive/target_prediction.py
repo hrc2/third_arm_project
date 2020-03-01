@@ -25,7 +25,7 @@ class thirdarm_logit:
         self.Ykt = np.array([])
         self.Ynt = np.array([])
         self.num_targets = 0
-        self.trial_number = 0
+        self.trial_number = 1.0
         self.target_positions = np.array([])
         self.jump_init_number = jump_init_number
         self.target_labels = np.array([])

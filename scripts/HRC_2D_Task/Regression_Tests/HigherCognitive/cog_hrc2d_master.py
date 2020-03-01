@@ -36,10 +36,6 @@ from sklearn.externals import joblib
 #path = os.path.dirname(__file__)
 path = '/home/hriclass/catkin_ws/src/third_arm/scripts/HRC_2D_Task/Regression_Tests'
 today = str(date.today()) + '-' + str(int(time.time()))
-logit_save_file = str(path + '/Data/Trained_Models/Logit_Target_Model' + today + '.sav')
-knn_save_file = str(path + '/Data/Trained_Models/KNN_Task_Model' + today + '.sav')
-logit_load_file = str(path + '/Data/Trained_Models/Logit_Target_Model2020-02-13-1581624602.sav')
-knn_load_file = str(path + '/Data/Trained_Models/KNN_Task_Model2020-02-13-1581624602.sav')
 sound_path = os.path.dirname(__file__)
 going_sound = str(sound_path + '/going.wav')
 putting_sound = str(sound_path + '/putting.wav')
@@ -67,6 +63,7 @@ class hrc2d_closed_loop:
         self.pub_trial_number = rospy.Publisher('/hrc2d_task_number', Float64, queue_size=1)
         self.pub_target_probs = rospy.Publisher('/target_probs', Float32MultiArray, queue_size=1)
         self.pub_task_probs = rospy.Publisher('/task_probs', Float32MultiArray, queue_size=1)
+        self.pub_task_timeouts = rospy.Publisher('/task_timeouts', Float32MultiArray, queue_size=1)
 
         self.trial_number = 1.0
         self.speed_topics = ['/base_swivel_controller/set_speed', '/vertical_tilt_controller/set_speed',
@@ -105,7 +102,7 @@ class hrc2d_closed_loop:
         print('Setting motor initial states')
         for i in range(len(self.initial_angles)):
             self.pubvec[i].publish(self.initial_angles[i])
-            time.sleep(1)
+            time.sleep(0.3)
 
         self.calibrate()
 
@@ -137,6 +134,16 @@ class hrc2d_closed_loop:
         self.prev_cmd = ''
         self.tflag = 0
 
+
+
+        self.timeout_timers = np.array([]) # Timeouts T1, T2, T3, T4 for all the commands
+        self.t_current_start = 0.0
+        self.timeout_t1 = np.array([])
+        self.timeout_t2 = np.array([])
+        self.timeout_t3 = np.array([])
+        self.timeout_t4 = np.array([])
+        self.timeout_start_timer = 0.0
+
         self.pub_task_probs.publish(Float32MultiArray(data=self.task_pred_probs))
         self.pub_target_probs.publish(Float32MultiArray(data=self.target_probs))
         self.pub_trial_number.publish(self.trial_number)
@@ -162,7 +169,6 @@ class hrc2d_closed_loop:
         print("Waiting for joint states")
         self.count = 0
         for topic in topic_list:
-            # print("Topic name : " + topic)
             data = rospy.wait_for_message(topic, dynamixel_msgs.msg.JointState)
             self.currval[self.count] = data.current_pos
             print("Topic name : " + topic + " Angle : " + str(data.current_pos))
@@ -270,6 +276,7 @@ class hrc2d_closed_loop:
             self.grip_open_prob = 0.0
             self.go_to_init()
             self.speech_current = ''
+            self.timeout_start_timer = time.time()
             #if self.trial_number <= self.task_prediction_threshold:
             #    self.task_predict.add_to_command_buffer(np.array(['open', time.time()], ndmin=2))
             #time.sleep(0.1)
@@ -277,18 +284,10 @@ class hrc2d_closed_loop:
     def training_data_prepare(self):
         tk = time.time()
         if self.speech_current == 'put':
-            #print('Updating current data')
             X_current = [self.base_x, self.base_y, self.lh_x, self.lh_y, self.rh_x, self.rh_y]
             Y_current = [2 - (self.trial_number % 2), self.trial_number]  # For first two targets
             self.target_logit.add_to_data_buffer(X_current, Y_current)
-            # if(self.Xkt.size == 0):
-            #     self.Xkt = np.array(X_current, ndmin=2)
-            #     self.Ykt = np.array(Y_current, ndmin=2)
-            #     self.Tnt = np.array(tk, ndmin=2)
-            # else:
-            #     self.Xkt = np.append(self.Xkt, np.array(X_current, ndmin=2), axis=0)
-            #     self.Ykt = np.append(self.Ykt, np.array(Y_current, ndmin=2), axis=0)
-            #     self.Tnt = np.append(self.Tnt, np.array(tk, ndmin=2), axis=0)
+
 
         elif self.speech_current == 'open' and self.tflag == 1:
             print('Training Task KNN model')
@@ -296,42 +295,11 @@ class hrc2d_closed_loop:
             self.task_predict.train()
 
             self.target_logit.update_train_buffer()
-            # if(self.Xnt.size==0):
-            #     self.Xnt = self.Xkt
-            #     self.Ynt = self.Ykt
-            # else:
-            #     self.Xnt = np.append(self.Xnt, self.Xkt, axis=0)
-            #     self.Ynt = np.append(self.Ynt, self.Ykt, axis=0)
-            #self.Tnt = np.append(self.Tnt, np.array(tk, ndmin=2), axis=0)
-
             self.target_logit.update_target_data(np.array([self.ee_x - self.init_base_x, self.ee_y - self.init_base_y], ndmin=2))
-
-            # if (self.target_positions.size == 0):
-            #     self.target_positions = np.array([self.ee_x - self.init_base_x, self.ee_y - self.init_base_y], ndmin=2)
-            # else:
-            #     self.target_positions = np.append(self.target_positions,
-            #                                        np.array([self.ee_x - self.init_base_x, self.ee_y - self.init_base_y], ndmin=2),
-            #                                        axis=0)
             
             if self.trial_number >= self.jump_init_number:
                 self.target_logit.process_data(self.trial_number)
-                # jm = JumpsMethod(self.target_positions)
-                # jm.Distortions(cluster_range=range(1, self.target_positions.shape[0]), random_state=0)
-                # jm.Jumps(Y=0.1)
-                #
-                # #print('Optimal Number of clusters for N = ' + str(self.target_positions.shape[0]) + ' data points: '
-                # #      + str(jm.recommended_cluster_number))
-                #
-                # self.num_targets = jm.recommended_cluster_number
-                # if self.num_targets != 2:
-                #     self.num_targets = 2
-                # km = KMeans(n_clusters=self.num_targets)
-                # self.target_labels = km.fit_predict(self.target_positions) + 1
-                # self.reprocess_Yn()
-                # self.compute_target_means()
-
                 print('Training Logit model')
-                #self.target_logit.assign_data(self.Xnt, self.Ynt[:, 0])
                 self.target_logit.train()
                 self.target_means = self.target_logit.get_target_means()
 
@@ -340,26 +308,16 @@ class hrc2d_closed_loop:
             self.speech_current = ''
             self.tflag = 0
 
-    # def compute_target_means(self):
-    #     labels = np.unique(self.target_labels)
-    #     self.target_means = np.zeros([len(labels), 2])
-    #     for i in range(len(labels)):
-    #         ind = np.where(self.target_labels == labels[i])[0]
-    #         self.target_means[i, :] = np.mean(self.target_positions[ind, :], axis=0)
-    #
-    # def reprocess_Yn(self):
-    #     for i in range(0, int(self.trial_number)):
-    #         ind = np.where(self.Ynt[:, 1].astype(int) == i+1)[0]
-    #         self.Ynt[ind, 0] = self.target_labels[i]
-
     def update_speech_input(self, dat):
         data = dat.data
 
-        if self.mode == 'train' or self.mode == 'auto' or self.mode == 'speech' or self.mode == 'init':
-        #if self.mode == 'train' or self.mode == 'speech' or self.mode == 'init':
+        #if self.mode == 'train' or self.mode == 'auto' or self.mode == 'speech' or self.mode == 'init':
+        if self.mode == 'train' or self.mode == 'speech' or self.mode == 'init':
             self.speech_current = data
             self.pub_speech_command.publish(data)
             if data == 'close':
+                self.timeout_t1 = np.append(self.timeout_t1, np.array([time.time() - self.t_current_start]), axis=0)
+                self.t_current_start = time.time()
                 print('Gripper Closing')
                 self.pubvec[5].publish(self.grip_close)
                 self.prev_cmd = 'close'
@@ -368,6 +326,8 @@ class hrc2d_closed_loop:
                 time.sleep(0.1)
             elif data == 'open' and self.prev_cmd == 'put':
                 print('Gripper Opening')
+                self.timeout_t3 = np.append(self.timeout_t3, np.array([time.time() - self.t_current_start]), axis=0)
+                self.t_current_start = time.time()
                 self.tflag = 1
                 self.pubvec[5].publish(self.grip_open)
                 if self.mode == 'speech': #and data == 'open' and self.prev_cmd == 'put':
@@ -385,6 +345,8 @@ class hrc2d_closed_loop:
                 self.go_to_init()
             elif data == 'go':
                 print('Going to handover')
+                self.timeout_t4 = np.append(self.timeout_t4, np.array([time.time() - self.t_current_start]), axis=0)
+                self.t_current_start = time.time()
                 self.prev_cmd = 'go'
                 self.pubvec[5].publish(self.grip_open)
                 if self.mode == 'auto':
@@ -392,6 +354,8 @@ class hrc2d_closed_loop:
                 self.go_to_handover_location()
             elif data == 'put':
                 print('Putting away cup')
+                self.timeout_t2 = np.append(self.timeout_t2, np.array([time.time() - self.t_current_start]), axis=0)
+                self.t_current_start = time.time()
                 self.prev_cmd = 'put'
                 self.go_to_dropoff()
             elif data == 'reset':
@@ -442,22 +406,32 @@ class hrc2d_closed_loop:
 
     def move_after_prediction(self, probs):
         # probs order: [close, go , put]
+        time_difference = time.time() - self.timeout_start_timer
         thresh = 0.70
-        if probs[0] > thresh and self.pred_state_prev == 'go':
+        if (probs[0] > thresh or time_difference > self.timeout_timers[0]) and self.pred_state_prev == 'go':
             data = 'close'
+            self.speech_current = data
             msg = rospy.wait_for_message('/cup_pose', Point)
             dist = math.sqrt((msg.x - self.ee_x) ** 2 + (msg.y - self.ee_y) ** 2)
             if dist < 0.25:
-                print('Prediction: Gripper closing')
+                if probs[0] > thresh:
+                    print('Prediction: Gripper closing')
+                else:
+                    print('Timeout: Gripper closing')
                 playsound(closing_sound)
                 self.pubvec[5].publish(self.grip_close)
                 self.pub_speech_command.publish(data)
                 self.pred_state_prev = 'close'
                 self.prev_cmd = 'close'
                 time.sleep(0.1)
-        elif probs[1] > thresh and self.pred_state_prev == 'open':
+                self.timeout_start_timer = time.time()
+        elif (probs[1] > thresh or time_difference > self.timeout_timers[3]) and self.pred_state_prev == 'open':
             data = 'go'
-            print('Prediction: Going to handover')
+            self.speech_current = data
+            if probs[1] > thresh:
+                print('Prediction: Going to handover')
+            else:
+                print('Timeout: Going to handover')
             playsound(going_sound)
             self.pubvec[5].publish(self.grip_open)
             self.go_to_handover_location()
@@ -465,26 +439,44 @@ class hrc2d_closed_loop:
             self.pred_state_prev = 'go'
             self.prev_cmd = 'go'
             time.sleep(0.3)
-        elif probs[2] > thresh and self.pred_state_prev == 'close':
+            self.timeout_start_timer = time.time()
+        elif (probs[2] > thresh or time_difference > self.timeout_timers[1]) and self.pred_state_prev == 'close':
             data = 'put'
             self.speech_current = 'put'
-            print('Prediction: Putting away cup')
+            if probs[2] > thresh:
+                print('Prediction: Putting away cup')
+            else:
+                print('Timeout: Putting away cup')
             playsound(putting_sound)
             self.go_to_dropoff()
             self.pred_state_prev = 'put'
             self.prev_cmd = 'put'
             self.pub_speech_command.publish(data)
+            self.timeout_start_timer = time.time()
             #time.sleep(0.3)
 
     def load_trained_models(self):
         print('Loading trained models')
+        logit_load_file = str(path + '/Data/Trained_Models/Logit_Target_Model2020-02-13-1581624602.sav')
+        knn_load_file = str(path + '/Data/Trained_Models/KNN_Task_Model2020-02-13-1581624602.sav')
         self.target_logit.logreg = joblib.load(logit_load_file)
         self.task_predict.knn_model = joblib.load(knn_load_file)
 
     def save_trained_models(self):
         print('Saving trained models')
+        logit_save_file = str(path + '/Data/Trained_Models/Logit_Target_Model' + today + '.sav')
+        logit_xdata = str(path + '/Data/Trained_Models/Logit_Training_Data_X' + today + '.npy')
+        logit_ydata = str(path + '/Data/Trained_Models/Logit_Training_Data_Y' + today + '.npy')
         joblib.dump(self.target_logit.logreg, logit_save_file)
+        np.save(logit_xdata, self.target_logit.Xtrain)
+        np.save(logit_ydata, self.target_logit.Ytrain)
+
+        knn_save_file = str(path + '/Data/Trained_Models/KNN_Task_Model' + today + '.sav')
+        knn_xdata = str(path + '/Data/Trained_Models/KNN_Training_Data_X' + today + '.npy')
+        knn_ydata = str(path + '/Data/Trained_Models/KNN_Training_Data_Y' + today + '.npy')
         joblib.dump(self.task_predict.knn_model, knn_save_file)
+        np.save(knn_xdata, self.task_predict.x_train)
+        np.save(knn_ydata, self.task_predict.y_train)
 
     def training_method(self):
         self.training_data_prepare()
@@ -508,12 +500,24 @@ class hrc2d_closed_loop:
             probs = self.target_probs.ravel().tolist()
             self.pub_target_probs.publish(Float32MultiArray(data=[100 * x for x in probs]))
             for k in range(len(probs)):
-                if probs[k] > 0.8:
+                if probs[k] > 0.7:
                     self.set_target = k + 1
             if self.set_target != 0:
                 self.move_to_target()
 
+    def estimate_timeout(self, data):
+        q75, q25 = np.percentile(data, [75, 25])
+        iqr = q75 - q25
+        return (np.median(data) + 1.5*iqr)
 
+    def compute_timeouts(self):
+        timeout_list = [self.timeout_t1, self.timeout_t2, self.timeout_t3, self.timeout_t4]
+        result = []
+        for i in range(len(timeout_list)):
+            result.append(self.estimate_timeout(timeout_list[i]))
+        self.timeout_timers = np.array(result)
+        print('Command timeouts computed: '+ str(self.timeout_timers))
+        self.pub_task_timeouts.publish(Float32MultiArray(data=list(self.timeout_timers)))
 
     def speech_method(self):
         pass
@@ -533,6 +537,7 @@ class hrc2d_closed_loop:
             if init_user_input == 'Y' or init_user_input == 'y':
                 print('Initiating Training Sequence')
                 self.mode = 'train'
+                self.t_current_start = time.time()
                 init_user_input = 'set'
             elif init_user_input == 'N' or init_user_input == 'n':
                 init_user_input = raw_input('An error had occurred after training. Begin Autonomous Sequence? (Y/N): ')
@@ -556,6 +561,7 @@ class hrc2d_closed_loop:
                     self.training_method()
                 if self.trial_number > self.trials_per_condition:
                     self.save_trained_models()
+                    self.compute_timeouts()
                     auto_user_input = raw_input('Begin Autonomous Trial First? (Y/N): ')
                     if auto_user_input == 'Y' or auto_user_input == 'y':
                         self.mode = 'auto'
