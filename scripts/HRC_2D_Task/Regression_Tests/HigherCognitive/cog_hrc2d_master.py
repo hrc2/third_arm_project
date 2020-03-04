@@ -263,7 +263,7 @@ class hrc2d_closed_loop:
             #print('Moving DoF3')
             self.pubvec[2].publish(m3_command)
 
-        if self.grip_open_prob > 0.80 and (self.pred_state_prev == 'put' or self.prev_cmd == 'put'):
+        if self.grip_open_prob > 0.70 and (self.pred_state_prev == 'put' or self.prev_cmd == 'put'):
             print('Found target. Opening gripper')
             playsound(opening_sound)
             self.pred_state_prev = 'open'
@@ -500,7 +500,7 @@ class hrc2d_closed_loop:
             probs = self.target_probs.ravel().tolist()
             self.pub_target_probs.publish(Float32MultiArray(data=[100 * x for x in probs]))
             for k in range(len(probs)):
-                if probs[k] > 0.7:
+                if probs[k] > 0.70:
                     self.set_target = k + 1
             if self.set_target != 0:
                 self.move_to_target()
@@ -508,7 +508,7 @@ class hrc2d_closed_loop:
     def estimate_timeout(self, data):
         q75, q25 = np.percentile(data, [75, 25])
         iqr = q75 - q25
-        return (np.median(data) + 1.5*iqr)
+        return (np.median(data) + 1.0*iqr)
 
     def compute_timeouts(self):
         timeout_list = [self.timeout_t1, self.timeout_t2, self.timeout_t3, self.timeout_t4]
@@ -523,7 +523,7 @@ class hrc2d_closed_loop:
         pass
 
     def run(self):
-        self.trials_per_condition = 8
+        self.trials_per_condition = 15
         auto_user_input = ''
         speech_user_input = ''
         init_user_input = ''
@@ -588,6 +588,7 @@ class hrc2d_closed_loop:
                     self.pred_state_prev = 'open'
                     auto_user_input = 'set'
                     self.mode = 'auto'
+                    self.timeout_start_timer = time.time()
 
                 self.autonomous_method()
 
