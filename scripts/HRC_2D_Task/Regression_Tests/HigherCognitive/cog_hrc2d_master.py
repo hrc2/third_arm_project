@@ -69,7 +69,7 @@ class hrc2d_closed_loop:
         self.speed_topics = ['/base_swivel_controller/set_speed', '/vertical_tilt_controller/set_speed',
                              '/arm_extension_controller/set_speed', '/wrist_controller/set_speed',
                              '/wrist_tilt_controller/set_speed', '/gripper_controller/set_speed']
-        self.motor_max_speeds = [0.5, 0.5, 1.0, 1.0, 1.0, 1.6]
+        self.motor_max_speeds = [0.7, 0.5, 1.0, 1.0, 1.0, 1.6]
 
 
         print('Setting motor max speeds')
@@ -143,6 +143,7 @@ class hrc2d_closed_loop:
         self.timeout_t3 = np.array([])
         self.timeout_t4 = np.array([])
         self.timeout_start_timer = 0.0
+        self.time_difference = 0.0
 
         self.pub_task_probs.publish(Float32MultiArray(data=self.task_pred_probs))
         self.pub_target_probs.publish(Float32MultiArray(data=self.target_probs))
@@ -253,7 +254,8 @@ class hrc2d_closed_loop:
         #print('Commands DoF1 : ' + str(m1_command) + ' DoF3 : ' + str(m3_command))
 
         dist = math.sqrt((ee_target_x - self.ee_x) ** 2 + (ee_target_y - self.ee_y) ** 2)
-        lam = 16.252
+        #lam = 16.252
+        lam = 8.91 # To give 70% probability at dist = 0.20 m
         self.grip_open_prob = math.exp(-lam*dist*dist)
 
         if (m1_command > -3.1) and (m1_command < 3.1):
@@ -263,7 +265,7 @@ class hrc2d_closed_loop:
             #print('Moving DoF3')
             self.pubvec[2].publish(m3_command)
 
-        if self.grip_open_prob > 0.70 and (self.pred_state_prev == 'put' or self.prev_cmd == 'put'):
+        if (self.grip_open_prob > 0.70 or self.time_difference > self.timeout_timers[2]) and (self.pred_state_prev == 'put' or self.prev_cmd == 'put'):
             print('Found target. Opening gripper')
             playsound(opening_sound)
             self.pred_state_prev = 'open'
@@ -406,9 +408,9 @@ class hrc2d_closed_loop:
 
     def move_after_prediction(self, probs):
         # probs order: [close, go , put]
-        time_difference = time.time() - self.timeout_start_timer
+        self.time_difference = time.time() - self.timeout_start_timer
         thresh = 0.70
-        if (probs[0] > thresh or time_difference > self.timeout_timers[0]) and self.pred_state_prev == 'go':
+        if (probs[0] > thresh or self.time_difference > self.timeout_timers[0]) and self.pred_state_prev == 'go':
             data = 'close'
             self.speech_current = data
             msg = rospy.wait_for_message('/cup_pose', Point)
@@ -425,7 +427,7 @@ class hrc2d_closed_loop:
                 self.prev_cmd = 'close'
                 time.sleep(0.1)
                 self.timeout_start_timer = time.time()
-        elif (probs[1] > thresh or time_difference > self.timeout_timers[3]) and self.pred_state_prev == 'open':
+        elif (probs[1] > thresh or self.time_difference > self.timeout_timers[3]) and self.pred_state_prev == 'open':
             data = 'go'
             self.speech_current = data
             if probs[1] > thresh:
@@ -440,7 +442,7 @@ class hrc2d_closed_loop:
             self.prev_cmd = 'go'
             time.sleep(0.3)
             self.timeout_start_timer = time.time()
-        elif (probs[2] > thresh or time_difference > self.timeout_timers[1]) and self.pred_state_prev == 'close':
+        elif (probs[2] > thresh or self.time_difference > self.timeout_timers[1]) and self.pred_state_prev == 'close':
             data = 'put'
             self.speech_current = 'put'
             if probs[2] > thresh:
