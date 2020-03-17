@@ -271,6 +271,7 @@ class hrc2d_closed_loop:
             self.pred_state_prev = 'open'
             self.prev_cmd = 'open'
             self.pubvec[5].publish(self.grip_open)
+            time.sleep(0.2)
             self.trial_number += 1
             self.pub_trial_number.publish(self.trial_number)
             self.set_target = 0
