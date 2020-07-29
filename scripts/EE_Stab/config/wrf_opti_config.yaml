@@ -15,6 +15,16 @@ rigid_bodies:
         pose2d: end_eff/ground_pose
         child_frame_id: end_eff/base_link
         parent_frame_id: world
+    '12':
+        pose: hand/pose
+        pose2d: hand/ground_pose
+        child_frame_id: hand/base_link
+        parent_frame_id: world
+    '13':
+        pose: elbow/pose
+        pose2d: elbow/ground_pose
+        child_frame_id: elbow/base_link
+        parent_frame_id: world
 optitrack_config:
         multicast_address: 224.0.0.1
         command_port: 1010
