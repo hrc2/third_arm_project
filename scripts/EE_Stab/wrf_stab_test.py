@@ -4,6 +4,7 @@ import rospy
 import math
 import time
 import numpy as np
+import scipy.signal as sg
 import sys
 import tf
 from datetime import date
@@ -73,6 +74,9 @@ class wrf_sys_id:
         self.commands = self.initial_angles
         self.d5m = 1
 
+        self.data_buffer = np.array([], ndmin=2)
+        self.buffer_full = 0
+
         print('Setting motor initial states')
         for i in range(len(self.initial_angles)):
             self.pubvec[i].publish(self.initial_angles[i])
@@ -109,14 +113,49 @@ class wrf_sys_id:
     def update_t6(self,data):
         self.currval[5] = data.current_pos
 
+    def filter_mocap(self):
+        # Transfer function for IIR low-pass filters, cutoff at 12 Hz
+        b = np.array([0.1400982208, -0.0343775491, 0.0454003083, 0.0099732061, 0.0008485135])
+        a = np.array([1, -1.9185418203, 1.5929378702, -0.5939699187, 0.0814687111])
+        N = 50
+        S = 20
+        
+        newdat = np.ravel(np.array([self.base_pose, self.ee_pose, self.elbow_pose, self.wrist_pose]))
+        newdat = newdat.tolist()
+
+        if self.buffer_full == 0:
+            if self.data_buffer.size == 0:                
+                self.data_buffer = np.array(newdat, ndmin=2)
+                #print('First pose: ', self.data_buffer)                
+            else:                
+                self.data_buffer = np.append(self.data_buffer, np.array(newdat, ndmin=2), axis=0)                                
+                if self.data_buffer.shape[0] >= N:
+                    self.buffer_full = 1
+        else:
+            buff_del = np.delete(self.data_buffer, 0, 0)
+            self.data_buffer = np.append(buff_del, np.array(newdat, ndmin=2), axis=0)                        
+            sample = self.data_buffer[-S:-1, :]
+            data_filt = sg.filtfilt(b, a, x=sample, axis=0)
+            #print('Filtered pose: ', data_filt[-1,:])
+            self.base_pose = data_filt[-1,0:3].tolist()
+            self.base_pose = data_filt[-1,3:6].tolist()
+            self.base_pose = data_filt[-1,6:9].tolist()
+            self.base_pose = data_filt[-1,9:12].tolist()
+            #time.sleep(2)
+
+
     def update_base_pose(self,data):
         self.base_pose = [data.pose.position.x, data.pose.position.y, data.pose.position.z]
+        self.filter_mocap()
     def update_ee_pose(self,data):
         self.ee_pose = [data.pose.position.x, data.pose.position.y, data.pose.position.z]
+        #self.filter_mocap()
     def update_wrist_pose(self,data):
         self.wrist_pose = [data.pose.position.x, data.pose.position.y, data.pose.position.z]
+        #self.filter_mocap()
     def update_elbow_pose(self,data):
         self.elbow_pose = [data.pose.position.x, data.pose.position.y, data.pose.position.z]
+        #self.filter_mocap()
         
     def set_motor_speeds(self, speed_topic, speed):
         rospy.wait_for_service(speed_topic)
@@ -153,8 +192,8 @@ class wrf_sys_id:
         print('Setting initial EE pose')        
         self.pub_motor2.publish(-2.0)
         time.sleep(3)     
-        self.pub_motor1.publish(0.7)
-        time.sleep(3)               
+        self.pub_motor1.publish(1.5)
+        time.sleep(7)               
         ed = rospy.wait_for_message('/mocap_node/end_eff/pose', PoseStamped)        
         self.ee_init_pose = [ed.pose.position.x, ed.pose.position.y, ed.pose.position.z]
         time.sleep(2)        
@@ -183,6 +222,8 @@ class wrf_sys_id:
 
         
     def closed_loop(self):
+        print('Starting closed loop control')
+        
         elb_vec = np.array(self.wrist_pose) - np.array(self.elbow_pose)
         R_elb = rotm_from_vecs(np.array([1,0,0]),np.array(elb_vec))
 
@@ -191,8 +232,8 @@ class wrf_sys_id:
 
         self.map_to_commands(thets)      
 
-        print('Desired Pose from IK:', thets)
-        print('Motor Commands:', self.commands)
+        #print('Desired Pose from IK:', thets)
+        #print('Motor Commands:', self.commands)
 
         self.send_cmd_to_motor()
 
