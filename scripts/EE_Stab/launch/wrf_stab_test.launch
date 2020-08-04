@@ -12,6 +12,7 @@
                       /mocap_node/wrf_base/pose
                       /mocap_node/end_eff/pose
                       /mocap_node/hand/pose
-                      /mocap_node/elbow/pose"  
+                      /mocap_node/elbow/pose
+                      /mocap_filtered"  
                       />
 </launch>

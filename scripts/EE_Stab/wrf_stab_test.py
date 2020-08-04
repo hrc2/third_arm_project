@@ -35,9 +35,10 @@ class wrf_sys_id:
         self.pub_motor4 = rospy.Publisher('/wrist_controller/command', Float64, queue_size=1)
         self.pub_motor5 = rospy.Publisher('/wrist_tilt_controller/command', Float64, queue_size=1)
         self.pub_motor6 = rospy.Publisher('/gripper_controller/command', Float64, queue_size=1)
+        self.pub_mocap_filt = rospy.Publisher('/mocap_filtered', Float32MultiArray, queue_size=10)
         self.pubvec = [self.pub_motor1, self.pub_motor2, self.pub_motor3, self.pub_motor4, self.pub_motor5,self.pub_motor6]
 
-        self.motor_max_speeds = [2.0, 1.2, 2.5, 1.5, 1.5, 1.6]
+        self.motor_max_speeds = [1.5, 1.2, 2.5, 1.5, 1.5, 1.6]
         self.speed_topics = ['/base_swivel_controller/set_speed', '/vertical_tilt_controller/set_speed',
                              '/arm_extension_controller/set_speed', '/wrist_controller/set_speed',
                              '/wrist_tilt_controller/set_speed', '/gripper_controller/set_speed']
@@ -68,10 +69,11 @@ class wrf_sys_id:
             print('Error: Re-calibrate length extension')
             exit(0)        
         
-        self.initial_angles = [0.0, 0.0, self.len_mid, 0.0, -0.7, self.grip_close]
-        self.up_lims = [3.1, 0.001, self.full_in - 0.0001, 1.5, 1.5, self.grip_close + 0.0001]
-        self.lo_lims = [-3.1, -4.5, self.full_out + 0.0001, 1.5, 1.5, self.grip_open - 0.0001]
+        self.initial_angles = [0.0, 0.0, self.len_mid, 0.0, -0.2, self.grip_close]
+        self.up_lims = [3.1, 0.001, self.full_in - 0.0001, 1.5, 1.5, self.grip_close + 0.1]
+        self.lo_lims = [-3.1, -1.9, self.full_out + 0.0001, -1.5, -1.5, self.grip_open - 0.1]
         self.commands = self.initial_angles
+        self.cmd_prev = self.commands
         self.d5m = 1
 
         self.data_buffer = np.array([], ndmin=2)
@@ -96,6 +98,7 @@ class wrf_sys_id:
 
 
         self.initialize()
+        self.start_motor_loop = 0
 
     def update_t1(self,data):
         self.currval[0] = data.current_pos    
@@ -117,8 +120,8 @@ class wrf_sys_id:
         # Transfer function for IIR low-pass filters, cutoff at 12 Hz
         b = np.array([0.1400982208, -0.0343775491, 0.0454003083, 0.0099732061, 0.0008485135])
         a = np.array([1, -1.9185418203, 1.5929378702, -0.5939699187, 0.0814687111])
-        N = 50
-        S = 20
+        N = 100
+        S = 18
         
         newdat = np.ravel(np.array([self.base_pose, self.ee_pose, self.elbow_pose, self.wrist_pose]))
         newdat = newdat.tolist()
@@ -138,9 +141,15 @@ class wrf_sys_id:
             data_filt = sg.filtfilt(b, a, x=sample, axis=0)
             #print('Filtered pose: ', data_filt[-1,:])
             self.base_pose = data_filt[-1,0:3].tolist()
-            self.base_pose = data_filt[-1,3:6].tolist()
-            self.base_pose = data_filt[-1,6:9].tolist()
-            self.base_pose = data_filt[-1,9:12].tolist()
+            self.ee_pose = data_filt[-1,3:6].tolist()
+            self.elbow_pose = data_filt[-1,6:9].tolist()
+            self.wrist_pose = data_filt[-1,9:12].tolist()
+
+            self.start_motor_loop = 1
+
+            filt_dat = Float32MultiArray()
+            filt_dat.data = data_filt[-1,:].tolist()
+            self.pub_mocap_filt.publish(filt_dat)        
             #time.sleep(2)
 
 
@@ -190,9 +199,9 @@ class wrf_sys_id:
     
     def initialize(self):
         print('Setting initial EE pose')        
-        self.pub_motor2.publish(-2.0)
+        self.pub_motor2.publish(-0.6)
         time.sleep(3)     
-        self.pub_motor1.publish(1.5)
+        self.pub_motor1.publish(1.8)
         time.sleep(7)               
         ed = rospy.wait_for_message('/mocap_node/end_eff/pose', PoseStamped)        
         self.ee_init_pose = [ed.pose.position.x, ed.pose.position.y, ed.pose.position.z]
@@ -205,7 +214,7 @@ class wrf_sys_id:
 
         tr1 = -tt1;
         
-        tr2 = -2*np.pi + 4*tt2
+        tr2 = -2.0*np.pi + 3.99*tt2
 
         tr3 = self.full_out + (tt3 - self.l_max) * ((self.full_in - self.full_out) / (self.l_min - self.l_max))
         
@@ -213,29 +222,29 @@ class wrf_sys_id:
         tr5 = self.initial_angles[4]
         tr6 = self.initial_angles[5]
 
-        self.commands = [tr1,tr2,tr3,tr4,tr5,tr6]
-
+        self.cmd_prev = self.commands
+        self.commands = [tr1,tr2,tr3,tr4,tr5,tr6]    
+        
     def send_cmd_to_motor(self):
         for i in range(len(self.commands)):
             if self.commands[i] <= self.up_lims[i] and self.commands[i] >= self.lo_lims[i]:
-                self.pubvec[i].publish(self.commands[i])          
+                max_delta = 0.15*np.abs(self.lo_lims[i] - self.up_lims[i])
+                if i==0:
+                    max_delta = 0.1
+                if np.abs(self.commands[i] - self.cmd_prev[i]) <= max_delta:
+                    self.pubvec[i].publish(self.commands[i])          
 
         
-    def closed_loop(self):
-        print('Starting closed loop control')
-        
-        elb_vec = np.array(self.wrist_pose) - np.array(self.elbow_pose)
-        R_elb = rotm_from_vecs(np.array([1,0,0]),np.array(elb_vec))
+    def closed_loop(self):     
+        if self.start_motor_loop == 1:
+            elb_vec = np.array(self.wrist_pose) - np.array(self.elbow_pose)
+            R_elb = rotm_from_vecs(np.array([1,0,0]),np.array(elb_vec))
 
-        self.delta_p = np.dot(R_elb.transpose(), np.array(self.ee_init_pose) - np.array(self.base_pose))
-        thets = ik_3d_pos(self.delta_p)
+            self.delta_p = np.dot(R_elb.transpose(), np.array(self.ee_init_pose) - np.array(self.base_pose))
+            thets = ik_3d_pos(self.delta_p)
 
-        self.map_to_commands(thets)      
-
-        #print('Desired Pose from IK:', thets)
-        #print('Motor Commands:', self.commands)
-
-        self.send_cmd_to_motor()
+            self.map_to_commands(thets)   
+            self.send_cmd_to_motor()
 
 
     def run(self):
@@ -244,5 +253,5 @@ class wrf_sys_id:
         rospy.spin()
 
 if __name__ == '__main__':
-    t1 = wrf_sys_id()
-    t1.run()
+    node = wrf_sys_id()
+    node.run()
