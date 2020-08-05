@@ -4,6 +4,7 @@ import rospy
 import math
 import time
 import numpy as np
+import scipy.signal as sg
 
 def rotm_from_vecs(vec1, vec2):
     a, b = (vec1 / np.linalg.norm(vec1)).reshape(3), (vec2 / np.linalg.norm(vec2)).reshape(3)
@@ -31,3 +32,14 @@ def ik_3d_pos(pos):
 
     return [thet1, thet2, thet3]
 
+def mocap_filter(data):
+    # Transfer function for IIR low-pass filters, cutoff at 12 Hz
+    b = np.array([0.1400982208, -0.0343775491, 0.0454003083, 0.0099732061, 0.0008485135])
+    a = np.array([1, -1.9185418203, 1.5929378702, -0.5939699187, 0.0814687111])
+
+    data_filt = sg.filtfilt(b, a, x=data, axis=0)
+    diff = np.diff(data, axis=0)
+    mean_dx = np.mean(diff, axis=0)
+    alpha = 0.02
+
+    return alpha*mean_dx + (1-alpha)*data_filt, mean_dx

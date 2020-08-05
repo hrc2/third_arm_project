@@ -22,6 +22,7 @@ from diagnostic_msgs.msg import DiagnosticArray
 import csv
 
 from math_funcs import rotm_from_vecs, ik_3d_pos, mocap_filter
+from ar_funcs import ar_forecast
 
 class wrf_sys_id:
     def __init__(self):
@@ -84,6 +85,9 @@ class wrf_sys_id:
         self.mocap_sample = np.array([], ndmin=2)
         self.mocap_data_filt = np.array([])
 
+        self.curr_mocap_vel = np.array([])
+        self.del_t = 1.0/100.0
+
         print('Setting motor initial states')
         for i in range(len(self.initial_angles)):
             self.pubvec[i].publish(self.initial_angles[i])
@@ -123,7 +127,7 @@ class wrf_sys_id:
 
     def prepare_filter_mocap(self):
         N = 100
-        S = 18        
+        S = 20       
         
         newdat = np.ravel(np.array([self.base_pose, self.ee_pose, self.elbow_pose, self.wrist_pose]))
         newdat = newdat.tolist()
@@ -142,32 +146,36 @@ class wrf_sys_id:
             self.mocap_sample = self.data_buffer[-S:-1, :]
             
     def filter_mocap(self):
-        self.mocap_data_filt, mean_vel = mocap_filter(self.mocap_sample)
+
+        self.mocap_data_filt, mean_dx = mocap_filter(self.mocap_sample)
              
         self.base_pose = self.mocap_data_filt[-1,0:3].tolist()
         self.ee_pose = self.mocap_data_filt[-1,3:6].tolist()
         self.elbow_pose = self.mocap_data_filt[-1,6:9].tolist()
         self.wrist_pose = self.mocap_data_filt[-1,9:12].tolist()
 
-        self.start_motor_loop = 1
+        self.start_motor_loop = 1   
+
+        self.curr_mocap_vel = mean_dx/self.del_t
 
         filt_dat = Float32MultiArray()
-        filt_dat.data = data_filt[-1,:].tolist()
+        filt_dat.data = self.mocap_data_filt[-1,:].tolist()
         self.pub_mocap_filt.publish(filt_dat)        
 
 
     def update_base_pose(self,data):
         self.base_pose = [data.pose.position.x, data.pose.position.y, data.pose.position.z]
         self.prepare_filter_mocap()
+
     def update_ee_pose(self,data):
         self.ee_pose = [data.pose.position.x, data.pose.position.y, data.pose.position.z]
-        #self.filter_mocap()
+        
     def update_wrist_pose(self,data):
         self.wrist_pose = [data.pose.position.x, data.pose.position.y, data.pose.position.z]
-        #self.filter_mocap()
+
     def update_elbow_pose(self,data):
         self.elbow_pose = [data.pose.position.x, data.pose.position.y, data.pose.position.z]
-        #self.filter_mocap()
+
         
     def set_motor_speeds(self, speed_topic, speed):
         rospy.wait_for_service(speed_topic)
@@ -203,11 +211,11 @@ class wrf_sys_id:
     def initialize(self):
         self.commands = [self.m1_start, self.m2_start, self.len_mid, 0.0, -0.2, self.grip_close]
         self.cmd_prev = self.commands
-        print('Setting initial EE pose')        
-        self.pub_motor2.publish(self.m2_start)
-        time.sleep(3)     
-        self.pub_motor1.publish(self.m1_start)
-        time.sleep(7)               
+        # print('Setting initial EE pose')        
+        # self.pub_motor2.publish(self.m2_start)
+        # time.sleep(3)     
+        # self.pub_motor1.publish(self.m1_start)
+        # time.sleep(7)               
         ed = rospy.wait_for_message('/mocap_node/end_eff/pose', PoseStamped)        
         self.ee_init_pose = [ed.pose.position.x, ed.pose.position.y, ed.pose.position.z]
         time.sleep(2)        
@@ -227,38 +235,63 @@ class wrf_sys_id:
         tr5 = self.initial_angles[4]
         tr6 = self.initial_angles[5]
 
-        self.cmd_prev = self.commands
-        self.commands = [tr1,tr2,tr3,tr4,tr5,tr6]    
+        return [tr1,tr2,tr3,tr4,tr5,tr6]    
+
+    def control_func_ar(self):
+
+        elbow_vel = np.linalg.norm(self.curr_mocap_vel[6:9])
+        wrist_vel = np.linalg.norm(self.curr_mocap_vel[9:12])
+        thresh = 0.0 #0.005
+        pred_horizon = 10
+        ar_order = 18
+
+        control_coeffs = np.logspace(0, -1, num=pred_horizon)
+
+        if elbow_vel >= thresh or wrist_vel >= thresh:
+            ar_sample = self.mocap_sample[-ar_order:, :]
+            base_pred, elbow_pred, wrist_pred = ar_forecast(ar_sample, pred_horizon)
+            init_cmd = 0
+
+            for i in range(pred_horizon):
+                elb_vec = np.array(wrist_pred[i,:]) - np.array(elbow_pred[i,:])
+                R_elb = rotm_from_vecs(np.array([1,0,0]),np.array(elb_vec))
+                self.delta_p = np.dot(R_elb.transpose(), np.array(self.ee_init_pose) - np.array(base_pred[i,:]))
+                thets = ik_3d_pos(self.delta_p)
+                if i == 0:
+                    init_cmd = np.array(self.map_to_commands(thets))       
+                new_cmd = np.array(self.map_to_commands(thets))
+                self.cmd_prev = self.commands
+                cmd_compute = init_cmd + control_coeffs[i]*(new_cmd - init_cmd)
+                self.commands = cmd_compute.tolist()
+                #self.send_cmd_to_motor()           
+                print('AR pred:', [base_pred[i,:], elbow_pred[i,:], wrist_pred[i,:]])
+                print('Forecast Command:', self.commands)
+        else:
+            elb_vec = np.array(self.wrist_pose) - np.array(self.elbow_pose)
+            R_elb = rotm_from_vecs(np.array([1,0,0]),np.array(elb_vec))
+            self.delta_p = np.dot(R_elb.transpose(), np.array(self.ee_init_pose) - np.array(self.base_pose))
+            thets = ik_3d_pos(self.delta_p)          
+            self.cmd_prev = self.commands
+            self.commands = self.map_to_commands(thets) 
+            #self.send_cmd_to_motor()
         
     def send_cmd_to_motor(self):
         for i in range(len(self.commands)):
             max_delta = 0.15*np.abs(self.lo_lims[i] - self.up_lims[i])
             if self.commands[i] <= self.up_lims[i] and self.commands[i] >= self.lo_lims[i]:                
                 if i == 0:
-                    max_delta = 0.1
+                    max_delta = 0.2
                     if np.abs(self.commands[i] - self.m1_start) <= max_delta:
                         self.pubvec[i].publish(self.commands[i])     
                 elif np.abs(self.commands[i] - self.cmd_prev[i]) <= max_delta:
-                    self.pubvec[i].publish(self.commands[i])          
-
-        
-    def closed_loop(self):     
-        if self.start_motor_loop == 1:
-            elb_vec = np.array(self.wrist_pose) - np.array(self.elbow_pose)
-            R_elb = rotm_from_vecs(np.array([1,0,0]),np.array(elb_vec))
-
-            self.delta_p = np.dot(R_elb.transpose(), np.array(self.ee_init_pose) - np.array(self.base_pose))
-            thets = ik_3d_pos(self.delta_p)
-
-            self.map_to_commands(thets)   
-            self.send_cmd_to_motor()
-
+                    self.pubvec[i].publish(self.commands[i])           
 
     def run(self):
         while not rospy.is_shutdown():
             if self.mocap_sample.size != 0:
                 self.filter_mocap()
-            self.closed_loop()
+            if self.start_motor_loop == 1:
+                self.control_func_ar()
         rospy.spin()
 
 if __name__ == '__main__':
