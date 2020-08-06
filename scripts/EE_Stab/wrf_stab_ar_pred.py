@@ -211,11 +211,11 @@ class wrf_sys_id:
     def initialize(self):
         self.commands = [self.m1_start, self.m2_start, self.len_mid, 0.0, -0.2, self.grip_close]
         self.cmd_prev = self.commands
-        # print('Setting initial EE pose')        
-        # self.pub_motor2.publish(self.m2_start)
-        # time.sleep(3)     
-        # self.pub_motor1.publish(self.m1_start)
-        # time.sleep(7)               
+        print('Setting initial EE pose')        
+        self.pub_motor2.publish(self.m2_start)
+        time.sleep(3)     
+        self.pub_motor1.publish(self.m1_start)
+        time.sleep(7)               
         ed = rospy.wait_for_message('/mocap_node/end_eff/pose', PoseStamped)        
         self.ee_init_pose = [ed.pose.position.x, ed.pose.position.y, ed.pose.position.z]
         time.sleep(2)        
@@ -241,13 +241,14 @@ class wrf_sys_id:
 
         elbow_vel = np.linalg.norm(self.curr_mocap_vel[6:9])
         wrist_vel = np.linalg.norm(self.curr_mocap_vel[9:12])
-        thresh = 0.0 #0.005
-        pred_horizon = 10
+        thresh = 0.005
+        pred_horizon = 6
         ar_order = 18
+        pred_on = True
 
         control_coeffs = np.logspace(0, -1, num=pred_horizon)
 
-        if elbow_vel >= thresh or wrist_vel >= thresh:
+        if (elbow_vel >= thresh or wrist_vel >= thresh) and pred_on == True:
             ar_sample = self.mocap_sample[-ar_order:, :]
             base_pred, elbow_pred, wrist_pred = ar_forecast(ar_sample, pred_horizon)
             init_cmd = 0
@@ -263,9 +264,9 @@ class wrf_sys_id:
                 self.cmd_prev = self.commands
                 cmd_compute = init_cmd + control_coeffs[i]*(new_cmd - init_cmd)
                 self.commands = cmd_compute.tolist()
-                #self.send_cmd_to_motor()           
-                print('AR pred:', [base_pred[i,:], elbow_pred[i,:], wrist_pred[i,:]])
-                print('Forecast Command:', self.commands)
+                self.send_cmd_to_motor()           
+                #print('AR pred:', [base_pred[i,:], elbow_pred[i,:], wrist_pred[i,:]])
+                #print('Forecast Command:', self.commands)
         else:
             elb_vec = np.array(self.wrist_pose) - np.array(self.elbow_pose)
             R_elb = rotm_from_vecs(np.array([1,0,0]),np.array(elb_vec))
@@ -273,7 +274,7 @@ class wrf_sys_id:
             thets = ik_3d_pos(self.delta_p)          
             self.cmd_prev = self.commands
             self.commands = self.map_to_commands(thets) 
-            #self.send_cmd_to_motor()
+            self.send_cmd_to_motor()
         
     def send_cmd_to_motor(self):
         for i in range(len(self.commands)):
