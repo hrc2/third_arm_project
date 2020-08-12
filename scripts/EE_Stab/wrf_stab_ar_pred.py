@@ -24,7 +24,7 @@ import csv
 from math_funcs import rotm_from_vecs, ik_3d_pos, mocap_filter
 from ar_funcs import ar_forecast
 
-class wrf_sys_id:
+class wrf_closed_loop:
     def __init__(self):
         rospy.init_node('wrf_motor_controller')
 
@@ -241,12 +241,13 @@ class wrf_sys_id:
 
         elbow_vel = np.linalg.norm(self.curr_mocap_vel[6:9])
         wrist_vel = np.linalg.norm(self.curr_mocap_vel[9:12])
-        thresh = 0.005
-        pred_horizon = 6
+        thresh = 0.01
+        pred_horizon = 10
         ar_order = 18
+
         pred_on = True
 
-        control_coeffs = np.logspace(0, -1, num=pred_horizon)
+        control_coeffs = np.logspace(0, -0.3, num=pred_horizon)
 
         if (elbow_vel >= thresh or wrist_vel >= thresh) and pred_on == True:
             ar_sample = self.mocap_sample[-ar_order:, :]
@@ -296,5 +297,5 @@ class wrf_sys_id:
         rospy.spin()
 
 if __name__ == '__main__':
-    node = wrf_sys_id()
+    node = wrf_closed_loop()
     node.run()
