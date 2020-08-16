@@ -25,6 +25,7 @@ import csv
 
 from math_funcs import rotm_from_vecs, ik_3d_pos, mocap_filter
 from rnn_funcs import rnn_forecast
+from ar_funcs import ar_forecast
 import zmq
 
 class wrf_closed_loop:
@@ -74,10 +75,10 @@ class wrf_closed_loop:
             print('Error: Re-calibrate length extension')
             exit(0)        
         
-        #self.initial_angles = [0.0, 0.0, self.len_mid, 0.0, -0.2, self.grip_close]
-        self.initial_angles = [0.0, 0.0, self.full_out, 0.0, -0.2, self.grip_close]
+        self.initial_angles = [0.0, -0.3, self.len_mid, 0.0, -0.2, self.grip_close]
+        #self.initial_angles = [0.0, 0.0, self.full_out, 0.0, -0.2, self.grip_close]
 
-        self.up_lims = [3.1, 0.001, self.full_in - 0.0001, 1.5, 1.5, self.grip_close + 0.1]
+        self.up_lims = [3.1, -0.29, self.full_in - 0.0001, 1.5, 1.5, self.grip_close + 0.1]
         self.lo_lims = [-3.1, -1.9, self.full_out + 0.0001, -1.5, -1.5, self.grip_open - 0.1]
         self.commands = self.initial_angles
         self.cmd_prev = self.commands
@@ -118,6 +119,7 @@ class wrf_closed_loop:
         self.pred_horizon = 10  
         self.cols = [0,1,2,6,7,8,9,10,11]
         self.initialize()
+        self.rnn_flag = False
         
 
 
@@ -191,7 +193,8 @@ class wrf_closed_loop:
     def update_rnn_pred(self, data):
         arr = data.data
         self.rnn_pred = arr.reshape(self.pred_horizon,9)
-        print('Prediction: ', self.rnn_pred)          
+        self.rnn_flag = True
+        #print('Prediction: ', self.rnn_pred)          
 
     def update_ee_pose(self,data):
         self.ee_pose = [data.pose.position.x, data.pose.position.y, data.pose.position.z]
@@ -239,13 +242,13 @@ class wrf_closed_loop:
         # self.sock = context.socket(zmq.REQ)
         # self.sock.connect("tcp://localhost:5555")
         self.first_sample = True
-        #self.commands = [self.m1_start, self.m2_start, self.len_mid, 0.0, -0.2, self.grip_close]
+        self.commands = [self.m1_start, self.m2_start, self.len_mid, 0.0, -0.2, self.grip_close]
         self.cmd_prev = self.commands
         print('Setting initial EE pose')        
-        #self.pub_motor2.publish(self.m2_start)
-        #time.sleep(3)     
-        #self.pub_motor1.publish(self.m1_start)
-        #time.sleep(5)               
+        self.pub_motor2.publish(self.m2_start)
+        time.sleep(3)     
+        self.pub_motor1.publish(self.m1_start)
+        time.sleep(5)               
         ed = rospy.wait_for_message('/mocap_node/end_eff/pose', PoseStamped)        
         self.ee_init_pose = [ed.pose.position.x, ed.pose.position.y, ed.pose.position.z]
         time.sleep(2)        
@@ -273,15 +276,23 @@ class wrf_closed_loop:
         wrist_vel = np.linalg.norm(self.curr_mocap_vel[9:12])
         thresh = 0.01        
         cont_horizon = 8
+        pred_horizon = 10
+        ar_order = 18
                 
         pred_on = True
 
         control_coeffs = np.logspace(0, -0.1, num=cont_horizon)
 
-        if (elbow_vel >= thresh or wrist_vel >= thresh) and pred_on == True:
-            base_pred = self.rnn_pred[:, 0:3]
-            elbow_pred = self.rnn_pred[:, 3:6]
-            wrist_pred = self.rnn_pred[:, 6:9]            
+        if (elbow_vel >= thresh) and pred_on == True:
+           
+            ar_sample = self.mocap_sample[-ar_order:, :]
+            base_pred, elbow_pred, wrist_pred = ar_forecast(ar_sample, pred_horizon)
+            if self.rnn_flag == True:
+                base_pred[-1,:] = self.rnn_pred[-1, 0:3]
+                elbow_pred[-1,:] = self.rnn_pred[-1, 3:6]
+                wrist_pred[-1,:] = self.rnn_pred[-1, 6:9]
+                self.rnn_flag = False 
+
             init_cmd = 0
             for i in range(cont_horizon):
                 elb_vec = np.array(wrist_pred[i,:]) - np.array(elbow_pred[i,:])
@@ -295,7 +306,7 @@ class wrf_closed_loop:
                 cmd_compute = init_cmd + control_coeffs[i]*(new_cmd - init_cmd)
                 self.commands = cmd_compute.tolist()
                 #print('Pred motion: ', time.time())
-                #self.send_cmd_to_motor()           
+                self.send_cmd_to_motor()           
                 
         else:            
             elb_vec = np.array(self.wrist_pose) - np.array(self.elbow_pose)
@@ -304,8 +315,10 @@ class wrf_closed_loop:
             thets = ik_3d_pos(self.delta_p)          
             self.cmd_prev = self.commands
             self.commands = self.map_to_commands(thets)
-            #print('Non-pred motion: ', time.time()) 
-            #self.send_cmd_to_motor()
+            #print('Elbow Velocity: ', time.time()) 
+            #print('Elbow Velocity: ', elbow_vel) 
+            #print('Hand Velocity: ', wrist_vel) 
+            self.send_cmd_to_motor()
         
     def send_cmd_to_motor(self):
         for i in range(len(self.commands)):
