@@ -276,21 +276,22 @@ class wrf_closed_loop:
         wrist_vel = np.linalg.norm(self.curr_mocap_vel[9:12])
         thresh = 0.01        
         cont_horizon = 8
-        pred_horizon = 10
+        pred_horizon = 20
         ar_order = 18
                 
         pred_on = True
 
-        control_coeffs = np.logspace(0, -0.1, num=cont_horizon)
+        control_coeffs = np.logspace(0, 0.0, num=cont_horizon)
 
         if (elbow_vel >= thresh) and pred_on == True:
            
             ar_sample = self.mocap_sample[-ar_order:, :]
             base_pred, elbow_pred, wrist_pred = ar_forecast(ar_sample, pred_horizon)
             if self.rnn_flag == True:
-                base_pred[-1,:] = self.rnn_pred[-1, 0:3]
-                elbow_pred[-1,:] = self.rnn_pred[-1, 3:6]
-                wrist_pred[-1,:] = self.rnn_pred[-1, 6:9]
+				rnn_rng = math.ceil(pred_horizon/2)
+                base_pred[-rnn_rng:,:] = self.rnn_pred[-rnn_rng:, 0:3]
+                elbow_pred[-rnn_rng:,:] = self.rnn_pred[-rnn_rng:, 3:6]
+                wrist_pred[-rnn_rng:,:] = self.rnn_pred[-rnn_rng:, 6:9]
                 self.rnn_flag = False 
 
             init_cmd = 0

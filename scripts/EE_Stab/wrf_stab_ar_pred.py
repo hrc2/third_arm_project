@@ -247,7 +247,7 @@ class wrf_closed_loop:
 
         pred_on = False
 
-        control_coeffs = np.logspace(0, -0.3, num=pred_horizon)
+        control_coeffs = np.logspace(0, 0, num=pred_horizon)
 
         if (elbow_vel >= thresh or wrist_vel >= thresh) and pred_on == True:
             ar_sample = self.mocap_sample[-ar_order:, :]

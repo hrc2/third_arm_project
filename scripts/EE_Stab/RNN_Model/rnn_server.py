@@ -45,7 +45,7 @@ class rnn_server:
         self.pred_pub = rospy.Publisher( '/rnn_pred', numpy_msg(Floats), queue_size=10)
         self.sess = sess
         self.mod = mod
-        self.k = 10
+        self.k = 20
         self.pred = np.zeros((self.k, self.mod.input_size), dtype=float)
 
         data = rospy.wait_for_message('/rnn_sample', numpy_msg(Floats))
