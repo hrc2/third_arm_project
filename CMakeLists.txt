@@ -4,7 +4,9 @@ project(third_arm)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED
+dynamixel_workbench_controllers
+)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -98,7 +100,7 @@ find_package(catkin REQUIRED)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES third_arm
-#  CATKIN_DEPENDS other_catkin_pkg
+   CATKIN_DEPENDS dynamixel_workbench_controllers
 #  DEPENDS system_lib
 )
 
@@ -108,7 +110,9 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-# include_directories(include)
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+  )
 
 ## Declare a C++ library
 # add_library(third_arm
@@ -125,7 +129,10 @@ catkin_package(
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(third_arm_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#add_dependencies(third_arm 
+#  ${${PROJECT_NAME}_EXPORTED_TARGETS} 
+#  ${catkin_EXPORTED_TARGETS}
+#)
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(third_arm_node
@@ -142,9 +149,13 @@ catkin_package(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 # install(PROGRAMS
-#   scripts/my_python_script
+#   scripts/control_motors.py
 #   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
+
+catkin_install_python(PROGRAMS scripts/control_motors.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark executables and/or libraries for installation
 # install(TARGETS third_arm third_arm_node
