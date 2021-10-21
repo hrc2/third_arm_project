@@ -31,7 +31,7 @@
     <param name="is_loop" value="$(arg is_loop)"/>
   </node>
 
-  <node name="control_motors" pkg="third_arm" type="control_motors.py" output="screen"/>
+  <node name="WRTA_ROS_interface" pkg="third_arm" type="WRTA_ROS_interface.py" output="screen"/>
 
 </launch>
 

@@ -7,10 +7,22 @@ motors = {
     6: 'MX_28' # ^^^
 }
 
+class WRTA_ROS_config:
+
+    def __init__(self):
+        ## TOPICS ##
+        self.trajectory_topic_name = '/dynamixel_workbench/joint_trajectory'
+
+        ## SERVICES ##
+
+        self.command_service = "/dynamixel_workbench/dynamixel_command"
+        self.execution_service = "/dynamixel_workbench/execution"
+
+
 class MainMotor:
 
 
-    def __init__(self, service_caller, motor_number, config_class):
+    def __init__(self, service_caller, config_class):
         """instantiate the service_caller for controlling this motor
         Args:
             service_caller: function that will communicate to dynamixal command
@@ -27,8 +39,9 @@ class MainMotor:
         self.CCW_Angle_Limit_value = 0
 
         self.service_caller = service_caller
-        self.motor_number = motor_number
         self.config = config_class()
+        self.motor_number = self.config.motor_id
+
 
     def call_service(self, address, value):
         """ call function to communicate with dynamixel"""
