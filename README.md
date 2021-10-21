@@ -66,3 +66,21 @@ gripper: 6
 [ INFO] [1634248959.076021599]: id : 4, model name : AX-12A
 [ INFO] [1634248959.076025555]: id : 5, model name : AX-12A
 [ INFO] [1634248959.076029448]: id : 6, model name : MX-28
+
+
+
+write a service to use dynamixel command - done
+command arm through dynamixel command - done
+write a publisher for JointTrajectory - wip
+	- write a service to use dynamixel execution - wip
+
+
+
+
+http://wiki.ros.org/ROS/Tutorials/WritingServiceClient%28python%29
+
+try to send a velocity profile 0 to 32737, at 10 Hz to update
+
+be in velocity control mode and set to slow
+
+and then actuate it back and backforth
