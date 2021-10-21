@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<launch>
+
+    <!-- Start the Dynamixel Controller -->
+    <node name="dynamixel_manager" pkg="dynamixel_controllers" type="controller_manager.py" required="true" output="screen">
+        <rosparam file="$(find third_arm)/config/manager.yaml" command="load" />
+    </node>
+
+    <rosparam file="$(find third_arm)/config/dof_controllers.yaml" command="load"/>
+
+    <!-- Start Joint Position Controllers for each DoF -->
+    <node name="ctrl_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --port=third_arm_port
+                 base_swivel_controller
+                 vertical_tilt_controller
+                 arm_extension_controller
+                 wrist_controller
+                 wrist_tilt_controller
+		             gripper_controller"
+           />
+    
+
+
+    <node name="joy_node" pkg="joy" type="joy_node">
+      <param name="deadzone" value="0.01" />
+      <param name="autorepeat_rate" value="50" />
+    </node>
+
+    <node name = "thirdarm_joystick" pkg="third_arm" type="third_arm_joystick_testing.py" output ='screen'/>
+
+    <!--node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" /-->      
+    <!-- Start Meta Controllers for the whole Head -->
+    
+
+    <!-- Start the Pose Goer -->
+    <!-- node name="poser" pkg="third_arm" type="pose_goer.py" output="screen" -->
+        <!-- rosparam file="$(find third_arm)/config/poses.yaml" command="load" / -->
+    <!-- /node -->
+</launch>

@@ -1,0 +1,31 @@
+
+rigid_bodies:
+    '4':
+        pose: calib_tool/pose
+        pose2d: calib_tool/ground_pose
+        child_frame_id: calib_tool/base_link
+        parent_frame_id: world
+    '11':
+        pose: wrf_base/pose
+        pose2d: wrf_base/ground_pose
+        child_frame_id: wrf_base/base_link
+        parent_frame_id: world
+    '10':
+        pose: end_eff/pose
+        pose2d: end_eff/ground_pose
+        child_frame_id: end_eff/base_link
+        parent_frame_id: world
+    '12':
+        pose: hand/pose
+        pose2d: hand/ground_pose
+        child_frame_id: hand/base_link
+        parent_frame_id: world
+    '13':
+        pose: elbow/pose
+        pose2d: elbow/ground_pose
+        child_frame_id: elbow/base_link
+        parent_frame_id: world
+optitrack_config:
+        multicast_address: 224.0.0.1
+        command_port: 1010
+        data_port: 1001
