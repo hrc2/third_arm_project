@@ -44,4 +44,4 @@ class gripper:
     open = 2000
     closed = 2700
 
-joint_names = [base_swivel, vertical_tilt, arm_extension, wrist, wrist_tilt, gripper]
+joint_names = [base_swivel, vertical_tilt, arm_extension, wrist_axiel, wrist_tilt, gripper]

@@ -9,8 +9,44 @@ from std_srvs.srv import Trigger
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 import genpy
 
-import MAIN_CONFIG_CLASSES
-import motor_config
+# from MAIN_CONFIG_CLASSES import WRTA_ROS_config
+
+# import motor_config
+
+class WRTA_ROS_config:
+
+    def __init__(self):
+        ## TOPICS ##
+        self.trajectory_topic_name = '/dynamixel_workbench/joint_trajectory'
+
+        ## SERVICES ##
+
+        self.command_service = "/dynamixel_workbench/dynamixel_command"
+        self.execution_service = "/dynamixel_workbench/execution"
+
+class wrist_axiel:
+    motor_id = 4
+    max = 1000
+    min = 0
+    range = abs(max-min)
+    # 500 - rotate right
+    # level, upright- 0
+    # max - 1000, level upright
+
+class wrist_tilt:
+    motor_id = 5
+    max = 1000
+    min = 0
+    range = abs(max-min)
+    level = 500
+
+class gripper:
+    motor_id = 6
+    max = 2700
+    min = 2000
+    range = abs(max-min)
+    open = 2000
+    closed = 2700
 
 
 # Class to control third arm
@@ -19,15 +55,15 @@ class WRTA_ROS_controller_interface:
     def __init__(self):
         # #########################Fields#####################################
 
-        self.config = MAIN_CONFIG_CLASSES.WRTA_ROS_config()
+        self.config = WRTA_ROS_config()
         self.command_service_client = None
         self.execution_service_client = None
 
 
         ## temp, will be replaced with main config classes with built in support for motors
-        self.wrist_axiel = motor_config.wrist_axiel
-        self.wrist_tilt = motor_config.wrist_tilt
-        self.gripper = motor_config.gripper
+        self.wrist_axiel = wrist_axiel()
+        self.wrist_tilt = wrist_tilt()
+        self.gripper = gripper()
         self.goal_position = 'Goal_Position'
         self.goal_velocity = 'Goal_Velocity'
         self.moving_speed = 'Moving_Speed'
@@ -57,23 +93,25 @@ class WRTA_ROS_controller_interface:
         """move wrist and gripper at same time using goal position command"""
 
         self.sendCommandClient(self.gripper.motor_id, self.goal_position, self.gripper.max)
-        self.sendCommandClient(self.wrist_axiel, self.goal_position, self.wrist_axiel.max)
-        rospy.sleep(2)
+        self.sendCommandClient(self.wrist_tilt.motor_id, self.goal_position, self.wrist_tilt.max)
+        self.sendCommandClient(self.wrist_axiel.motor_id, self.goal_position, self.wrist_axiel.max)
+        rospy.sleep(2.0)
         self.sendCommandClient(self.gripper.motor_id, self.goal_position, self.gripper.min)
-        self.sendCommandClient(self.wrist_axiel, self.goal_position, self.wrist_axiel.min)
+        self.sendCommandClient(self.wrist_tilt.motor_id, self.goal_position, self.wrist_tilt.min)
+        self.sendCommandClient(self.wrist_axiel.motor_id, self.goal_position, self.wrist_axiel.min)
         rospy.sleep(2.0)
 
     def test_wrist_and_gripper_at_same_time_service_gaol_velocity(self):
         """move wrist and gripper at same time using goal_velocity command"""
 
         self.sendCommandClient(self.gripper.motor_id, self.goal_velocity, .4)
-        self.sendCommandClient(self.wrist_axiel, self.goal_velocity, 1)
+        self.sendCommandClient(self.wrist_axiel.motor_id, self.goal_velocity, 1)
         rospy.sleep(.4)
         self.sendCommandClient(self.gripper.motor_id, self.goal_velocity, -.4)
-        self.sendCommandClient(self.wrist_axiel, self.goal_velocity, -1)
+        self.sendCommandClient(self.wrist_axiel.motor_id, self.goal_velocity, -1)
         rospy.sleep(.4)
         self.sendCommandClient(self.gripper.motor_id, self.goal_velocity, 0)
-        self.sendCommandClient(self.wrist_axiel, self.goal_velocity, 0)
+        self.sendCommandClient(self.wrist_axiel.motor_id, self.goal_velocity, 0)
         rospy.sleep(2.0)
 
     def test_joint_trajectory(self):
