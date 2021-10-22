@@ -1,7 +1,5 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 """A program to control Third Arm via dynamixel_command service"""
-
-from __future__ import print_function
 
 import rospy
 from dynamixel_workbench_msgs.srv import DynamixelCommand
@@ -9,44 +7,50 @@ from std_srvs.srv import Trigger
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 import genpy
 
-# from MAIN_CONFIG_CLASSES import WRTA_ROS_config
+import sys
+import os
 
-# import motor_config
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-class WRTA_ROS_config:
 
-    def __init__(self):
-        ## TOPICS ##
-        self.trajectory_topic_name = '/dynamixel_workbench/joint_trajectory'
+from scripts.MAIN_CONFIG_CLASSES import WRTA_ROS_config
+from scripts.motor_config import wrist_tilt, wrist_axiel, gripper
 
-        ## SERVICES ##
+# class WRTA_ROS_config:
 
-        self.command_service = "/dynamixel_workbench/dynamixel_command"
-        self.execution_service = "/dynamixel_workbench/execution"
+#     def __init__(self):
+#         ## TOPICS ##
+#         self.trajectory_topic_name = '/dynamixel_workbench/joint_trajectory'
 
-class wrist_axiel:
-    motor_id = 4
-    max = 1000
-    min = 0
-    range = abs(max-min)
-    # 500 - rotate right
-    # level, upright- 0
-    # max - 1000, level upright
+#         ## SERVICES ##
 
-class wrist_tilt:
-    motor_id = 5
-    max = 1000
-    min = 0
-    range = abs(max-min)
-    level = 500
+#         self.command_service = "/dynamixel_workbench/dynamixel_command"
+#         self.execution_service = "/dynamixel_workbench/execution"
 
-class gripper:
-    motor_id = 6
-    max = 2700
-    min = 2000
-    range = abs(max-min)
-    open = 2000
-    closed = 2700
+# class wrist_axiel:
+#     motor_id = 4
+#     max = 1000
+#     min = 0
+#     range = abs(max-min)
+#     # 500 - rotate right
+#     # level, upright- 0
+#     # max - 1000, level upright
+
+# class wrist_tilt:
+#     motor_id = 5
+#     max = 1000
+#     min = 0
+#     range = abs(max-min)
+#     level = 500
+
+# class gripper:
+#     motor_id = 6
+#     max = 2700
+#     min = 2000
+#     range = abs(max-min)
+#     open = 2000
+#     closed = 2700
 
 
 # Class to control third arm
@@ -83,6 +87,8 @@ class WRTA_ROS_controller_interface:
         self.execution_service_client = self.connect_to_service(self.config.execution_service, Trigger)
 
         # Startup Procedure ##
+
+        # self.send_joint_trajectory()
         self.test_wrist_and_gripper_at_same_time_service_goal_position()
 
 
@@ -101,15 +107,15 @@ class WRTA_ROS_controller_interface:
         self.sendCommandClient(self.wrist_axiel.motor_id, self.goal_position, self.wrist_axiel.min)
         rospy.sleep(2.0)
 
-    def test_wrist_and_gripper_at_same_time_service_gaol_velocity(self):
+    def test_wrist_and_gripper_at_same_time_service_goal_velocity(self):
         """move wrist and gripper at same time using goal_velocity command"""
 
-        self.sendCommandClient(self.gripper.motor_id, self.goal_velocity, .4)
+        self.sendCommandClient(self.gripper.motor_id, self.goal_velocity, 1)
         self.sendCommandClient(self.wrist_axiel.motor_id, self.goal_velocity, 1)
-        rospy.sleep(.4)
-        self.sendCommandClient(self.gripper.motor_id, self.goal_velocity, -.4)
+        rospy.sleep(1.0)
+        self.sendCommandClient(self.gripper.motor_id, self.goal_velocity, -1)
         self.sendCommandClient(self.wrist_axiel.motor_id, self.goal_velocity, -1)
-        rospy.sleep(.4)
+        rospy.sleep(1.0)
         self.sendCommandClient(self.gripper.motor_id, self.goal_velocity, 0)
         self.sendCommandClient(self.wrist_axiel.motor_id, self.goal_velocity, 0)
         rospy.sleep(2.0)
@@ -119,7 +125,7 @@ class WRTA_ROS_controller_interface:
         input('Hit enter to send trajectory')
         self.send_joint_trajectory()
         input('Hit enter to execute')
-        self.sendExecutionClient()
+        # self.sendExecutionClient() # this has been commented out to avoid the robot moving, the point is make sure trajectory is sent correctly
         input()
 
     # ################### Service Clients ##################################
@@ -138,6 +144,7 @@ class WRTA_ROS_controller_interface:
 
     def sendExecutionClient(self):
         try:
+            message = []
             response = self.execution_service_client()
 
             if response:
@@ -153,7 +160,7 @@ class WRTA_ROS_controller_interface:
     # ################### Methods ###########################################
     def send_joint_trajectory(self):
         new_trajectory = JointTrajectory()
-        new_trajectory.joint_names = ['gripper']
+        new_trajectory.joint_names = ['gripper'] # this is the safest motor to move
         gripper_point = JointTrajectoryPoint()
         gripper_point.positions = [2300, 2700]
         gripper_point.time_from_start = genpy.Duration(2)
