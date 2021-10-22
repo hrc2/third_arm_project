@@ -14,6 +14,7 @@ class vertical_tilt:
     min = 0
     range = abs(max-min)     
 
+#Extension should be in multi-turn mode
 class arm_extension:
     motor_id = 3
     max = 1850

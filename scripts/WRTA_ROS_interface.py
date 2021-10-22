@@ -138,7 +138,6 @@ class WRTA_ROS_controller_interface:
 
     def sendExecutionClient(self):
         try:
-            message = []
             response = self.execution_service_client()
 
             if response:
