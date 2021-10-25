@@ -10,6 +10,9 @@ import genpy
 import sys
 import os
 
+import pypot
+
+
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
@@ -99,12 +102,12 @@ class WRTA_ROS_controller_interface:
         """move wrist and gripper at same time using goal position command"""
 
         self.sendCommandClient(self.gripper.motor_id, self.goal_position, self.gripper.max)
-        self.sendCommandClient(self.wrist_tilt.motor_id, self.goal_position, self.wrist_tilt.max)
-        self.sendCommandClient(self.wrist_axiel.motor_id, self.goal_position, self.wrist_axiel.max)
+        # self.sendCommandClient(self.wrist_tilt.motor_id, self.goal_position, self.wrist_tilt.max)
+        # self.sendCommandClient(self.wrist_axiel.motor_id, self.goal_position, self.wrist_axiel.max)
         rospy.sleep(2.0)
         self.sendCommandClient(self.gripper.motor_id, self.goal_position, self.gripper.min)
-        self.sendCommandClient(self.wrist_tilt.motor_id, self.goal_position, self.wrist_tilt.min)
-        self.sendCommandClient(self.wrist_axiel.motor_id, self.goal_position, self.wrist_axiel.min)
+        # self.sendCommandClient(self.wrist_tilt.motor_id, self.goal_position, self.wrist_tilt.min)
+        # self.sendCommandClient(self.wrist_axiel.motor_id, self.goal_position, self.wrist_axiel.min)
         rospy.sleep(2.0)
 
     def test_wrist_and_gripper_at_same_time_service_goal_velocity(self):

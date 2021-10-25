@@ -4,3 +4,6 @@ import motor_config
 class BasicJoint:
 
     def __init__(self, motor_model, service_caller, config_class):
+        pass
+import sys
+print(sys.version)

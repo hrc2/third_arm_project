@@ -28,7 +28,7 @@ catkin_install_python(PROGRAMS scripts/MAIN_CONFIG_CLASSES.py
 
 
 catkin_package(
-   CATKIN_DEPENDS std_msgs message_runtime dynamixel_workbench_controllers
+   CATKIN_DEPENDS std_msgs pypot message_runtime dynamixel_workbench_controllers
 )
 
 
