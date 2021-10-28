@@ -55,3 +55,5 @@ write a publisher for JointTrajectory - wip
 	- write a service to use dynamixel execution - wip  
 Set WRTA dynamixel wrist tilt motor to wheel mode and command a slow velocity to it
 
+https://phoenixnap.com/kb/ssh-to-connect-to-remote-server-linux-or-windows
+https://phoenixnap.com/kb/ssh-connection-refused
