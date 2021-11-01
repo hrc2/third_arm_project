@@ -10,14 +10,13 @@ import PyPotMotorConfig
 # The closing decorator make sure that the close function will be called
 # on the object passed as argument when the with block is exited.
 
-with closing(pypot.robot.from_config(PyPotMotorConfig)) as my_robot:
+
+with closing(pypot.robot.from_config(PyPotMotorConfig.third_arm_robot_config)) as my_robot:
     # do stuff without having to make sure not to forget to close my_robot!
 
-    # for direct access to motors
-    port = "/dev/ttyACM0"
-    dxl_io = DxlIO(port, baudrate=1000000)
-
-    # test velocity/wheel mode
+    #test velocity/wheel mode
+    print('start test 1')
+    print(my_robot.wrist_axiel.present_position)
     my_robot.wrist_axiel.goal_speed = 10
     time.sleep(3)
     my_robot.wrist_axiel.goal_speed = -10
@@ -25,9 +24,10 @@ with closing(pypot.robot.from_config(PyPotMotorConfig)) as my_robot:
     my_robot.wrist_axiel.goal_speed = 0
 
     # test position control mode
-    my_robot.wrist_axiel.goal_position = 50
+    print('start test 2')
+    my_robot.wrist_axiel.goal_position = 90
     time.sleep(3)
-    my_robot.wrist_axiel.goal_position = -50
+    my_robot.wrist_axiel.goal_position = -100
 
 # class used to control motors and not have to call functions directly and have checks in place
 class control_motor:
