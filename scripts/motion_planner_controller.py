@@ -77,7 +77,7 @@ class third_arm_motion_planner:
         # do control loop for setting new positions
 
     def control_main_ROS(self):
-        loop_rate = rospy.Rate(20)   
+        loop_rate = rospy.Rate(10)   
 
         # plan from human and arm position
 
