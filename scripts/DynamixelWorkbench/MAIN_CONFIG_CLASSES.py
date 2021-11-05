@@ -1,11 +1,4 @@
-motors = {
-    1: 'MX_64', #https://emanual.robotis.com/docs/en/dxl/mx/mx-64/
-    2: 'MX_64', # ^
-    3: 'MX_28', #https://emanual.robotis.com/docs/en/dxl/mx/mx-28/
-    4: 'AX_12A', #https://emanual.robotis.com/docs/en/dxl/ax/ax-12a/
-    5: 'AX_12A', # ^
-    6: 'MX_28' # ^^^
-}
+
 
 class WRTA_ROS_config:
 
