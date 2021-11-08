@@ -74,13 +74,17 @@ class third_arm_motion_planner:
         self.human_position = new_human_pos
         self.third_arm_positions = new_human_pos
 
-        # do control loop for setting new positions
-
     def control_main_ROS(self):
-        loop_rate = rospy.Rate(20)   
 
         # plan from human and arm position
 
         # move motors
 
-            loop_rate.sleep() # 20 Hz
+        for motor in self.motor_controllers:
+            if self.motor_payload.motor.pos == True:
+                self.motor_controllers[motor].move(self.motor_payload.motor.command)
+            else:
+                self.motor_controllers[motor].move_with_speed(self.motor_payload.motor.command)
+
+        loop_rate = rospy.Rate(20)   
+        loop_rate.sleep() # 20 Hz

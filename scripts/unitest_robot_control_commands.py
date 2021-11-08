@@ -67,8 +67,9 @@ with closing(pypot.robot.from_config(third_arm_robot_config)) as my_robot:
 
         # need to run base DXL control to first control the motor
         # otherwise will not work
-        
-        time.sleep(10)
+        for motor in my_robot.motors:
+            motor.compliant = False
+        time.sleep(1)
         # gripper
         test_position_control(my_robot.gripper, control_config['gripper']['max'], control_config['gripper']['min'])
         test_velocity(my_robot.gripper)
