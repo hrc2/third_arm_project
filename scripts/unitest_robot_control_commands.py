@@ -33,6 +33,28 @@ def test_position_control(robot_part, max, min):
     print("Ending test:", test_position_control.__name__)
     print()
 
+def test_position_control_speed(robot_part, max, min):
+    """ robot_part is part want to control """
+    print("Starting test:", test_position_control.__name__, str(robot_part))
+    print('min pos')
+    robot_part.goal_position = min/2
+    time.sleep(0.05)
+    print('max pos')
+    robot_part.goal_position = min
+    time.sleep(0.05)
+    robot_part.goal_position = min/2
+    time.sleep(0.05)
+    print('max pos')
+    robot_part.goal_position = max/2
+    time.sleep(0.05)
+    robot_part.goal_position = max
+    time.sleep(0.05)
+    print('max pos')
+    robot_part.goal_position = max/2
+    time.sleep(0.05)
+    print("Ending test:", test_position_control.__name__)
+    print()
+
 def save_speeds(robot_class):
     """ Save current speeds """
      
@@ -69,18 +91,17 @@ with closing(pypot.robot.from_config(third_arm_robot_config)) as my_robot:
         # otherwise will not work
         for motor in my_robot.motors:
             motor.compliant = False
-        time.sleep(1)
-        # gripper
-        test_position_control(my_robot.gripper, control_config['gripper']['max'], control_config['gripper']['min'])
-        test_velocity(my_robot.gripper)
-        # wrist axiel
-        test_position_control(my_robot.wrist_axiel, control_config['wrist_axiel']['max'], control_config['wrist_axiel']['min'])
-        test_velocity(my_robot.wrist_axiel)
-        # wrist tilt
-        test_position_control(my_robot.wrist_tilt, control_config['wrist_tilt']['max'], control_config['wrist_tilt']['min'])
-        test_velocity(my_robot.wrist_tilt)
+        test_position_control_speed(my_robot.wrist_axiel, control_config['wrist_axiel']['max'], control_config['wrist_axiel']['min'])
+        # # gripper
+        # test_position_control(my_robot.gripper, control_config['gripper']['max'], control_config['gripper']['min'])
+        # test_velocity(my_robot.gripper)
+        # # wrist axiel
+        # test_position_control(my_robot.wrist_axiel, control_config['wrist_axiel']['max'], control_config['wrist_axiel']['min'])
+        # test_velocity(my_robot.wrist_axiel)
+        # # wrist tilt
+        # test_position_control(my_robot.wrist_tilt, control_config['wrist_tilt']['max'], control_config['wrist_tilt']['min'])
+        # test_velocity(my_robot.wrist_tilt)
 
     finally:
         # clean up and set old speeds back
         set_speeds(my_robot, old_speeds)
-

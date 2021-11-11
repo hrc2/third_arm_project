@@ -28,7 +28,7 @@ third_arm_robot_config = {
             'type':'MX_28',
             'angle_limit':(-4.18, 57.36),
             'offset': 0.0,
-            'moving_speed': 80,
+            'moving_speed': 20,
                 },
         'wrist_tilt':{
             'orientation': 'direct',

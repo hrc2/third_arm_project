@@ -23,12 +23,12 @@ print(motor_positions)
 #     pass
 
 dxl_io.set_goal_position({6: 100})
-dxl_io.set_goal_position({5: -50})
-dxl_io.set_goal_position({4: 0})
+# dxl_io.set_goal_position({5: -50})
+# dxl_io.set_goal_position({4: 0})
 
 time.sleep(2)
-dxl_io.set_goal_position({5: 50})
+# dxl_io.set_goal_position({5: 50})
 dxl_io.set_goal_position({6: 0})
-dxl_io.set_goal_position({4: 50})
+# dxl_io.set_goal_position({4: 50})
 
 

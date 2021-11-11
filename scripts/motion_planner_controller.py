@@ -6,7 +6,7 @@ from pypot.dynamixel import DxlIO, motor
 
 from PyPotMotorConfig import third_arm_robot_config, control_config, motors_types
 
-from PyPotController import control_motor
+from PyPotController import control_motor, control_payload
 import motion_planner_config
 
 
@@ -20,11 +20,13 @@ class third_arm_motion_planner:
         self.human_position = [] # Human hand's position received from optitrack
         self.third_arm_positions = []
 
-        # initialze the motors, reuqired for robot controls to work
-        self.init_motors()
+        self.control_payload = control_payload()
 
         # load robot config
         self.robot = pypot.robot.from_config(third_arm_robot_config)
+
+        # initialze the motors, reuqired for robot controls to work
+        self.init_motors()
 
         # set the motor speeds
         self.set_initial_motor_speed()
@@ -32,28 +34,13 @@ class third_arm_motion_planner:
         # make motor controllers
         self.motor_controllers = {}
         for motor in third_arm_robot_config['motors']:
-            self.motor_controllers[motor] = control_motor(motor, None, self.robot)
+            self.motor_controllers[motor] = control_motor(motor, third_arm_robot_config['motors'][motor]['moving_speed'], self.robot)
 
     def init_motors(self):
-        """ initilize the motors by twitching them slightly """
-        dxl_io = DxlIO(self.config.port, baudrate=self.config.baudrate)
+        """ initilize the motors by setting compliance to false """
         
-        # TODO check order of motors positions returned
-        motor_positions = dxl_io.get_present_position(list(motors_types.keys()))
-        
-        for motor in motors_types:
-            # now do a tiny movement, motor-1 used since motor_positions index corresponds to motor-1 when got present positions
-            dxl_io.set_goal_position({motor: motor_positions[motor-1]-1})
-            time.sleep(.005)
-            dxl_io.set_goal_position({motor: motor_positions[motor-1]+1})
-            time.sleep(.005)
-
-            # back to where started
-            dxl_io.set_goal_position({motor: motor_positions[motor-1]})
-            time.sleep(.005)
-        
-        # close so can make robot class
-        dxl_io.close()
+        for motor in self.robot.motors:
+            motor.compliant = False
 
     def set_initial_motor_speed(self):
 
@@ -77,14 +64,19 @@ class third_arm_motion_planner:
     def control_main_ROS(self):
 
         # plan from human and arm position
+        
+        self.plan_with_kinematics()
 
         # move motors
 
         for motor in self.motor_controllers:
-            if self.motor_payload.motor.pos == True:
-                self.motor_controllers[motor].move(self.motor_payload.motor.command)
+            if self.control_payload.motor.pos == True:
+                self.motor_controllers[motor].move(self.control_payload.motor.command)
             else:
-                self.motor_controllers[motor].move_with_speed(self.motor_payload.motor.command)
+                self.motor_controllers[motor].move_with_speed(self.control_payload.motor.command)
 
-        loop_rate = rospy.Rate(20)   
-        loop_rate.sleep() # 20 Hz
+   
+    def plan_with_kinematics(self):
+        """ updates control_payload with new values from inverse kinematics """
+
+        
