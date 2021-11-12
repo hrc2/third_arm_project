@@ -3,7 +3,7 @@ project(third_arm)
 
 
 find_package(catkin REQUIRED COMPONENTS
-rospy roscpp std_msgs message_generation dynamixel_workbench_controllers
+rospy roscpp std_msgs message_generation
 )
 
 include_directories(
@@ -16,19 +16,29 @@ generate_messages(
 )
 
 
-catkin_install_python(PROGRAMS scripts/WRTA_ROS_interface.py
+catkin_install_python(PROGRAMS scripts/ROS_to_third_arm.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-catkin_install_python(PROGRAMS scripts/motor_config.py
+catkin_install_python(PROGRAMS scripts/PyPotMotorConfig.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-catkin_install_python(PROGRAMS scripts/MAIN_CONFIG_CLASSES.py
+catkin_install_python(PROGRAMS scripts/PyPotController.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+catkin_install_python(PROGRAMS scripts/motion_planner_controller.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+catkin_install_python(PROGRAMS scripts/motion_planner_config.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+catkin_install_python(PROGRAMS scripts/inverse_kinematics.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 
 
 catkin_package(
-   CATKIN_DEPENDS std_msgs pypot message_runtime dynamixel_workbench_controllers
+   CATKIN_DEPENDS std_msgs pypot message_runtime
 )
 
 

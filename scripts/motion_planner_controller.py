@@ -4,11 +4,15 @@ from contextlib import closing
 import pypot.robot
 from pypot.dynamixel import DxlIO, motor
 
-from PyPotMotorConfig import third_arm_robot_config, control_config, motors_types
+import sys
+import os
 
-from PyPotController import control_motor, control_payload
+from scripts.PyPotMotorConfig import third_arm_robot_config, control_config, motors_types
+from scripts.PyPotController import control_motor, control_payload
+
 import motion_planner_config
 
+import inverse_kinematics
 
 
 class third_arm_motion_planner:
@@ -21,6 +25,8 @@ class third_arm_motion_planner:
         self.third_arm_positions = []
 
         self.control_payload = control_payload()
+
+        self.IKSolver = inverse_kinematics.InverseKinematicsSolver()
 
         # load robot config
         self.robot = pypot.robot.from_config(third_arm_robot_config)
@@ -79,4 +85,4 @@ class third_arm_motion_planner:
     def plan_with_kinematics(self):
         """ updates control_payload with new values from inverse kinematics """
 
-        
+        pass
