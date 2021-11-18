@@ -35,7 +35,7 @@ class control_payload:
         self.base_swivel = motor_payload()
         self.vertical_tilt = motor_payload()
         self.arm_extension = motor_payload()
-
+# check IK using current angles then plugging in Base to gripper H to check if IK is correct
 
 # class used to control motors and not have to call functions directly and have checks in place
 class control_motor:

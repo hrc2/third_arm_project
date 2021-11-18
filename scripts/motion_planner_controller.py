@@ -87,7 +87,15 @@ class third_arm_motion_planner:
 
         self.move_with_payloads()
 
-   
+    def get_angles(self):
+        """ returns angles of all motors """
+
+        angles = {}
+        for motor in self.motor_controllers:
+            angles[motor] = self.motor_controllers[motor].get_position()
+
+        return angles
+        
     def plan_with_kinematics(self, input_matrix):
         """ updates control_payload with new values from inverse kinematics
         
@@ -112,19 +120,19 @@ class third_arm_motion_planner:
             #     self.control_payload.__getattribute__(motor).command = new_output_joints[motor]
             # if was doing no motion planning and just using new_output_joints
 
-    def control_gripper_with_distance():
+    def control_gripper_with_distance(self, ):
         """ Control the gripper by checking how close it is to the human hand"""
 
         # TODO
 
         return 0
 
-    def motion_planning(joint_thetas):
+    def motion_planning(self, joint_thetas):
         """ do the motion planning for the third arm """
 
         # TODO
 
-    def move_with_payloads():
+    def move_with_payloads(self, ):
         """ move the motors using the payload in control_payload """
 
         for motor in self.motor_controllers:
