@@ -41,7 +41,7 @@ class control_payload:
 class control_motor:
     def __init__(self, motor_name, default_speed, robot):
         self.motor_name = motor_name
-        self.default_speed = config
+        self.default_speed = default_speed
         self.robot = robot
 
     def move(self, position, speed = None):

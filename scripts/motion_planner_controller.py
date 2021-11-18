@@ -7,26 +7,32 @@ from pypot.dynamixel import DxlIO, motor
 import sys
 import os
 
-from scripts.PyPotMotorConfig import third_arm_robot_config, control_config, motors_types
-from scripts.PyPotController import control_motor, control_payload
+# ROS import way
+try:
+    from scripts.PyPotMotorConfig import third_arm_robot_config, control_config, motors_types
+    from scripts.PyPotController import control_motor, control_payload
+    from scripts.motion_planner_config import motion_planning_controller_config
+    from scripts.inverse_kinematics import InverseKinematicsSolver
 
-import motion_planner_config
-
-import inverse_kinematics
-
+# regular import way
+except:
+    from PyPotMotorConfig import third_arm_robot_config, control_config, motors_types
+    from PyPotController import control_motor, control_payload
+    from motion_planner_config import motion_planning_controller_config
+    from inverse_kinematics import InverseKinematicsSolver
 
 class third_arm_motion_planner:
     """ The class for controlling the third arm"""
 
     def __init__(self):
-        self.config = motion_planner_config.motion_planning_controller_config()
+        self.config = motion_planning_controller_config()
 
         self.human_position = [] # Human hand's position received from optitrack
         self.third_arm_positions = []
 
         self.control_payload = control_payload()
 
-        self.IKSolver = inverse_kinematics.InverseKinematicsSolver()
+        self.IKSolver = InverseKinematicsSolver()
 
         # load robot config
         self.robot = pypot.robot.from_config(third_arm_robot_config)
@@ -71,18 +77,58 @@ class third_arm_motion_planner:
 
         # plan from human and arm position
         
-        self.plan_with_kinematics()
+        new_output_joints = self.plan_with_kinematics()
+
+        # do motion planning if possible with new_output_joints
+
+        self.motion_planning(new_output_joints)
 
         # move motors
+
+        self.move_with_payloads()
+
+   
+    def plan_with_kinematics(self, input_matrix):
+        """ updates control_payload with new values from inverse kinematics
+        
+        input_matrix is a 4x4 homogeneous transformation matrix T
+        
+         """
+        
+        valid, output_joints  = self.IKSolver.solve_kinematics(input_matrix)
+
+        new_output_joints = {}
+
+        if valid:
+            new_output_joints['base_swivel'] = output_joints[0]
+            new_output_joints['vertical_tilt'] = output_joints[1]
+            new_output_joints['arm_extension'] = output_joints[2]
+            new_output_joints['wrist_axiel'] = output_joints[3]
+            new_output_joints['wrist_tilt'] = output_joints[4]
+            new_output_joints['gripper'] = control_gripper_with_distance()
+
+        return new_output_joints
+            # for motor in third_arm_robot_config['motors']:
+            #     self.control_payload.__getattribute__(motor).command = new_output_joints[motor]
+            # if was doing no motion planning and just using new_output_joints
+
+    def control_gripper_with_distance():
+        """ Control the gripper by checking how close it is to the human hand"""
+
+        # TODO
+
+        return 0
+
+    def motion_planning(joint_thetas):
+        """ do the motion planning for the third arm """
+
+        # TODO
+
+    def move_with_payloads():
+        """ move the motors using the payload in control_payload """
 
         for motor in self.motor_controllers:
             if self.control_payload.motor.pos == True:
                 self.motor_controllers[motor].move(self.control_payload.motor.command)
             else:
                 self.motor_controllers[motor].move_with_speed(self.control_payload.motor.command)
-
-   
-    def plan_with_kinematics(self):
-        """ updates control_payload with new values from inverse kinematics """
-
-        pass

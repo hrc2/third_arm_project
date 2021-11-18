@@ -2,6 +2,8 @@
 
 <launch>
 
+  <include file="$(find mocap_optitrack)/launch/mocap.launch"/>
+
   <node name="ROS_to_third_arm" pkg="third_arm" type="ROS_to_third_arm.py" output="screen"/>
 
 </launch>

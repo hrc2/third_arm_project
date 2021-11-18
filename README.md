@@ -6,6 +6,8 @@ We propose to develop an online controller for the third arm, which will continu
 observed human motion. The key challenge is to avoid collisions with the human body and any other obstacles in the workspace. Also, since the third arm is underactuated (5 DoF) this adds to the difficulty in computing online joint-space trajectories towards the target location. Finally, the controller needs to compensate for the motion of the base arm.
 
 ## Running the Code on third-arm-computer
+`export ROS_MASTER_URI=http://192.168.0.114:11311`  
+`export ROS_IP=192.168.0.114`  
 `cd third_arm_noetic_ws/`  
 `source devel/setup.bash`  
 `roslaunch third_arm third_arm_noetic.launch`  
