@@ -33,7 +33,7 @@ class WRTA_ROS_controller_interface:
         self.transformation_base = None
         self.transformation_gripper = None
         self.transformation_other_hand = None
-
+        self.transformation_gripper_base = None
         # ################### Subscribers ####################################
 
         self.tf_listener = tf.TransformListener() #Optitrack tf listner
@@ -50,6 +50,20 @@ class WRTA_ROS_controller_interface:
     # ################### Callback Functions ###############################
 
     # callback for optitrack
+    def control_loop(self):
+        """ control loop for updating arm """
+
+        while self.incomplete and not rospy.is_shutdown():
+            try:
+                self.optitrack_callback()
+            except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+                print ('Could not find transform')
+                continue
+            # self.motion_planner.control_main_ROS()
+            self.loop_rate.sleep()
+
+    def get_from_tf(self,origin, frame):
+        return self.tf_listener.lookupTransform(origin, frame, rospy.Time(0))
 
     def optitrack_callback(self):
         """ get pose of human and third arm using optitrack data """
@@ -60,25 +74,35 @@ class WRTA_ROS_controller_interface:
             self.transformation_base = self.get_transform_from_translation_and_rotation(base_translation, base_rotation)
 
             gripper_translation, gripper_rotation = self.get_from_tf(self.config.opti_track_origin, self.config.third_arm_gripper)
-            self.transformation_gripper = self.get_transform_from_translation_and_rotation(base_translation, base_rotation)
+            self.transformation_gripper = self.get_transform_from_translation_and_rotation(gripper_translation, gripper_rotation)
 
             other_hand_translation, other_hand_rotation = self.get_from_tf(self.config.opti_track_origin, self.config.third_arm_other_hand)
             self.transformation_other_hand = self.get_transform_from_translation_and_rotation(other_hand_translation, other_hand_rotation)
 
             # transofrmation matrix with numpy for posion and quaterinon  vector
             # send aove magrix to ik solver in same loop and then get joint agnels then command said jintnangles
+            
+            gripper_translation_base, gripper_rotation_base = self.get_from_tf(self.config.third_arm_base, self.config.third_arm_gripper)
+            self.transformation_gripper_base = self.get_transform_from_translation_and_rotation(gripper_translation_base, gripper_rotation_base)
+
+
+            # print(base_translation)
+            # print(gripper_translation)
+            print(gripper_translation_base)
+            
+            print("Current Robot thetas:", str(self.motion_planner.get_angles()))
 
         except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
             print('Could not find transform')
 
-        if self.transformation_base is not None and self.transformation_gripper is not None:
+        if self.transformation_gripper_base is not None and self.transformation_gripper is not None:
             self.compareToIK()
 
         # self.motion_planner.motion_callback(new_human_pos, new_third_arm_pos)
 
     # ################### Methods ###########################################
 
-    def get_transform_from_translation_and_rotation(translation, rotation):
+    def get_transform_from_translation_and_rotation(self, translation, rotation):
         """ get the transformation matrix from the tranlsation and rotation arrays """
 
         # https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.from_quat.html
@@ -86,7 +110,8 @@ class WRTA_ROS_controller_interface:
         # https://stackoverflow.com/questions/40833073/insert-matrix-into-the-center-of-another-matrix-in-python
 
         rotation_matrix = R.from_quat(rotation)
-        rotation_matrix = rotation_matrix.as_matrix()
+        rotation_matrix = rotation_matrix.as_dcm()
+        # rotation_matrix = rotation_matrix.as_matrix()
         # assemble transform
 
         transform = np.zeros((4, 4))
@@ -105,7 +130,9 @@ class WRTA_ROS_controller_interface:
     def compareToIK(self):
         """ test current position to IK solver """
 
-        gripper_to_base_transform = np.matmul(np.linalg.inv(self.transformation_base), self.transformation_gripper)
+        # gripper_to_base_transform = np.linalg.inv(self.transformation_base)* self.transformation_gripper
+        gripper_to_base_transform = self.transformation_gripper_base
+        print(gripper_to_base_transform)
         success, thetas = self.motion_planner.IKSolver.solve_kinematics(gripper_to_base_transform)
         print()
         print()

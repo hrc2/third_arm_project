@@ -95,7 +95,7 @@ class third_arm_motion_planner:
             angles[motor] = self.motor_controllers[motor].get_position()
 
         return angles
-        
+
     def plan_with_kinematics(self, input_matrix):
         """ updates control_payload with new values from inverse kinematics
         
@@ -113,7 +113,7 @@ class third_arm_motion_planner:
             new_output_joints['arm_extension'] = output_joints[2]
             new_output_joints['wrist_axiel'] = output_joints[3]
             new_output_joints['wrist_tilt'] = output_joints[4]
-            new_output_joints['gripper'] = control_gripper_with_distance()
+            new_output_joints['gripper'] = self.control_gripper_with_distance()
 
         return new_output_joints
             # for motor in third_arm_robot_config['motors']:

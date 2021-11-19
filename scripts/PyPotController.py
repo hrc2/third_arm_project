@@ -1,5 +1,5 @@
 import time
-
+import math
 from contextlib import closing
 
 import pypot.robot
@@ -66,7 +66,7 @@ class control_motor:
     def get_position(self):
         """ return motor's position"""
 
-        return self.robot.__getattribute__(self.motor_name).present_position
+        return self.robot.__getattribute__(self.motor_name).present_position*math.pi/180
 
     def set_speed(self, speed):
         """ set the speed of the motor """

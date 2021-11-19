@@ -46,7 +46,7 @@ class InverseKinematicsSolver:
         
         # when R2z == 0
         else:
-            output_joints = self.zero_R2_calculation(output_joints)
+            output_joints = self.zero_R2_calculation(output_joints, flat_IM)
 
         output_joints[2] = self.theta_3(output_joints, flat_IM)
 
@@ -99,7 +99,7 @@ class InverseKinematicsSolver:
 
         t1 = abs(self.horizontal_pan_len)
 
-        tempArray = self.np.array(
+        tempArray = np.array(
             [px - R1x * self.end_effector_len, py - R1y * self.end_effector_len, pz - R1z * self.end_effector_len])
 
         t2 = np.linalg.norm(tempArray)
@@ -235,7 +235,7 @@ class InverseKinematicsSolver:
         """
         Range: [0,pi]
         """
-        c4 = c4.item()
+        c4 = c4
         r1z = flat_IM[2].item()
         r3z = flat_IM[10].item()
 
@@ -262,7 +262,7 @@ class InverseKinematicsSolver:
             return False
         
         # Second constraint equation, c2 should be ~=0
-        c2 = r2x*cos(output_joints[0])*sin(output_joints[1]) - r2z*cos(output_joints[1]) + r2y*sin(output_joints[0])*sin(output_joints[1])
+        c2 = r2x*math.cos(output_joints[0])*math.sin(output_joints[1]) - r2z*math.cos(output_joints[1]) + r2y*math.sin(output_joints[0])*math.sin(output_joints[1])
         if abs(c2) > thresh:
             return False
 

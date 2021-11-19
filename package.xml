@@ -23,7 +23,8 @@
 
   <build_depend>pypot</build_depend>
   <run_depend>pypot</run_depend>
-
+ <build_depend>scipy</build_depend>
+  <run_depend>scipy</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

@@ -40,4 +40,4 @@ c = np.matmul(np.linalg.inv(a), b)
 
 solver = InverseKinematicsSolver()
 
-solver.solve_kinematics(c)
+print(solver.solve_kinematics(c))

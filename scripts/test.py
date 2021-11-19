@@ -17,11 +17,6 @@ dxl_io = DxlIO(port, baudrate=1000000)
 motor_positions = dxl_io.get_present_position([6])
 print(motor_positions)    
 
-# dxl_io.close()
-# with closing(pypot.robot.from_config(third_arm_robot_config)) as my_robot:
-#     # do stuff without having to make sure not to forget to close my_robot!
-#     pass
-
 dxl_io.set_goal_position({6: 100})
 # dxl_io.set_goal_position({5: -50})
 # dxl_io.set_goal_position({4: 0})
