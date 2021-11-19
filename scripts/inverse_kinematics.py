@@ -42,15 +42,16 @@ class InverseKinematicsSolver:
             output_joints[3] = self.theta_4(c4, flat_IM)
 
             output_joints[4] = self.theta_5(c4, flat_IM)
-
+            # TODO test output_joints here with a print to make sure no arrays got messed up
+        
         # when R2z == 0
         else:
             output_joints = self.zero_R2_calculation(output_joints)
 
-        flat_IM[2] = self.theta_3(output_joints, flat_IM)
+        output_joints[2] = self.theta_3(output_joints, flat_IM)
 
         if not self.is_constraint_check_valid(flat_IM, output_joints):
-            output_joints[2] = -1
+            return False, output_joints
 
         return self.check_IK_constraints(output_joints)
 
@@ -70,13 +71,11 @@ class InverseKinematicsSolver:
 
         for i in range(len(thetas)):
             T_new = np.array(
-                [[math.cos(thetas[i]), -math.cos(alphas[i]) * math.sin(thetas[i]), math.sin(alphas[i]) * math.sin(thetas[i]),
-                 ais[i] * math.cos(thetas[i])],
-                 [math.sin(thetas[i]), math.cos(alphas[i]) * math.cos(thetas[i]), -math.sin(alphas[i]) * math.cos(thetas[i]),
-                 ais[i] * math.sin(thetas[i])],
+                [[math.cos(thetas[i]), -math.cos(alphas[i]) * math.sin(thetas[i]), math.sin(alphas[i]) * math.sin(thetas[i]), ais[i] * math.cos(thetas[i])],
+                 [math.sin(thetas[i]), math.cos(alphas[i]) * math.cos(thetas[i]), -math.sin(alphas[i]) * math.cos(thetas[i]), ais[i] * math.sin(thetas[i])],
                  [0, math.sin(alphas[i]), math.cos(alphas[i]), di[i]],
                  [0, 0, 0, 1]])
-            TIK = TIK * T_new
+            TIK = np.matmul(TIK, T_new)
 
         if np.linalg.matrix_rank(TIK) == 4:
             return True, output_joints
@@ -97,7 +96,6 @@ class InverseKinematicsSolver:
         pz = flat_IM[14]
 
         output_joints[0] = self.theta_1(flat_IM)
-        np.array([px - R1x * self.end_effector_len, py - R1y * self.end_effector_len, pz - R1z * self.end_effector_len])
 
         t1 = abs(self.horizontal_pan_len)
 
@@ -111,7 +109,7 @@ class InverseKinematicsSolver:
         t3 = np.linalg.norm(tempArray)
 
         output_joints[1] = abs(math.pi - math.acos((t1 * t1 + t3 * t3 - t2 * t2) / (2 * t1 * t3)))
-
+        
         output_joints[4] = self.theta_5(1, flat_IM)
 
         return output_joints
@@ -139,7 +137,7 @@ class InverseKinematicsSolver:
         avec = np.linalg.lstsq(A, numerator, rcond=-1)[0]
 
         #cos(t4) is also found
-        c4 = avec[0][0]
+        c4 = avec[0][0] # TODO which want? [10] or [1]? probably 0 since matches other
 
         cand = math.atan2(1, avec[1])
 
@@ -219,7 +217,7 @@ class InverseKinematicsSolver:
              d3 = d3x
         elif f2 and (d3x == 0 or f_check) and f_check_2:
             d3 = d3y
-        elif f3 and f_check or (d3x == 0 and d3y == 0):
+        elif f3 and (f_check or (d3x == 0 and d3y == 0)):
             d3 = d3z
         else:
             d3 = -1 # No solution found
@@ -264,7 +262,7 @@ class InverseKinematicsSolver:
             return False
         
         # Second constraint equation, c2 should be ~=0
-        c2 = r2x*cos(output_joints[0])*sin(output_joints[1]) - r2z*cos(output_joints[2]) + r2y*sin(output_joints[0])*sin(output_joints[1])
+        c2 = r2x*cos(output_joints[0])*sin(output_joints[1]) - r2z*cos(output_joints[1]) + r2y*sin(output_joints[0])*sin(output_joints[1])
         if abs(c2) > thresh:
             return False
 
