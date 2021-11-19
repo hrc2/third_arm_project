@@ -5,7 +5,14 @@
 We propose to develop an online controller for the third arm, which will continuously adapt the robot’s motion based on the 
 observed human motion. The key challenge is to avoid collisions with the human body and any other obstacles in the workspace. Also, since the third arm is underactuated (5 DoF) this adds to the difficulty in computing online joint-space trajectories towards the target location. Finally, the controller needs to compensate for the motion of the base arm.
 
+## Setting up the code  
+Install PyPot using command line (Python 3): python -m pip install PyPot    
+Install PyPot (Python 2.7): pip install PyPot==3.3.1  
+Set ACM0 permissions, type in command line for usb port using: sudo chmod 0777 /dev/ttyUSB0  
+
 ## Running the Code on third-arm-computer
+Plug in Power  
+Plug in USB  
 `export ROS_MASTER_URI=http://192.168.0.124:11311`  
 `export ROS_IP=192.168.0.124`  
 `cd third_arm_noetic_ws/`  
@@ -47,8 +54,6 @@ id : 3, model name : MX-28
 id : 4, model name : AX-12A  
 id : 5, model name : AX-12A  
 id : 6, model name : MX-28  
-
-set ACM0 permissions: sudo chmod 0777 /dev/ttyUSB0
 
 ### Tasks:
 

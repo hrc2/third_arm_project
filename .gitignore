@@ -1,3 +1,4 @@
 /home/hriclass/catkin_ws/src/third_arm/scripts/HRC_2D_Task/Regression_Tests/Data/
 .idea
 .vscode/settings.json
+*.pyc

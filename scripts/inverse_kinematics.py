@@ -17,12 +17,12 @@ class InverseKinematicsSolver:
     def solve_kinematics(self, input_matrix):
         """ used to perform inverse kinematics on the wearable third robotic arm
 
-        returns True if successful matrix found, False if not matrix found
-        also returns matrix itself
+        returns success, np.matrix
+        success is True if successful matrix found, False if not matrix found
 
+        np.matrix is the output thetas
         """
-
-        output_joints = np.zeros([1, 5])
+        output_joints = np.zeros(5)
 
         # check rank
         if np.linalg.matrix_rank(input_matrix) != 4:
@@ -30,14 +30,14 @@ class InverseKinematicsSolver:
             return False, output_joints
 
         # flatten input matrix to be more easily used
-        flat_IM = np.reshape(input_matrix, [16, 1])
+        flat_IM = np.reshape(input_matrix, (16, 1))
 
         # when R2z is > 0
-        if abs(flat_IM[6]) > zero:
+        if abs(flat_IM[6]) > self.zero:
 
             output_joints[0] = self.theta_1(flat_IM)
 
-            c4, output_joints[1] = self.theta_2(flat_IM)
+            c4, output_joints[1] = self.theta_2(output_joints[0], flat_IM)
 
             output_joints[3] = self.theta_4(c4, flat_IM)
 
@@ -47,14 +47,14 @@ class InverseKinematicsSolver:
         else:
             output_joints = self.zero_R2_calculation(output_joints)
 
-        flat_IM[2] = thet3(output_joints, flat_IM)
+        flat_IM[2] = self.theta_3(output_joints, flat_IM)
 
-        if constraint_check(flat_IM, output_joints):
+        if not self.is_constraint_check_valid(flat_IM, output_joints):
             output_joints[2] = -1
 
-        return self.check_constraints(output_joints, flat_IM)
+        return self.check_IK_constraints(output_joints)
 
-    def check_contraints(self, output_joints):
+    def check_IK_constraints(self, output_joints):
 
         # FK from IK predictions:
         TIK = np.identity(4)
@@ -64,8 +64,8 @@ class InverseKinematicsSolver:
         ais = [0, 0, 0, 0, 0, self.end_effector_len]
 
         di = [self.horizontal_pan_len, 0, output_joints[2], self.wrist_len, 0, 0]
-
-        thetas = output_joints.tolist().append(0)
+        thetas = output_joints.tolist()
+        thetas.append(0)
         thetas[2] = math.pi
 
         for i in range(len(thetas)):
@@ -118,30 +118,30 @@ class InverseKinematicsSolver:
 
     def theta_1(self, flat_IM):
         # Range: [-pi,pi]
-        r1y = flat_IM(1)
-        r1x = flat_IM(0)
-        py = flat_IM(13)
-        px = flat_IM(12)
+        r1y = flat_IM[1]
+        r1x = flat_IM[0]
+        py = flat_IM[13]
+        px = flat_IM[12]
 
         return math.atan2(py - self.end_effector_len * r1y, px - self.end_effector_len * r1x)
 
-    def theta_2(self, flat_TM):
+    def theta_2(self, t1, flat_TM):
         # Range: [0, pi / 2]
 
-        r2x = flat_TM[4]
-        r2y = flat_TM[5]
-        r2z = flat_TM[6]
+        r2x = flat_TM[4].item()
+        r2y = flat_TM[5].item()
+        r2z = flat_TM[6].item()
 
-        A = [[math.sin(t1), math.cos(t1) * r2z],
-        [-cos(t1), sin(t1) * r2z]],
+        A = np.asarray([[math.sin(t1), math.cos(t1) * r2z], [-math.cos(t1), math.sin(t1) * r2z]])
 
         numerator = [[r2x] ,[r2y]]
 
-        avec = np.linalg.lstsq(A, numerator)[0]
+        avec = np.linalg.lstsq(A, numerator, rcond=-1)[0]
 
         #cos(t4) is also found
-        c4 = avec[0]
-        cand = math.atan2[1, avec[1]]
+        c4 = avec[0][0]
+
+        cand = math.atan2(1, avec[1])
 
         if cand > 0 and cand < self.half_pi:
             t2 = cand
@@ -237,15 +237,35 @@ class InverseKinematicsSolver:
         """
         Range: [0,pi]
         """
-
-        r1z = flat_IM[2]
-        r3z = flat_IM[10]
+        c4 = c4.item()
+        r1z = flat_IM[2].item()
+        r3z = flat_IM[10].item()
 
         A = np.array([[-math.cos(self.wrist_len), -c4*math.sin(self.wrist_len)], [-c4*math.sin(self.wrist_len), math.cos(self.wrist_len)]])
 
-        numerator = np.array([[r1z][r3z]])
-
-        cvec = np.linalg.lstsq(A,numerator)[0]
+        numerator = [[r1z], [r3z]]
+        cvec = np.linalg.lstsq(A, numerator, rcond=-1)[0]
 
         return math.atan2(cvec[0], cvec[1])
 
+    def is_constraint_check_valid(self, flat_IM, output_joints):
+        """ check contraints of output_joints """
+        
+        r1z = flat_IM[2].item()
+        r2z = flat_IM[6].item()
+        r3z = flat_IM[10].item()
+        r2x = flat_IM[4].item()
+        r2y = flat_IM[5].item()
+        thresh = 1e-10
+        
+        # First constraint equation, c1 should be ~=0
+        c1 = r1z*math.cos(output_joints[4])*math.sin(output_joints[3]) - r2z*math.cos(output_joints[3]) + r3z*math.sin(output_joints[3])*math.sin(output_joints[4])
+        if abs(c1) > thresh:
+            return False
+        
+        # Second constraint equation, c2 should be ~=0
+        c2 = r2x*cos(output_joints[0])*sin(output_joints[1]) - r2z*cos(output_joints[2]) + r2y*sin(output_joints[0])*sin(output_joints[1])
+        if abs(c2) > thresh:
+            return False
+
+        return True

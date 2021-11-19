@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 
+from scipy.spatial.transform import Rotation as R
+import numpy as np
+
 import sys
 import os
 import tf
@@ -10,6 +13,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from scripts.motion_planner_controller import third_arm_motion_planner
+from scripts.ROS_Config import ROS_config
 
 class WRTA_ROS_controller_interface:
     """A program to control Third Arm via PyPot"""
@@ -18,9 +22,17 @@ class WRTA_ROS_controller_interface:
 
         self.loop_rate = rospy.Rate(20) # loop_rate.sleep() # 20 Hz
 
+        self.test_ik_rate = rospy.Rate(1)
+
         self.motion_planner = third_arm_motion_planner()
 
         self.incomplete = True
+
+        self.config = ROS_config()
+
+        self.transformation_base = None
+        self.transformation_gripper = None
+        self.transformation_other_hand = None
 
         # ################### Subscribers ####################################
 
@@ -42,29 +54,67 @@ class WRTA_ROS_controller_interface:
     def optitrack_callback(self):
         """ get pose of human and third arm using optitrack data """
 
-        self.motion_planner.motion_callback(new_human_pos, new_third_arm_pos)
+        try:
+            # update positions
+            base_translation, base_rotation = self.get_from_tf(self.config.opti_track_origin, self.config.third_arm_base)
+            self.transformation_base = self.get_transform_from_translation_and_rotation(base_translation, base_rotation)
+
+            gripper_translation, gripper_rotation = self.get_from_tf(self.config.opti_track_origin, self.config.third_arm_gripper)
+            self.transformation_gripper = self.get_transform_from_translation_and_rotation(base_translation, base_rotation)
+
+            other_hand_translation, other_hand_rotation = self.get_from_tf(self.config.opti_track_origin, self.config.third_arm_other_hand)
+            self.transformation_other_hand = self.get_transform_from_translation_and_rotation(other_hand_translation, other_hand_rotation)
+
+            # transofrmation matrix with numpy for posion and quaterinon  vector
+            # send aove magrix to ik solver in same loop and then get joint agnels then command said jintnangles
+
+        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+            print('Could not find transform')
+
+        if self.transformation_base is not None and self.transformation_gripper is not None:
+            self.compareToIK()
+
+        # self.motion_planner.motion_callback(new_human_pos, new_third_arm_pos)
 
     # ################### Methods ###########################################
 
-    def control_loop(self):
-        """ control loop for updating arm """
+    def get_transform_from_translation_and_rotation(translation, rotation):
+        """ get the transformation matrix from the tranlsation and rotation arrays """
 
-        while self.incomplete and not rospy.is_shutdown():
-            try:
-                (trans_third_arm_gripper, rot_third_arm_gripper) = self.tf_listener.lookupTransform("optitrack_origin", "third_arm_other_hand", rospy.Time(0))
-                # (trans_object, rot_object) = self.tf_listener.lookupTransform(self.config.optitrack_tf_origin, self.config.optitrack_tf_object, rospy.Time(0))
-                # (trans_human, rot_human) = self.tf_listener.lookupTransform(self.config.optitrack_tf_origin, self.config.optitrack_tf_human_hand, rospy.Time(0))
-                # print("Human position =", trans_human)
-                print("Robot position =", trans_third_arm_gripper)
-                print("Robot orientation =", rot_third_arm_gripper)
-                print(self.motion_planner.get_angles())
-                # transofrmation matrix with numpy for posion and quaterinon  vector
-                # send aove magrix to ik solver in same loop and then get joint agnels then command said jintnangles
-            except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-                print 'Could not find transform'
-                continue
-            # self.motion_planner.control_main_ROS()
-            self.loop_rate.sleep()
+        # https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.from_quat.html
+        # http://docs.ros.org/en/jade/api/tf/html/python/transformations.html
+        # https://stackoverflow.com/questions/40833073/insert-matrix-into-the-center-of-another-matrix-in-python
+
+        rotation_matrix = R.from_quat(rotation)
+        rotation_matrix = rotation_matrix.as_matrix()
+        # assemble transform
+
+        transform = np.zeros((4, 4))
+
+        # add rotation
+        transform[0:3, 0:3] = rotation_matrix
+        
+        # add transform
+        translation = np.array(translation)
+        transform[0:3, 3:4] = translation.reshape((3, 1))
+
+        transform[3][3] = 1
+
+        return transform
+
+    def compareToIK(self):
+        """ test current position to IK solver """
+
+        gripper_to_base_transform = np.matmul(np.linalg.inv(self.transformation_base), self.transformation_gripper)
+        success, thetas = self.motion_planner.IKSolver.solve_kinematics(gripper_to_base_transform)
+        print()
+        print()
+        print()
+        print("IK Successful:", str(success))
+        print("IK Output:", str(thetas.tolist()))
+        print("Current Robot thetas:", str(self.motion_planner.get_angles()))
+ 
+        self.loop_rate.sleep()
 
 if __name__ == '__main__':
     # Initialize node
