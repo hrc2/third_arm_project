@@ -6,6 +6,7 @@ from pypot.dynamixel import DxlIO, motor
 
 import sys
 import os
+import numpy as np
 
 # ROS import way
 try:
@@ -73,19 +74,30 @@ class third_arm_motion_planner:
         self.human_position = new_human_pos
         self.third_arm_positions = new_human_pos
 
-    def control_main_ROS(self):
+    def control_main_ROS(self, input_matrix):
 
         # plan from human and arm position
         
-        new_output_joints = self.plan_with_kinematics()
+        new_output_joints = self.plan_with_kinematics(input_matrix)
+        current_joints = self.get_angles()
 
-        # do motion planning if possible with new_output_joints
+        # Compute joint velocities with PV control
+        commanded_velocity = self.config.kp_base_swivel*(new_output_joints["base_swivel"]-current_joints["base_swivel"])
+        if abs(commanded_velocity) < self.config.pid_velocity_threshold:
+            commanded_velocity = 0.0
+        if abs(commanded_velocity) > self.config.max_velocity:
+            commanded_velocity = commanded_velocity/abs(commanded_velocity)*self.config.max_velocity
 
-        self.motion_planning(new_output_joints)
+        # Joint Position Control
+        # self.motor_controllers["base_swivel"].move(new_output_joints["base_swivel"]*180/np.pi)
+
+        # Joint Velocity Control
+        self.motor_controllers["base_swivel"].move_with_speed(commanded_velocity*180/np.pi)
+
 
         # move motors
 
-        self.move_with_payloads()
+        # self.move_with_payloads()
 
     def get_angles(self):
         """ returns angles of all motors """
@@ -107,14 +119,14 @@ class third_arm_motion_planner:
 
         new_output_joints = {}
 
-        if valid:
-            new_output_joints['base_swivel'] = output_joints[0]
-            new_output_joints['vertical_tilt'] = output_joints[1]
-            new_output_joints['arm_extension'] = output_joints[2]
-            new_output_joints['wrist_axiel'] = output_joints[3]
-            new_output_joints['wrist_tilt'] = output_joints[4]
-            new_output_joints['gripper'] = self.control_gripper_with_distance()
-
+        # if valid:
+        #     new_output_joints['base_swivel'] = output_joints[0]
+        #     new_output_joints['vertical_tilt'] = output_joints[1]
+        #     new_output_joints['arm_extension'] = output_joints[2]
+        #     new_output_joints['wrist_axiel'] = output_joints[3]
+        #     new_output_joints['wrist_tilt'] = output_joints[4]
+        #     new_output_joints['gripper'] = self.control_gripper_with_distance()
+        new_output_joints['base_swivel'] = -1.0*output_joints[0]
         return new_output_joints
             # for motor in third_arm_robot_config['motors']:
             #     self.control_payload.__getattribute__(motor).command = new_output_joints[motor]

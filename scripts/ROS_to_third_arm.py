@@ -9,6 +9,9 @@ import tf
 
 import rospy
 
+#TODO add offset for base to gripper since center not exact
+
+
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
@@ -34,6 +37,7 @@ class WRTA_ROS_controller_interface:
         self.transformation_gripper = None
         self.transformation_other_hand = None
         self.transformation_gripper_base = None
+        self.transformation_otherHand_base = None
         # ################### Subscribers ####################################
 
         self.tf_listener = tf.TransformListener() #Optitrack tf listner
@@ -59,7 +63,8 @@ class WRTA_ROS_controller_interface:
             except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
                 print ('Could not find transform')
                 continue
-            # self.motion_planner.control_main_ROS()
+            if self.transformation_otherHand_base is not None: 
+                self.motion_planner.control_main_ROS(self.transformation_otherHand_base)
             self.loop_rate.sleep()
 
     def get_from_tf(self,origin, frame):
@@ -84,11 +89,17 @@ class WRTA_ROS_controller_interface:
             
             gripper_translation_base, gripper_rotation_base = self.get_from_tf(self.config.third_arm_base, self.config.third_arm_gripper)
             self.transformation_gripper_base = self.get_transform_from_translation_and_rotation(gripper_translation_base, gripper_rotation_base)
+            self.transformation_gripper_base += self.config.base_offset_for_IK
 
+            otherHand_translation_base, otherHand_rotation_base = self.get_from_tf(self.config.third_arm_base, self.config.third_arm_other_hand)
+            self.transformation_otherHand_base = self.get_transform_from_translation_and_rotation(otherHand_translation_base, otherHand_rotation_base)
+            self.transformation_otherHand_base += self.config.base_offset_for_IK
 
             # print(base_translation)
             # print(gripper_translation)
-            print(gripper_translation_base)
+            print("Gripper translation:", str(gripper_translation_base))
+            print("Gripper rotation:", str(gripper_rotation_base))
+            
             
             print("Current Robot thetas:", str(self.motion_planner.get_angles()))
 
@@ -131,15 +142,17 @@ class WRTA_ROS_controller_interface:
         """ test current position to IK solver """
 
         # gripper_to_base_transform = np.linalg.inv(self.transformation_base)* self.transformation_gripper
-        gripper_to_base_transform = self.transformation_gripper_base
-        print(gripper_to_base_transform)
-        success, thetas = self.motion_planner.IKSolver.solve_kinematics(gripper_to_base_transform)
+        otherHand_to_base_transform = self.transformation_otherHand_base
+        print(otherHand_to_base_transform)
+        success, thetas = self.motion_planner.IKSolver.solve_kinematics(otherHand_to_base_transform)
+        thetas[0] = -thetas[0]
         print()
         print()
         print()
         print("IK Successful:", str(success))
         print("IK Output:", str(thetas.tolist()))
-        print("Current Robot thetas:", str(self.motion_planner.get_angles()))
+        current_angles = self.motion_planner.get_angles()
+        print("Current Robot thetas:", str(current_angles["base_swivel"]), str(current_angles["vertical_tilt"]), str(current_angles["arm_extension"]),str(current_angles["wrist_axiel"]),str(current_angles["wrist_tilt"]),str(current_angles["gripper"]))
  
         self.loop_rate.sleep()
 
@@ -151,4 +164,5 @@ if __name__ == '__main__':
         third_arm_brain = WRTA_ROS_controller_interface()
         third_arm_brain.control_loop()
     except rospy.ROSInterruptException:
+        third_arm_brain.motion_planner.motor_controllers["base_swivel"].move_with_speed[0.0]
         pass

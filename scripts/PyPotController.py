@@ -3,7 +3,7 @@ import math
 from contextlib import closing
 
 import pypot.robot
-from pypot.dynamixel import DxlIO
+from pypot.dynamixel import DxlIO, motor
 
 import PyPotMotorConfig
 
@@ -43,6 +43,7 @@ class control_motor:
         self.motor_name = motor_name
         self.default_speed = default_speed
         self.robot = robot
+        self.config = PyPotMotorConfig.control_config[motor_name]
 
     def move(self, position, speed = None):
         """ move the motor to a position with a certain or default speed i no speed specified"""

@@ -30,7 +30,7 @@ class InverseKinematicsSolver:
             return False, output_joints
 
         # flatten input matrix to be more easily used
-        flat_IM = np.reshape(input_matrix, (16, 1))
+        flat_IM = np.reshape(input_matrix, (16,1,), order = 'F')
 
         # when R2z is > 0
         if abs(flat_IM[6]) > self.zero:
@@ -120,6 +120,7 @@ class InverseKinematicsSolver:
         r1x = flat_IM[0]
         py = flat_IM[13]
         px = flat_IM[12]
+        
 
         return math.atan2(py - self.end_effector_len * r1y, px - self.end_effector_len * r1x)
 
@@ -135,11 +136,12 @@ class InverseKinematicsSolver:
         numerator = [[r2x] ,[r2y]]
 
         avec = np.linalg.lstsq(A, numerator, rcond=-1)[0]
+        
 
         #cos(t4) is also found
         c4 = avec[0][0] # TODO which want? [10] or [1]? probably 0 since matches other
 
-        cand = math.atan2(1, avec[1])
+        cand = math.atan2(1, avec[1][0])
 
         if cand > 0 and cand < self.half_pi:
             t2 = cand
