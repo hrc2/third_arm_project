@@ -14,6 +14,7 @@ try:
     from scripts.PyPotController import control_motor, control_payload
     from scripts.motion_planner_config import motion_planning_controller_config
     from scripts.inverse_kinematics import InverseKinematicsSolver
+    from scripts.toolbox import PID_template
 
 # regular import way
 except:
@@ -21,6 +22,7 @@ except:
     from PyPotController import control_motor, control_payload
     from motion_planner_config import motion_planning_controller_config
     from inverse_kinematics import InverseKinematicsSolver
+    from toolbox import PID_template
 
 class third_arm_motion_planner:
     """ The class for controlling the third arm"""
@@ -38,7 +40,7 @@ class third_arm_motion_planner:
         # load robot config
         self.robot = pypot.robot.from_config(third_arm_robot_config)
 
-        # initialze the motors, reuqired for robot controls to work
+        # initialze the motors, required for robot controls to work
         self.init_motors()
 
         # set the motor speeds
@@ -48,6 +50,9 @@ class third_arm_motion_planner:
         self.motor_controllers = {}
         for motor in third_arm_robot_config['motors']:
             self.motor_controllers[motor] = control_motor(motor, third_arm_robot_config['motors'][motor]['moving_speed'], self.robot)
+
+        # PID controllers
+        self.base_PID = PID_template(self.config.kp_base_swivel, 0, 0, -self.config.max_velocity, self.config.max_velocity)
 
     def init_motors(self):
         """ initilize the motors by setting compliance to false """
@@ -68,31 +73,17 @@ class third_arm_motion_planner:
             self.robot.__getattribute__(motor).moving_speed = speed
             print(motor, 'is now at', str(speed))
 
-    def motion_callback(self, new_human_pos, new_third_arm_pos):
-        """ callback to be called by ROS for using Optitrack data """
-
-        self.human_position = new_human_pos
-        self.third_arm_positions = new_human_pos
-
     def control_main_ROS(self, input_matrix):
 
         # plan from human and arm position
         
-        new_output_joints = self.plan_with_kinematics(input_matrix)
-        current_joints = self.get_angles()
-
-        # Compute joint velocities with PV control
-        commanded_velocity = self.config.kp_base_swivel*(new_output_joints["base_swivel"]-current_joints["base_swivel"])
-        if abs(commanded_velocity) < self.config.pid_velocity_threshold:
-            commanded_velocity = 0.0
-        if abs(commanded_velocity) > self.config.max_velocity:
-            commanded_velocity = commanded_velocity/abs(commanded_velocity)*self.config.max_velocity
+        new_velocities, new_positions = self.plan_with_kinematics(input_matrix)
 
         # Joint Position Control
-        # self.motor_controllers["base_swivel"].move(new_output_joints["base_swivel"]*180/np.pi)
+        # self.motor_controllers["base_swivel"].move_with_rad(new_positions["base_swivel"])
 
         # Joint Velocity Control
-        self.motor_controllers["base_swivel"].move_with_speed(commanded_velocity*180/np.pi)
+        self.motor_controllers["base_swivel"].move_with_rad_speed(new_velocities["base_swivel"])
 
 
         # move motors
@@ -115,19 +106,35 @@ class third_arm_motion_planner:
         
          """
         
-        valid, output_joints  = self.IKSolver.solve_kinematics(input_matrix)
+        valid, output_joints = self.IKSolver.solve_kinematics(input_matrix)
+        current_joints = self.get_angles()
 
-        new_output_joints = {}
+        new_velocities = {}
+        new_positions = {}
 
-        # if valid:
-        #     new_output_joints['base_swivel'] = output_joints[0]
-        #     new_output_joints['vertical_tilt'] = output_joints[1]
-        #     new_output_joints['arm_extension'] = output_joints[2]
-        #     new_output_joints['wrist_axiel'] = output_joints[3]
-        #     new_output_joints['wrist_tilt'] = output_joints[4]
-        #     new_output_joints['gripper'] = self.control_gripper_with_distance()
-        new_output_joints['base_swivel'] = -1.0*output_joints[0]
-        return new_output_joints
+        # get positions
+        new_positions['base_swivel'] = -1.0*output_joints[0]
+        # new_positions['vertical_tilt'] = output_joints[1]
+        # new_positions['arm_extension'] = output_joints[2]
+        # new_positions['wrist_axiel'] = output_joints[3]
+        # new_positions['wrist_tilt'] = output_joints[4]
+        # new_positions['gripper'] = self.control_gripper_with_distance()
+
+        # get velocities
+        new_velocities['base_swivel'] = self.base_PID.update(new_positions["base_swivel"], current_joints["base_swivel"])
+        # new_velocities['vertical_tilt'] = output_joints[1]
+        # new_velocities['arm_extension'] = output_joints[2]
+        # new_velocities['wrist_axiel'] = output_joints[3]
+        # new_velocities['wrist_tilt'] = output_joints[4]
+        # new_velocities['gripper'] = self.control_gripper_with_distance()
+
+        # set to 0 if needed
+        for motor in new_velocities:
+            if abs(new_velocities[motor]) < self.config.pid_velocity_threshold:
+                new_velocities[motor] = 0.0
+
+        return new_velocities, new_positions
+
             # for motor in third_arm_robot_config['motors']:
             #     self.control_payload.__getattribute__(motor).command = new_output_joints[motor]
             # if was doing no motion planning and just using new_output_joints
@@ -139,16 +146,11 @@ class third_arm_motion_planner:
 
         return 0
 
-    def motion_planning(self, joint_thetas):
-        """ do the motion planning for the third arm """
-
-        # TODO
-
     def move_with_payloads(self, ):
         """ move the motors using the payload in control_payload """
 
         for motor in self.motor_controllers:
             if self.control_payload.motor.pos == True:
-                self.motor_controllers[motor].move(self.control_payload.motor.command)
+                self.motor_controllers[motor].move_rad(self.control_payload.motor.command)
             else:
-                self.motor_controllers[motor].move_with_speed(self.control_payload.motor.command)
+                self.motor_controllers[motor].move_with_rad_speed(self.control_payload.motor.command)

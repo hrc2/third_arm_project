@@ -64,9 +64,12 @@ class control_motor:
         # move motor
         self.robot.__getattribute__(self.motor_name).goal_position = position
 
+    def move_rad(self, position, speed = None):
+        """ move the motor to a RADIAN position with a certain or default speed i no speed specified"""
+        self.move(position*180/math.pi, speed)
+
     def get_position(self):
         """ return motor's position"""
-
         return self.robot.__getattribute__(self.motor_name).present_position*math.pi/180
 
     def set_speed(self, speed):
@@ -76,3 +79,7 @@ class control_motor:
     def move_with_speed(self, speed):
         """ move the motor with a speed """
         self.robot.__getattribute__(self.motor_name).goal_speed = speed
+
+    def move_with_rad_speed(self, speed):
+        """ move the motor with a speed """
+        self.robot.__getattribute__(self.motor_name).goal_speed = speed*180/math.pi

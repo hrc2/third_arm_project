@@ -38,6 +38,7 @@ class WRTA_ROS_controller_interface:
         self.transformation_other_hand = None
         self.transformation_gripper_base = None
         self.transformation_otherHand_base = None
+
         # ################### Subscribers ####################################
 
         self.tf_listener = tf.TransformListener() #Optitrack tf listner
