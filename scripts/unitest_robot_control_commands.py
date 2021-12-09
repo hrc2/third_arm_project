@@ -91,13 +91,13 @@ with closing(pypot.robot.from_config(third_arm_robot_config)) as my_robot:
         # otherwise will not work
         for motor in my_robot.motors:
             motor.compliant = False
-        test_position_control_speed(my_robot.wrist_axiel, control_config['wrist_axiel']['max'], control_config['wrist_axiel']['min'])
+        test_position_control_speed(my_robot.wrist_axial, control_config['wrist_axial']['max'], control_config['wrist_axial']['min'])
         # # gripper
         # test_position_control(my_robot.gripper, control_config['gripper']['max'], control_config['gripper']['min'])
         # test_velocity(my_robot.gripper)
-        # # wrist axiel
-        # test_position_control(my_robot.wrist_axiel, control_config['wrist_axiel']['max'], control_config['wrist_axiel']['min'])
-        # test_velocity(my_robot.wrist_axiel)
+        # # wrist axial
+        # test_position_control(my_robot.wrist_axial, control_config['wrist_axial']['max'], control_config['wrist_axial']['min'])
+        # test_velocity(my_robot.wrist_axial)
         # # wrist tilt
         # test_position_control(my_robot.wrist_tilt, control_config['wrist_tilt']['max'], control_config['wrist_tilt']['min'])
         # test_velocity(my_robot.wrist_tilt)

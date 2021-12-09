@@ -1,6 +1,12 @@
+import math
+import numpy as np
+
+
 class PID_template:
+    """ template class for a PID """
 
     def __init__(self, proportional, integral, derivative, minimum, maximum):
+        """ instantiate PID"""
         self.integrator = 0
         self.derivator = 0
         self.previous = 0
@@ -15,6 +21,7 @@ class PID_template:
         self.derivativeC = derivative
 
     def update(self, calculated, processVariableCurrentValue):
+        """ update PID """
         self.error = calculated - processVariableCurrentValue
         self.integrator += self.error
         self.derivator += self.previous - self.error
@@ -39,8 +46,8 @@ def getVectorAngle(vectorStart, vectorEnd, fromTop=False):
         vector[1] /= factor
     if fromTop:
         angle = math.acos((np.dot(vector, [0, 1])))
-        angle *= getSide([0, 1], vector) * -1
-        if abs(angle) > 3.14 and abs(angle) < 3.15:
+        angle *= getSide_2d([0, 1], vector) * -1
+        if 3.14 < abs(angle) < 3.15:
             angle = 0
     else:
         angle = math.atan2(vector[1], vector[0])
@@ -49,8 +56,8 @@ def getVectorAngle(vectorStart, vectorEnd, fromTop=False):
             angle = 6.28318 + angle
     return angle, vector
 
-def getSide(anchorVector, relativeVector):
-    # def getSide(self, anchorVector: Array, relativeVector: Array):
+
+def getSide_2d(anchorVector, relativeVector):
     """get side of angle relativeVector relative to anchor vector, -1 for left, 1 for right"""
     # https://stackoverflow.com/questions/13221873/determining-if-one-2d-vector-is-to-the-right-or-left-of-another
 

@@ -31,7 +31,7 @@ class control_payload:
     def __init__(self):
         self.gripper = motor_payload()
         self.wrist_tilt = motor_payload()
-        self.wrist_axiel = motor_payload()
+        self.wrist_axial = motor_payload()
         self.base_swivel = motor_payload()
         self.vertical_tilt = motor_payload()
         self.arm_extension = motor_payload()
