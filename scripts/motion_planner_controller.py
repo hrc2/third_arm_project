@@ -1,4 +1,5 @@
 import pypot.robot
+import numpy as np
 
 # ROS import way
 try:
@@ -140,3 +141,25 @@ class third_arm_motion_planner:
                 self.motor_controllers[motor].move_rad(self.control_payload.__getattribute__(motor).command)
             else:
                 self.motor_controllers[motor].move_with_rad_speed(self.control_payload.__getattribute__(motor).command)
+
+    def potential_field(self, object_location):
+        """ returns target vector from a repelling potential field
+
+        Args:
+            object_location: np 1, 3 array
+        """
+        distance = np.linalg.norm(object_location)
+
+        target_vector = object_location*(2.0*self.config.repellingScalingParameter*(distance-self.config.repellingFactor))/(self.config.repellingFactor*distance*distance*distance*distance)
+
+        return target_vector
+
+    def get_obstacle_to_arm(self, obstacle_position, obstacle_size):
+        """ return the location of a obstacle in reference to the closest position of the arm and that arm position"""
+
+        location = np.zeros(1, 3)
+        arm_position = np.zeros(1, 3)
+
+        #TODO
+
+        return location, arm_position

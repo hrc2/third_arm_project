@@ -9,6 +9,9 @@ class motion_planning_controller_config:
         self.pid_velocity_threshold = 0.1
         self.max_velocity = 1
 
+        self.repellingScalingParameter = 1
+        self.repellingFactor = 1
+
         self.kp_base_swivel = 1
         self.ki_base_swivel = 0
         self.kd_base_swivel = 0
