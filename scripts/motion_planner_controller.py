@@ -35,7 +35,7 @@ class third_arm_motion_planner:
         self.robot = pypot.robot.from_config(third_arm_robot_config)
 
         # initialze the motors, required for robot controls to work
-        # self.init_motors()
+        self.init_motors()
 
         # set the motor speeds
         self.set_initial_motor_speed()
@@ -163,3 +163,9 @@ class third_arm_motion_planner:
         #TODO
 
         return location, arm_position
+
+a = third_arm_motion_planner()
+b = a.get_angles()
+for motor in b:
+    a.motor_controllers[motor].move_rad(b[motor]+.2)
+print('done')
