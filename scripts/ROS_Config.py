@@ -11,5 +11,5 @@ class ROS_config:
         self.base_offset_for_IK = np.array(
         [[0, 0, 0, 0],
         [0, 0, 0, 0],
-        [0, 0, 0, 0.064],
+        [0, 0, 0, 0.1],
         [0, 0, 0, 0]])

@@ -35,7 +35,7 @@ class third_arm_motion_planner:
         self.robot = pypot.robot.from_config(third_arm_robot_config)
 
         # initialze the motors, required for robot controls to work
-        self.init_motors()
+        # self.init_motors()
 
         # set the motor speeds
         self.set_initial_motor_speed()
@@ -51,9 +51,9 @@ class third_arm_motion_planner:
                                                           self.robot)
             # assemble PID
             self.motor_PIDs[motor] = PID_template(
-                self.config.__getattribute__("kp_" + motor),
-                self.config.__getattribute__("ki_" + motor),
-                self.config.__getattribute__("kd_" + motor),
+                self.config.kp_base_swivel,
+                self.config.ki_base_swivel,
+                self.config.kd_base_swivel,
                 -self.config.max_velocity,
                 self.config.max_velocity
             )

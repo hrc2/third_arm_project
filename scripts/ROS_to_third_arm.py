@@ -119,7 +119,7 @@ class WRTA_ROS_controller_interface:
             print('Could not find transform')
 
         if self.transformation_gripper_base is not None and self.transformation_gripper is not None:
-            self.compareToIK()
+            self.compareToIK(self.transformation_gripper_base)
 
         # self.motion_planner.motion_callback(new_human_pos, new_third_arm_pos)
 
@@ -149,13 +149,13 @@ class WRTA_ROS_controller_interface:
 
         return transform
 
-    def compareToIK(self):
+    def compareToIK(self, transform):
         """ test current position to IK solver """
 
         # gripper_to_base_transform = np.linalg.inv(self.transformation_base)* self.transformation_gripper
-        otherHand_to_base_transform = self.transformation_otherHand_base
-        print(otherHand_to_base_transform)
-        success, thetas = self.motion_planner.IKSolver.solve_kinematics(otherHand_to_base_transform)
+        # otherHand_to_base_transform = self.transformation_otherHand_base
+        print(transform)
+        success, thetas = self.motion_planner.IKSolver.solve_kinematics(transform)
         thetas[0] = -thetas[0]
         print()
         print()
