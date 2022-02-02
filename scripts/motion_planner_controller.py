@@ -87,6 +87,9 @@ class third_arm_motion_planner:
 
         # Joint Velocity Control
         self.motor_controllers["base_swivel"].move_with_rad_speed(new_velocities["base_swivel"])
+        # self.motor_controllers["vertical_tilt"].move_with_rad_speed(new_velocities["base_swivel"])
+        self.motor_controllers["vertical_tilt"].move(0.0)
+
 
     def get_angles(self):
         """ returns angles of all motors """
@@ -112,7 +115,7 @@ class third_arm_motion_planner:
 
         # get positions
         new_positions['base_swivel'] = -1.0 * output_joints[0]
-        # new_positions['vertical_tilt'] = output_joints[1]
+        new_positions['vertical_tilt'] = -1.0* output_joints[1]
         # new_positions['arm_extension'] = output_joints[2]
         # new_positions['wrist_axial'] = output_joints[3]
         # new_positions['wrist_tilt'] = output_joints[4]
@@ -164,8 +167,8 @@ class third_arm_motion_planner:
 
         return location, arm_position
 
-a = third_arm_motion_planner()
-b = a.get_angles()
-for motor in b:
-    a.motor_controllers[motor].move_rad(b[motor]+.2)
-print('done')
+# a = third_arm_motion_planner()
+# b = a.get_angles()
+# for motor in b:
+#     a.motor_controllers[motor].move_rad(b[motor]+.2)
+# print('done')

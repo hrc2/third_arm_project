@@ -20,13 +20,13 @@ print(motor_positions)
 for i in range(6):
     dxl_io.set_goal_position({i+1: motor_positions[i]})
 
-# dxl_io.set_goal_position({6: 100})
-# dxl_io.set_goal_position({5: -50})
-# dxl_io.set_goal_position({4: 0})
+dxl_io.set_goal_position({6: 100})
+dxl_io.set_goal_position({5: -50})
+dxl_io.set_goal_position({4: 0})
 
-# time.sleep(2)
-# dxl_io.set_goal_position({5: 50})
-# dxl_io.set_goal_position({6: 0})
-# dxl_io.set_goal_position({4: 50})
+time.sleep(2)
+dxl_io.set_goal_position({5: 50})
+dxl_io.set_goal_position({6: 0})
+dxl_io.set_goal_position({4: 50})
 
 
