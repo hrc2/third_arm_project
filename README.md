@@ -8,7 +8,7 @@ observed human motion. The key challenge is to avoid collisions with the human b
 ## Setting up the code  
 Install PyPot using command line (Python 3): python -m pip install PyPot    
 Install PyPot (Python 2.7): pip install PyPot==3.3.1  
-Set ACM0 permissions, type in command line for usb port using: sudo chmod 0777 /dev/ttyUSB0  
+Set ACM0 permissions, type in command line for usb port using: sudo chmod 0777 /dev/ttyACM0  
 
 ## Running the Code on third-arm-computer
 Plug in Power  

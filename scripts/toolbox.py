@@ -12,7 +12,8 @@ def array_almost_equal(array_one, array_two, tolerance):
     
     """
 
-    assert(len(array_one) == len(array_two))
+    if not len(array_one) == len(array_two):
+        return False
 
     for index in range(0, len(array_one)):
         val_one = array_one[index]

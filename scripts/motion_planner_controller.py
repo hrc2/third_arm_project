@@ -38,12 +38,14 @@ class third_arm_motion_planner:
         self.robot = pypot.robot.from_config(third_arm_robot_config)
 
         # only do this if going to control arm
-        if control_arm:
+        if self.arm_enabled:
             # initialze the motors, required for robot controls to work
             self.init_motors()
 
             # set the motor speeds
             self.set_initial_motor_speed()
+        else:
+            self.compliant_motors()
 
         # make motor controllers
         self.motor_controllers = {}
@@ -68,6 +70,12 @@ class third_arm_motion_planner:
 
         for motor in self.robot.motors:
             motor.compliant = False
+
+    def compliant_motors(self):
+        """ make the motors compliant by setting compliance to true """
+
+        for motor in self.robot.motors:
+            motor.compliant = True
 
     def set_initial_motor_speed(self):
 

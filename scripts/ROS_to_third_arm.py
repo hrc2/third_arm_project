@@ -165,7 +165,8 @@ class WRTA_ROS_controller_interface:
         # otherHand_to_base_transform = self.transformation_otherHand_base
         print("\n\n\n\n\n\n")
         print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-        print("Inputed transform", str(transform))
+        print("Inputed transform")
+        print(transform)
         success, thetas = self.motion_planner.IKSolver.solve_kinematics(transform)
         thetas[0] = -thetas[0]
         print("IK Successful:", str(success))
@@ -175,10 +176,11 @@ class WRTA_ROS_controller_interface:
         print("Current Robot thetas:", str(current_angles))
         print("IK matches thetas with", str(self.config.IK_tolerance), ": ", str(array_almost_equal(thetas, current_angles, self.config.IK_tolerance)))
         print("-----------------------------------------------------------")
-        print("\n\n\n\n\n\n")
 
-        self.ik_data.append(IK_package(transform, current_angles))
-
+        # self.ik_data.append(IK_package(transform, current_angles))
+        # if len(self.ik_data) > 1000:
+        #     saveJSON(third_arm_brain.ik_data, "ik_data", "save ik data")
+        #     self.ik_data = []
         self.loop_rate.sleep()
 
 
@@ -197,6 +199,6 @@ if __name__ == '__main__':
         third_arm_brain = WRTA_ROS_controller_interface()
         third_arm_brain.control_loop()
     except rospy.ROSInterruptException:
-        saveJSON(third_arm_brain.ik_data, "ik_data", "save ik data")
+        # print(saveJSON(third_arm_brain.ik_data, "ik_data", "save ik data"))
         if third_arm_brain is not None:
             third_arm_brain.motion_planner.motor_controllers["base_swivel"].move_with_speed[0.0]
