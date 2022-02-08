@@ -21,8 +21,11 @@ except:
 class third_arm_motion_planner:
     """ The class for controlling the third arm"""
 
-    def __init__(self):
+    def __init__(self, arm_enabled):
         self.config = motion_planning_controller_config()
+
+        # if arm is turned on
+        self.arm_enabled = arm_enabled
 
         self.human_position = []  # Human hand's position received from optitrack
         self.third_arm_positions = []
@@ -34,11 +37,13 @@ class third_arm_motion_planner:
         # load robot config
         self.robot = pypot.robot.from_config(third_arm_robot_config)
 
-        # initialze the motors, required for robot controls to work
-        self.init_motors()
+        # only do this if going to control arm
+        if control_arm:
+            # initialze the motors, required for robot controls to work
+            self.init_motors()
 
-        # set the motor speeds
-        self.set_initial_motor_speed()
+            # set the motor speeds
+            self.set_initial_motor_speed()
 
         # make motor controllers
         self.motor_controllers = {}
@@ -85,10 +90,11 @@ class third_arm_motion_planner:
         # Joint Position Control
         # self.motor_controllers["base_swivel"].move_with_rad(new_positions["base_swivel"])
 
-        # Joint Velocity Control
-        self.motor_controllers["base_swivel"].move_with_rad_speed(new_velocities["base_swivel"])
-        # self.motor_controllers["vertical_tilt"].move_with_rad_speed(new_velocities["base_swivel"])
-        self.motor_controllers["vertical_tilt"].move(0.0)
+        if self.arm_enabled:
+            # Joint Velocity Control
+            self.motor_controllers["base_swivel"].move_with_rad_speed(new_velocities["base_swivel"])
+            # self.motor_controllers["vertical_tilt"].move_with_rad_speed(new_velocities["base_swivel"])
+            self.motor_controllers["vertical_tilt"].move(0.0)
 
 
     def get_angles(self):

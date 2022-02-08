@@ -1,5 +1,50 @@
 import math
 import numpy as np
+import os
+
+def array_almost_equal(array_one, array_two, tolerance):
+    """ determine if two arrays are almost equal
+
+        Note we assume these could be lists so not done with numpy fastness
+        
+        Args:
+            tolerance is a decimal
+    
+    """
+
+    assert(len(array_one) == len(array_two))
+
+    for index in range(0, len(array_one)):
+        val_one = array_one[index]
+        val_two = array_two[index]
+        if val_one * val_two > 0:
+            if abs(abs(val_one)-abs(val_two))/val_one < tolerance:
+                pass
+            else:
+                return False
+        else:
+            return False
+
+    return True
+
+
+def generateFile(path, fileName, ending):
+    # def generateFile(path: str, fileName: str, ending: str):
+    """generates file inside path, ending is file ending like .txt, returns filePath"""
+
+    filePath = pathCheck(fileName, path)
+
+    # checking for duplicates
+    count = 0  # so you can have same folder name but a different version
+    while os.path.isfile(filePath + '_' + str(count) + ending):
+        count += 1
+    filePath = filePath + '_' + str(count) + ending
+    file = open(filePath, 'w+')
+    file.close()
+
+    print('File for', fileName, 'created at path', filePath)
+
+    return filePath
 
 
 class PID_template:
@@ -67,3 +112,4 @@ def getSide_2d(anchorVector, relativeVector):
         return 1
     else:
         return -1
+

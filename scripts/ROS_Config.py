@@ -8,6 +8,10 @@ class ROS_config:
         self.third_arm_other_hand = "third_arm_other_hand"
         self.third_arm_gripper = "third_arm_gripper"
 
+        self.arm_on = True
+        self.IK_tolerance = .1
+
+
         self.base_offset_for_IK = np.array(
         [[0, 0, 0, 0],
         [0, 0, 0, 0],
