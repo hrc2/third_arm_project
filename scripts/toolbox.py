@@ -47,6 +47,24 @@ def generateFile(path, fileName, ending):
 
     return filePath
 
+def pathCheck(fileFolderName, path):
+    # def pathCheck(fileFolderName: str, path: str):
+    """format the fileFolderPath correctly for generate folder and generate path"""
+
+    rootInFolderName = './' in fileFolderName
+
+    if rootInFolderName and path == './':
+        fileFolderPath = fileFolderName
+    elif path == './' and rootInFolderName:
+        index = fileFolderName.find('./')
+        fileFolderName = fileFolderName.replace('./', '')
+        fileFolderPath = path + fileFolderName
+    elif path == './':
+        fileFolderPath = path + fileFolderName
+    else:
+        fileFolderPath = path + '/' + fileFolderName
+
+    return fileFolderPath
 
 class PID_template:
     """ template class for a PID """

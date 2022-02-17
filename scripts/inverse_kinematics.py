@@ -183,14 +183,15 @@ class InverseKinematicsSolver:
         d3y = 0
         d3x = 0
 
+
         if d3z_Nan != 0:
             d3z = -pz/d3z_Nan + l1/d3z_Nan - l3*math.sin(t5) - l3*math.cos(t4)*math.cos(t5)*math.tan(t2) - l2
 
         if d3y_Nan != 0:
-            d3y = py / d3y_Nan - l2 - l3 * math.sin(t5) - l3 * (math.cos(t5) * math.cos(t1) * math.sin(t4) - math.cos(t5) * math.sin(t1) * math.cos(t2) * math.cos(t4)) / d3y_Nan
+            d3y = py / d3y_Nan - l2 - l3 * math.sin(t5) - l3 * (math.cos(t5) * math.cos(t1) * math.sin(t4) - math.sin(t1) * math.cos(t2) * math.cos(t4)) / d3y_Nan
 
         if d3x_Nan != 0:
-            d3x = px/d3x_Nan - l2 - l3*math.sin(t5) + l3*(math.cos(t5)*math.sin(t1)*math.sin(t4) + math.cos(t5)*math.cos(t1)*math.cos(t2)*math.cos(t4))/d3x_Nan
+            d3x = px/d3x_Nan - l2 - l3*math.sin(t5) + l3*(math.cos(t5)*math.sin(t1)*math.sin(t4) + math.cos(t1)*math.cos(t2)*math.cos(t4))/d3x_Nan
 
 
         f1 = 0
