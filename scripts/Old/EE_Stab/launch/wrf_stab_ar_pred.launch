@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>  
+	
+  <node name = "wrf_stab_main" pkg="third_arm" type="wrf_stab_ar_pred.py" output ='screen'/>  
+	
+	<node pkg="rosbag" type="record" name="wrf_stab_bag"
+       args="record -o $(find third_arm)/scripts/EE_Stab/StabData/wrf_stab_test_bag 
+       				  /base_swivel_controller/state /vertical_tilt_controller/state /arm_extension_controller/state /wrist_controller/state /wrist_tilt_controller/state /gripper_controller/state  
+                      /base_swivel_controller/command /vertical_tilt_controller/command
+                      /arm_extension_controller/command /wrist_controller/command /wrist_tilt_controller/command /gripper_controller/command
+                      /arm_command_state 
+                      /mocap_node/wrf_base/pose
+                      /mocap_node/end_eff/pose
+                      /mocap_node/hand/pose
+                      /mocap_node/elbow/pose
+                      /mocap_filtered"  
+                      />
+</launch>
