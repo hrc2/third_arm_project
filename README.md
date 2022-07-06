@@ -5,11 +5,15 @@
 We propose to develop an online controller for the third arm, which will continuously adapt the robot’s motion based on the 
 observed human motion. The key challenge is to avoid collisions with the human body and any other obstacles in the workspace. Also, since the third arm is underactuated (5 DoF) this adds to the difficulty in computing online joint-space trajectories towards the target location. Finally, the controller needs to compensate for the motion of the base arm.
 
-## Setting up the code  
-Install PyPot using command line (Python 3): `python -m pip install PyPot`    
-Install PyPot (Python 2.7): `pip install PyPot==3.3.1`  
-PyPot is used to control the Dynamixel Motors  
-Set USB port permissions, example for ACM0 usb port using: `sudo chmod 0777 /dev/ttyACM0`  
+## Setup
+
+### Dependencies and Setup
+You should have ROS-Noetic installed. Clone the repo into a catkin workspace.
+PyPot is used to control the Dynamixel Motors. Install PyPot: `python3 -m pip install PyPot`    
+<!-- Install PyPot (Python 2.7): `pip install PyPot==3.3.1`   -->
+Temporarily set USB port permissions, example for ACM0 usb port using: `sudo chmod 0777 /dev/ttyACM0`  
+Alternatively, add the current user to the dialout group: `sudo adduser $USER dialout`
+Build the catking workspace: `catkin_make`
 
 ## Running URDF with joint state publisher GUI and RVIZ
 Links:
