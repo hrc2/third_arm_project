@@ -11,6 +11,16 @@ Install PyPot (Python 2.7): `pip install PyPot==3.3.1`
 PyPot is used to control the Dynamixel Motors  
 Set USB port permissions, example for ACM0 usb port using: `sudo chmod 0777 /dev/ttyACM0`  
 
+## Running URDF with joint state publisher GUI and RVIZ
+Links:
+* Base Link <--Horizontal Panning (Revolute)--> Base Motor
+* Base Motor <--Vertical Pitching (Revolute)--> Lift Motor
+* Extend Link 1 <--Length Extension (Prismatic)--> Extend Link 2
+* Extend Link 2 <--Wrist Rotation (Revolute)--> Wrist Rotation Motor
+* Wrist Rotation Motor <--Wrist Pitching (Revolute)--> Wrist Tilt Motor
+
+`roslaunch third_arm urdf_5dof.launch`
+
 ## Running the Code on third-arm-computer
 Plug in Power FIRST  
 Plug in USB  
