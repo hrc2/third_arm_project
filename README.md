@@ -9,7 +9,9 @@ Launch files are provided to run the robot on hardware or in simulation, as well
 
 ### Dependencies and Setup
 You should have ROS-Noetic installed. Clone the repo into a catkin workspace.
-PyPot is used to control the Dynamixel Motors. Install PyPot: `python3 -m pip install PyPot`    
+PyPot is used to control the Dynamixel Motors. 
+
+To install PyPot: `python3 -m pip install PyPot`    
 <!-- Install PyPot (Python 2.7): `pip install PyPot==3.3.1`   -->
 
 Temporarily set USB port permissions, example for ACM0 usb port using: `sudo chmod 0777 /dev/ttyACM0`  
