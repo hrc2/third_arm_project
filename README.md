@@ -25,7 +25,14 @@ The five joints are defined in the file urdf/third_arm_5dof.urdf as follows:
 
 To launch an rviz visualization of the robot with GUI controls for those joints, build and source the workspace, then run `roslaunch third_arm urdf_5dof.launch`
 
-## Running the Code on Third Arm Hardware\
+
+## Running the Third Arm in Simulation
+To launch an empty gazebo world with the third arm in it, run:
+`roslaunch third_arm third_arm_gazebo.launch`
+
+Currently, there are no actuators or controllers hooked up to joint; this is in progress.
+
+## Running the Code on Third Arm Hardware
 
 ### Robot Details
 All of the actuators in the third arm are Dynamixel servomotors, (MX-64, MX-64, MX-28, MX-28, and AX-12) respectively.
