@@ -1,9 +1,9 @@
 # Wearable Robotic Third Arm
 
-## Goal:
-
-We propose to develop an online controller for the third arm, which will continuously adapt the robot’s motion based on the 
-observed human motion. The key challenge is to avoid collisions with the human body and any other obstacles in the workspace. Also, since the third arm is underactuated (5 DoF) this adds to the difficulty in computing online joint-space trajectories towards the target location. Finally, the controller needs to compensate for the motion of the base arm.
+## Overview
+This repository provides the necessary tools to control and develop libraries to control the Wearable Robotic Third Arm (WRF).
+Currently, the code to control the robot is in the form of a ROS package, supporting ROS Noetic. We have plans to add support for ROS 2 (Humble) as well.
+Launch files are provided to run the robot on hardware or in simulation, as well as optionally with an Optitrack Mo-Cap setup (more details below).
 
 ## Setup
 
@@ -25,17 +25,35 @@ The five joints are defined in the file urdf/third_arm_5dof.urdf as follows:
 
 To launch an rviz visualization of the robot with GUI controls for those joints, build and source the workspace, then run `roslaunch third_arm urdf_5dof.launch`
 
-## Running the Code on third-arm-computer
+## Running the Code on Third Arm Hardware\
+
+### Robot Details
+All of the actuators in the third arm are Dynamixel servomotors, (MX-64, MX-64, MX-28, MX-28, and AX-12) respectively.
+They are daisy-chained on a single serial bus via a USB2AX module and powered with a 12V supply (recommended 10A rating).
+Note that the USB2AX is no longer produced or avaiable to purchase. However, a very similar setup can be achieved using a U2D2 with the accompanying U2D2 power board. 
+
+To control the robot using the provided libraries, do the following:
+1. Plug the 12V supply in to the USB2AX or U2D2.
+2. Connect the USB cable fromt he USB2AX or U2D2 to your computer.
+3. Source your catkin workspace.
+4. Run `roslaunch third_arm third_arm_noetic.launch`.
+
+If you have an optitrack motion-tracking system, you can use our provided code with our experimental "online" controller. This uses a PID loop to update the servo velocities according towards the current location of a tracked object (e.g. a person's hand).
+
+Otherwise, motion-tracking is disabled by default. You can specify a target location and the robot will move to the correct joint angles to realize that pose.
+
+
+## Old README contents
 Plug in Power FIRST  
 Plug in USB  
-`export ROS_MASTER_URI=http://192.168.0.124:11311`  
+`export ROS_MASTER_URI=http://192.168.0.124:11311`
 `export ROS_IP=192.168.0.124`  
 `cd third_arm_noetic_ws/`  
 `source devel/setup.bash`  
 `roslaunch third_arm third_arm_noetic.launch`  
 
-## What to Run when Building
-`catkin build -DPYTHON_EXECUTABLE=/usr/bin/python3`  
+
+
 
 ## Running MotiveTracker
 Switch to HRC2 network  
