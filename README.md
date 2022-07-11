@@ -11,9 +11,12 @@ Launch files are provided to run the robot on hardware or in simulation, as well
 You should have ROS-Noetic installed. Clone the repo into a catkin workspace.
 PyPot is used to control the Dynamixel Motors. Install PyPot: `python3 -m pip install PyPot`    
 <!-- Install PyPot (Python 2.7): `pip install PyPot==3.3.1`   -->
+
 Temporarily set USB port permissions, example for ACM0 usb port using: `sudo chmod 0777 /dev/ttyACM0`  
 Alternatively, add the current user to the dialout group: `sudo adduser $USER dialout`
-Build the catking workspace: `catkin_make`
+
+Build the catkin workspace: `catkin_make`
+Source the workspace: `source devel/setup.bash`
 
 ## Running URDF with joint state publisher GUI and RVIZ
 The five joints are defined in the file urdf/third_arm_5dof.urdf as follows:
