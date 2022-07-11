@@ -16,14 +16,14 @@ Alternatively, add the current user to the dialout group: `sudo adduser $USER di
 Build the catking workspace: `catkin_make`
 
 ## Running URDF with joint state publisher GUI and RVIZ
-Links:
+The five joints are defined in the file urdf/third_arm_5dof.urdf as follows:
 * Base Link <--Horizontal Panning (Revolute)--> Base Motor
 * Base Motor <--Vertical Pitching (Revolute)--> Lift Motor
 * Extend Link 1 <--Length Extension (Prismatic)--> Extend Link 2
 * Extend Link 2 <--Wrist Rotation (Revolute)--> Wrist Rotation Motor
 * Wrist Rotation Motor <--Wrist Pitching (Revolute)--> Wrist Tilt Motor
 
-`roslaunch third_arm urdf_5dof.launch`
+To launch an rviz visualization of the robot with GUI controls for those joints, build and source the workspace, then run `roslaunch third_arm urdf_5dof.launch`
 
 ## Running the Code on third-arm-computer
 Plug in Power FIRST  
