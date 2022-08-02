@@ -2,7 +2,11 @@
 <robot name="wrta">
 
   <!-- Third Arm has 5 joints, base link kept trans_xyz with the environment link -->
-
+  <link name="world" />
+  <joint name="fixed" type="fixed">
+    <parent link="world"/>
+    <child link="environment_x"/>
+  </joint>
   <link name="environment_x">
     <visual>
       <origin xyz="0 0 0" rpy ="0 0 0"/>
