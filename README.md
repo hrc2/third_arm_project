@@ -22,11 +22,11 @@ Source the workspace: `source devel/setup.bash`
 
 ## Running URDF with joint state publisher GUI and RVIZ
 The five joints are defined in the file urdf/third_arm_5dof.urdf as follows:
-* Base Link <--Horizontal Panning (Revolute)--> Base Motor
-* Base Motor <--Vertical Pitching (Revolute)--> Lift Motor
-* Extend Link 1 <--Length Extension (Prismatic)--> Extend Link 2
-* Extend Link 2 <--Wrist Rotation (Revolute)--> Wrist Rotation Motor
-* Wrist Rotation Motor <--Wrist Pitching (Revolute)--> Wrist Tilt Motor
+* Base Link <--Horizontal Panning (Revolute)--> Base Motor, limits: (-3.14,3.14)
+* Base Motor <--Vertical Pitching (Revolute)--> Lift Motor, limits: (0,1.57)
+* Extend Link 1 <--Length Extension (Prismatic)--> Extend Link 2, limits: (0, 0.12)
+* Extend Link 2 <--Wrist Rotation (Revolute)--> Wrist Rotation Motor, limits: (-3.14, 3.14)
+* Wrist Rotation Motor <--Wrist Pitching (Revolute)--> Wrist Tilt Motor, limits: (0,3.14)
 
 To launch an rviz visualization of the robot with GUI controls for those joints, build and source the workspace, then run `roslaunch third_arm urdf_5dof.launch`
 
