@@ -1,7 +1,7 @@
 # Wearable Robotic Third Arm
 
 ## Overview
-This repository provides the necessary tools to control and develop libraries to control the Wearable Robotic Third Arm (WRF).
+This repository provides the necessary tools to control and develop libraries to control the Wearable Robotic Third Arm (WRTA).
 Currently, the code to control the robot is in the form of a ROS package, supporting ROS Noetic. We have plans to add support for ROS 2 (Humble) as well.
 Launch files are provided to run the robot on hardware or in simulation, as well as optionally with an Optitrack Mo-Cap setup (more details below).
 
@@ -22,11 +22,13 @@ Source the workspace: `source devel/setup.bash`
 
 ## Running URDF with joint state publisher GUI and RVIZ
 The five joints are defined in the file urdf/third_arm_5dof.urdf as follows:
-* Base Link <--Horizontal Panning (Revolute)--> Base Motor, limits: (-3.14,3.14)
-* Base Motor <--Vertical Pitching (Revolute)--> Lift Motor, limits: (0,1.57)
-* Extend Link 1 <--Length Extension (Prismatic)--> Extend Link 2, limits: (0, 0.12)
-* Extend Link 2 <--Wrist Rotation (Revolute)--> Wrist Rotation Motor, limits: (-3.14, 3.14)
-* Wrist Rotation Motor <--Wrist Pitching (Revolute)--> Wrist Tilt Motor, limits: (0,3.14)
+| Joint	Name		| Type		| Parent Link	| Child Link   	        | Min	| Max  |
+|-------------------|-----------|---------------|-----------------------|-------|------|
+| Horizontal Panning| Revolute	| Base Link		| Base Motor	        | -3.14	| 3.14 |
+| Vertical Pitching	| Revolute	| Base Motor	| Lift Motor	        | 0.00	| 1.57 |
+| Length Extension	| Prismatic	| Extend Link 1	| Extend Link 2	        | 0.00	| 0.12 |
+| Wrist Rotation	| Revolute	| Extend Link 2	| Wrist Rotation Motor	| -3.14	| 3.14 |
+| Wrist Pitching	| Revolute	| Wrist Rotation Motor	| Wrist Tilt Motor	| 0.00	| 3.14 |
 
 To launch an rviz visualization of the robot with GUI controls for those joints, build and source the workspace, then run `roslaunch third_arm urdf_5dof.launch`
 
@@ -35,7 +37,11 @@ To launch an rviz visualization of the robot with GUI controls for those joints,
 To launch an empty gazebo world with the third arm in it, run:
 `roslaunch third_arm third_arm_gazebo.launch`
 
-Currently, there are no actuators or controllers hooked up to joint; this is in progress.
+Position controllers are defined for each joint in [config/wrta_controllers.yaml](config/wrta_controllers.yaml).
+
+To launch ros_control and load the controllers, run:
+`roslaunch third_arm third_arm_control.launch`
+once Gazebo is running.
 
 ## Running the Code on Third Arm Hardware
 
