@@ -1,8 +1,0 @@
-go
-put
-close
-open
-stop
-reset
-hello
-
