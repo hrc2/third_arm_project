@@ -5,9 +5,10 @@ This repository provides the necessary tools to control and develop libraries to
 Currently, the code to control the robot is in the form of a ROS package, supporting ROS Noetic. We have plans to add support for ROS 2 (Humble) as well.
 Launch files are provided to run the robot on hardware or in simulation, as well as optionally with an Optitrack Mo-Cap setup (more details below).
 
+
 ## Setup
 
-### Dependencies and Setup
+### Dependencies and Initial Setup
 You should have ROS-Noetic installed. Clone the repo into a catkin workspace.
 PyPot is used to control the Dynamixel Motors. 
 
