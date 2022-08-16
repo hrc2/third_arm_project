@@ -51,10 +51,10 @@
     </inertial>    
   </link>
 
-  <joint name="env_x" type="prismatic">
+  <joint name="env_x" type="fixed">
   <origin xyz="0 0 0" rpy="0 0 0" />
   <axis xyz="1 0 0"/>    
-  <limit lower="-1" upper="1" effort="100" velocity="10"/>    
+  <!-- <limit lower="-1" upper="1" effort="100" velocity="10"/>     -->
     <parent link="environment_x"/>
     <child link="environment_y"/>
   </joint>
@@ -82,10 +82,10 @@
   </link>
 
 
-  <joint name="env_y" type="prismatic">
-  <origin xyz="0 0 0" rpy="0 0 0" />
+  <joint name="env_y" type="fixed">
+  <origin xyz="0 0 2" rpy="0 0 0" />
   <axis xyz="0 1 0"/>        
-  <limit lower="-1" upper="1" effort="100" velocity="10"/>    
+  <!-- <limit lower="-1" upper="1" effort="100" velocity="10"/>     -->
     <parent link="environment_y"/>
     <child link="environment_z"/>
   </joint>
@@ -110,15 +110,15 @@
         </geometry>
     </collision>
     <inertial>
-            <mass value="1.0"/>
+            <mass value="0.2"/>
             <inertia ixx="0.0" iyy="0.0" izz="0.0" ixy="0" ixz="0" iyz="0"/>
     </inertial>    
   </link>
 
-  <joint name="env_z_to_base" type="prismatic">
+  <joint name="env_z_to_base" type="fixed">
   <origin xyz="0 0 0" rpy="0 0 0" />
   <axis xyz="0 0 1"/>        
-  <limit lower="-1" upper="1" effort="100" velocity="10"/>      
+  <!-- <limit lower="-1" upper="1" effort="100" velocity="10"/>       -->
     <parent link="environment_z"/>
     <child link="base_link"/>
   </joint>
@@ -145,15 +145,15 @@
     </collision>
     <inertial>
   		<origin xyz="0 0 0" rpy ="0 0 0"/>
-  		<mass value="1"/>
-  		<inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+  		<mass value="0.135"/>
+  		<inertia ixx="0.001"  ixy="0"  ixz="0" iyy="0.001" iyz="0" izz="0.001" />
   	</inertial>
   </link>
 
 
   <joint name="horizontal_panning" type="revolute">
   	<axis xyz="0 0 1"/>
-  	<limit lower="-3.14" upper="3.14" effort="10" velocity="3.14"/>
+  	<limit lower="-3.14" upper="3.14" effort="6" velocity="3.14"/>
   	<origin xyz="0 0 0.0" rpy="0 0 -1.5708" />
     <parent link="base_link"/>
     <child link="base_motor"/>
@@ -182,14 +182,14 @@
     </collision>
     <inertial>
   		<origin xyz="0 0 0" rpy ="0 0 0"/>
-  		<mass value="1"/>
-  		<inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+  		<mass value="0.135"/>
+  		<inertia ixx="0.001"  ixy="0"  ixz="0" iyy="0.001" iyz="0" izz="0.001" />
   	</inertial>
   </link>
 
   <joint name="vertical_pitching" type="revolute">
   	<axis xyz="0 0 1"/>
-  	<limit lower="0" upper="1.5708" effort="10" velocity="0.314"/>
+  	<limit lower="0" upper="1.5708" effort="6" velocity="0.314"/>
   	<origin xyz="0 0 -0.08" rpy="1.5708 3.14159 1.5708" />
     <parent link="base_motor"/>
     <child link="lift_motor"/>
@@ -216,8 +216,8 @@
     </collision>
     <inertial>
   		<origin xyz="0 0 0" rpy ="0 0 0"/>
-  		<mass value="1"/>
-  		<inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+  		<mass value="0.077"/>
+  		<inertia ixx="0.001"  ixy="0"  ixz="0" iyy="0.001" iyz="0" izz="0.001" />
   	</inertial>
   </link>
 
@@ -248,8 +248,8 @@
     </collision>
     <inertial>
   		<origin xyz="0 0 0" rpy ="0 0 0"/>
-  		<mass value="1"/>
-  		<inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+  		<mass value="0.2"/>
+  		<inertia ixx="0.001"  ixy="0"  ixz="0" iyy="0.001" iyz="0" izz="0.001" />
   	</inertial>
   </link>
   
@@ -265,8 +265,8 @@
   <link name="wrist_rotation_motor">
   	<inertial>
   		<origin xyz="0 0 0" rpy =" 1.5708 0  0"/>
-  		<mass value="1"/>
-  		<inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+  		<mass value="0.0546"/>
+  		<inertia ixx="0.001"  ixy="0"  ixz="0" iyy="0.001" iyz="0" izz="0.001" />
   	</inertial>
     <visual>
 		<origin xyz="0 0 0" rpy ="1.5708 0 0"/>
@@ -300,8 +300,8 @@
   <link name="wrist_tilt_motor">
     <inertial>
       <origin xyz="0 0 0" rpy ="0 0 0"/>
-      <mass value="1"/>
-      <inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+      <mass value="0.0546"/>
+      <inertia ixx="0.001"  ixy="0"  ixz="0" iyy="0.001" iyz="0" izz="0.001" />
     </inertial>
     <visual>
     <origin xyz="0 0 0" rpy ="0 0 0"/>
@@ -352,8 +352,8 @@
     </collision>
     <inertial>
       <origin xyz="0 0 0" rpy ="0 0 0"/>
-      <mass value="1"/>
-      <inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+      <mass value="0.2"/>
+      <inertia ixx="0.001"  ixy="0"  ixz="0" iyy="0.001" iyz="0" izz="0.001" />
     </inertial>
 
   </link>
@@ -385,8 +385,8 @@
     </collision>
     <inertial>
       <origin xyz="0 0 0" rpy ="0 0 0"/>
-      <mass value="1"/>
-      <inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+      <mass value="0.2"/>
+      <inertia ixx="0.001"  ixy="0"  ixz="0" iyy="0.001" iyz="0" izz="0.001" />
     </inertial>
   </link>
 
@@ -417,8 +417,8 @@
     </collision>
     <inertial>
       <origin xyz="0 0 0" rpy ="0 0 0"/>
-      <mass value="1"/>
-      <inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+      <mass value="0.2"/>
+      <inertia ixx="0.001"  ixy="0"  ixz="0" iyy="0.001" iyz="0" izz="0.001" />
     </inertial>
   </link>
 
