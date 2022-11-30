@@ -36,12 +36,19 @@ To launch an rviz visualization of the robot with GUI controls for those joints,
 
 ## Running the Third Arm in Simulation
 To launch an empty gazebo world with the third arm in it, run:
-`roslaunch third_arm third_arm_gazebo.launch`
+`roslaunch third_arm wrta_gazebo.launch`
 
 Position controllers are defined for each joint in [config/wrta_controllers.yaml](config/wrta_controllers.yaml).
 
-To launch ros_control and load the controllers, run:
-`roslaunch third_arm third_arm_control.launch`
+You can publish float position messages to the following controller topics, e.g. with a tool like rqt:
+* /wrta/horizontal_panning_controller/command
+* /wrta/vertical_pitching_controller/command
+* /wrta/length_extension_controller/command
+* /wrta/wrist_pitching_controller/command
+* /wrta/wrist_rotation_controller/command
+
+Note that this will also launch the controller. To launch ros_control and load the controllers separately, run:
+`roslaunch third_arm wrta_control.launch`
 once Gazebo is running.
 
 ## Running the Code on Third Arm Hardware
